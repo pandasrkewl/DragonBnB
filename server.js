@@ -1,5 +1,8 @@
 const express = require("express");
+const pool = require("./db");
+
 const app = express();
+const PORT = process.env.PORT || 3000;
 
 app.use(express.static("public"));
 
@@ -7,6 +10,6 @@ app.use(express.static("public"));
     res.send("Hello CS375!");
 });*/
 
-app.listen(3000, () => {
-    console.log("Server running on http://localhost:3000");
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });
