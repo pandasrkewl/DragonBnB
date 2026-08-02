@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS reviews CASCADE;
+DROP TABLE IF EXISTS bookings CASCADE;
 DROP TABLE IF EXISTS property_amenities CASCADE;
 DROP TABLE IF EXISTS amenities CASCADE;
 DROP TABLE IF EXISTS properties CASCADE;
@@ -49,6 +51,39 @@ CREATE TABLE property_amenities (
     PRIMARY KEY (property_id, amenity_id)
 );
 
+CREATE TABLE bookings (
+    id SERIAL PRIMARY KEY,
+    property_id INTEGER NOT NULL REFERENCES properties(id),
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    start_date DATE NOT NULL, 
+    end_date DATE NOT NULL, 
+    total_price NUMERIC(10, 2) NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'Pending',
+
+    CHECK (end_date > start_date),
+    CHECK (total_price >= 0),
+    CHECK (
+        status in (
+            'Pending',
+            'Confirmed',
+            'Cancelled',
+            'Rejected',
+            'Completed'
+        )
+    )
+);
+
+CREATE TABLE reviews (
+    id SERIAL PRIMARY KEY,
+    rating INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
+    comment TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    property_id INTEGER NOT NULL REFERENCES properties(id),
+    booking_id INTEGER NOT NULL UNIQUE REFERENCES bookings(id)
+);
+
 INSERT INTO "users" ("first_name", "last_name", "email", "password_hash", "host")
 VALUES
     ('Max', 'Chiu', 'maxkchiu@gmail.com', 'admin', TRUE),
@@ -77,3 +112,15 @@ VALUES
     (1, 1),
     (2, 1),
     (2, 2);
+
+INSERT INTO "bookings" ("property_id", "user_id", "start_date", "end_date", "total_price", "status")
+VALUES 
+    (1, 2, '2026-09-10', '2026-09-13', 525.00, 'Confirmed'),
+    (2, 3, '2026-10-01', '2026-10-03', 280.00, 'Pending'),
+    (3, 5, '2026-11-15', '2026-11-18', 750.00, 'Completed');
+
+INSERT INTO "reviews" ("rating", "comment", "user_id", "property_id", "booking_id")
+VALUES
+    (5, 'Great location and very clean apartment.', 2, 1, 1),
+    (4, 'Nice loft and easy check-in process.', 3, 2, 2),
+    (5, 'Spacious home with plenty of room.', 5, 3, 3);
