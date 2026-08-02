@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS wishlists CASCADE;
+DROP TABLE IF EXISTS property_images CASCADE;
 DROP TABLE IF EXISTS reviews CASCADE;
 DROP TABLE IF EXISTS bookings CASCADE;
 DROP TABLE IF EXISTS property_amenities CASCADE;
@@ -84,6 +86,21 @@ CREATE TABLE reviews (
     booking_id INTEGER NOT NULL UNIQUE REFERENCES bookings(id)
 );
 
+CREATE TABLE property_images (
+    id SERIAL PRIMARY KEY,
+    property_id INTEGER NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
+    image_url TEXT NOT NULL,
+    display_order INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE wishlists (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    property_id INTEGER NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
+    list_name VARCHAR(100) NOT NULL,
+    UNIQUE (user_id, property_id, list_name)
+);
+
 INSERT INTO "users" ("first_name", "last_name", "email", "password_hash", "host")
 VALUES
     ('Max', 'Chiu', 'maxkchiu@gmail.com', 'admin', TRUE),
@@ -124,3 +141,16 @@ VALUES
     (5, 'Great location and very clean apartment.', 2, 1, 1),
     (4, 'Nice loft and easy check-in process.', 3, 2, 2),
     (5, 'Spacious home with plenty of room.', 5, 3, 3);
+
+INSERT INTO "property_images" ("property_id", "image_url", "display_order")
+VALUES
+    (1, '/images/property1-main.jpg', 1),
+    (1, '/images/property1-bedroom.jpg', 2),
+    (2, '/images/property2-main.jpg', 1),
+    (3, '/images/property3-main.jpg', 1);
+
+INSERT INTO "wishlists" ("user_id", "property_id", "list_name")
+VALUES
+    (2, 1, 'Philadelphia Trips'),
+    (2, 3, 'Large Homes'),
+    (3, 2, 'Weekend Stays');
