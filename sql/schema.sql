@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS messages CASCADE;
+DROP TABLE IF EXISTS conversations CASCADE;
 DROP TABLE IF EXISTS wishlists CASCADE;
 DROP TABLE IF EXISTS property_images CASCADE;
 DROP TABLE IF EXISTS reviews CASCADE;
@@ -101,6 +103,24 @@ CREATE TABLE wishlists (
     UNIQUE (user_id, property_id, list_name)
 );
 
+-- NGL im not sure what the messaging schemas are gonna be like placeholders
+
+CREATE TABLE conversations (
+    id SERIAL PRIMARY KEY,
+    guest_id INTEGER NOT NULL REFERENCES users(id),
+    host_id INTEGER NOT NULL REFERENCES users(id),
+    property_id INTEGER NOT NULL REFERENCES properties(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE messages (
+    id SERIAL PRIMARY KEY, 
+    conversation_id INTEGER NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
+    sender_id INTEGER NOT NULL REFERENCES users(id),
+    message TEXT NOT NULL, 
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 INSERT INTO "users" ("first_name", "last_name", "email", "password_hash", "host")
 VALUES
     ('Max', 'Chiu', 'maxkchiu@gmail.com', 'admin', TRUE),
@@ -154,3 +174,17 @@ VALUES
     (2, 1, 'Philadelphia Trips'),
     (2, 3, 'Large Homes'),
     (3, 2, 'Weekend Stays');
+
+INSERT INTO "conversations" ("guest_id", "host_id", "property_id")
+VALUES
+    (2, 1, 1),
+    (3, 1, 2),
+    (5, 1, 3);
+
+INSERT INTO "messages" ("conversation_id", "sender_id", "message")
+VALUES
+    (1, 2, 'Hi, is the apartment available for these dates?'),
+    (1, 1, 'Yes, it is currently available.'),
+    (2, 3, 'Does the loft include parking?'),
+    (2, 1, 'There is paid parking nearby.'),
+    (3, 5, 'Are pets allowed at this property?');
