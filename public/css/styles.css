@@ -1,0 +1,275 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:Arial, Helvetica, sans-serif;
+    background:#f5f5f5;
+    color:#222;
+}
+
+header{
+    background:#1e3a8a;
+    color:white;
+    padding:20px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+header h1 a{
+    color:white;
+    text-decoration:none;
+}
+
+header h1 a:hover{
+    text-decoration:none;
+}
+
+nav{
+    display:flex;
+    gap:20px;
+}
+
+nav a{
+    color:white;
+    text-decoration:none;
+    font-weight:bold;
+}
+
+nav a:hover{
+    text-decoration:underline;
+}
+
+main{
+    width:90%;
+    max-width:1200px;
+    margin:40px auto;
+}
+
+main h2{
+    text-align:center;
+    margin-bottom:20px;
+}
+
+/* Signup Form */
+
+form{
+    background:white;
+    max-width:500px;
+    margin:30px auto;
+    padding:30px;
+    border-radius:8px;
+    box-shadow:0 2px 8px rgba(0,0,0,.1);
+}
+
+form label{
+    display:block;
+    margin-top:15px;
+    margin-bottom:5px;
+    font-weight:bold;
+}
+
+form input[type="text"],
+form input[type="email"],
+form input[type="password"]{
+    width:100%;
+    padding:10px;
+    border:1px solid #ccc;
+    border-radius:4px;
+    font-size:16px;
+}
+
+.checkbox{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin:20px 0;
+    font-weight:normal;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    background:#1e3a8a;
+    color:white;
+    border:none;
+    border-radius:4px;
+    font-size:16px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#163172;
+}
+
+footer{
+    text-align:center;
+    padding:20px;
+    margin-top:50px;
+}
+
+
+/* ===========================
+   Host Dashboard
+=========================== */
+
+.page-description{
+    text-align:center;
+    color:#666;
+    margin-bottom:30px;
+}
+
+.listing-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));
+    gap:25px;
+}
+
+.listing-card{
+    background:white;
+    border-radius:8px;
+    overflow:hidden;
+    box-shadow:0 2px 8px rgba(0,0,0,.1);
+}
+
+.listing-card img{
+    width:100%;
+    height:220px;
+    object-fit:cover;
+}
+
+.listing-content{
+    padding:20px;
+}
+
+.listing-content h3{
+    margin-bottom:10px;
+}
+
+.price{
+    color:#1e3a8a;
+    font-weight:bold;
+    margin:10px 0;
+}
+
+.button-group{
+    display:flex;
+    gap:10px;
+    margin-top:15px;
+}
+
+.button-group button{
+    width:auto;
+}
+
+.delete-btn{
+    background:#c62828;
+}
+
+.delete-btn:hover{
+    background:#a61d1d;
+}
+
+
+.primary-btn{
+    display:inline-block;
+    background:#1e3a8a;
+    color:white;
+    text-decoration:none;
+    padding:12px 20px;
+    border-radius:4px;
+    margin-top:30px;
+    font-weight:bold;
+}
+
+.primary-btn:hover{
+    background:#163172;
+}
+
+.center{
+    text-align:center;
+}
+
+
+/* ===========================
+   Host Listing Forms
+=========================== */
+
+.form-container{
+    background:white;
+    max-width:600px;
+    margin:30px auto;
+    padding:30px;
+    border-radius:8px;
+    box-shadow:0 2px 8px rgba(0,0,0,.1);
+}
+
+.form-group{
+    margin-bottom:20px;
+}
+
+.form-group label{
+    display:block;
+    margin-bottom:8px;
+    font-weight:bold;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select{
+    width:100%;
+    padding:10px;
+    border:1px solid #ccc;
+    border-radius:4px;
+    font-size:16px;
+}
+
+.form-group textarea{
+    height:120px;
+    resize:none;
+}
+
+.radio-group{
+    display:flex;
+    gap:20px;
+    margin:15px 0;
+}
+
+.radio-group label{
+    font-weight:normal;
+}
+
+.checkbox-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:15px;
+}
+
+.checkbox-grid label{
+    font-weight:normal;
+}
+
+.photo-upload{
+    border:2px dashed #ccc;
+    padding:40px;
+    text-align:center;
+    border-radius:8px;
+    background:#fafafa;
+}
+
+.preview-card{
+    background:white;
+    max-width:700px;
+    margin:auto;
+    padding:30px;
+    border-radius:8px;
+    box-shadow:0 2px 8px rgba(0,0,0,.1);
+}
+
+.preview-card img{
+    width:100%;
+    border-radius:8px;
+}
