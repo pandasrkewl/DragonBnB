@@ -37,6 +37,8 @@ CREATE TABLE properties (
     beds INTEGER NOT NULL,
 
     price_per_night NUMERIC(10, 2) NOT NULL,
+    rating NUMERIC(3, 2) NOT NULL DEFAULT 0,
+    review_count INTEGER NOT NULL DEFAULT 0,
     property_type VARCHAR(50) NOT NULL,
     pets_allowed BOOLEAN DEFAULT FALSE,
     check_in_time TIME,
@@ -133,11 +135,11 @@ VALUES
     ('Liam', 'Davis', 'liam.davis@example.com', 'admin', TRUE);
 
 
-INSERT INTO "properties" ("host_id", "title", "description", "address_line_1", "address_line_2", "city", "state", "postal_code", "country", "max_guests", "bedrooms", "bathrooms", "beds", "price_per_night", "property_type", "pets_allowed", "check_in_time", "check_out_time")
+INSERT INTO "properties" ("host_id", "title", "description", "address_line_1", "address_line_2", "city", "state", "postal_code", "country", "max_guests", "bedrooms", "bathrooms", "beds", "price_per_night", "rating", "review_count", "property_type", "pets_allowed", "check_in_time", "check_out_time")
 VALUES
-    (1, 'Modern Center City Apartment', 'Bright apartment near restaurants and public transportation.', '1500 Market Street', 'Apartment 8B', 'Philadelphia', 'Pennsylvania', '19102', 'United States', 4, 2, 1.5, 2, 175.00, 'Apartment', FALSE, '15:00', '11:00'),
-    (1, 'Cozy Old City Loft', 'Historic loft close to shops and nightlife.', '225 Arch Street', NULL, 'Philadelphia', 'Pennsylvania', '19106', 'United States', 2, 1, 1.0, 1, 140.00, 'Apartment', FALSE, '16:00', '10:00'),
-    (1, 'Spacious University City Home', 'Large home near Drexel and Penn.', '3200 Powelton Avenue', NULL, 'Philadelphia', 'Pennsylvania', '19104', 'United States', 6, 3, 2.5, 4, 250.00, 'House', TRUE, '15:00', '11:00');
+    (1, 'Modern Center City Apartment', 'Bright apartment near restaurants and public transportation.', '1500 Market Street', 'Apartment 8B', 'Philadelphia', 'Pennsylvania', '19102', 'United States', 4, 2, 1.5, 2, 175.00, 0.00, 0, 'Apartment', FALSE, '15:00', '11:00'),
+    (1, 'Cozy Old City Loft', 'Historic loft close to shops and nightlife.', '225 Arch Street', NULL, 'Philadelphia', 'Pennsylvania', '19106', 'United States', 2, 1, 1.0, 1, 140.00, 0.00, 0, 'Apartment', FALSE, '16:00', '10:00'),
+    (1, 'Spacious University City Home', 'Large home near Drexel and Penn.', '3200 Powelton Avenue', NULL, 'Philadelphia', 'Pennsylvania', '19104', 'United States', 6, 3, 2.5, 4, 250.00, 0.00, 0, 'House', TRUE, '15:00', '11:00');
 
 INSERT INTO "amenities" ("name")
 VALUES
@@ -152,9 +154,9 @@ VALUES
 
 INSERT INTO "bookings" ("property_id", "user_id", "start_date", "end_date", "total_price", "status")
 VALUES 
-    (1, 2, '2026-09-10', '2026-09-13', 525.00, 'Confirmed'),
-    (2, 3, '2026-10-01', '2026-10-03', 280.00, 'Pending'),
-    (3, 5, '2026-11-15', '2026-11-18', 750.00, 'Completed');
+    (1, 2, '2026-05-10', '2026-05-13', 525.00, 'Completed'),
+    (2, 3, '2026-06-01', '2026-06-03', 280.00, 'Completed'),
+    (3, 5, '2026-07-15', '2026-07-18', 750.00, 'Completed');
 
 INSERT INTO "reviews" ("rating", "comment", "user_id", "property_id", "booking_id")
 VALUES
