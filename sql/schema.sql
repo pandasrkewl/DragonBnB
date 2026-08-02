@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS property_amenities CASCADE;
+DROP TABLE IF EXISTS amenities CASCADE;
 DROP TABLE IF EXISTS properties CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 
@@ -36,6 +38,16 @@ CREATE TABLE properties (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE amenities (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) UNIQUE NOT NULL
+);
+
+CREATE TABLE property_amenities (
+    property_id INTEGER NOT NULL REFERENCES properties(id) ON DELETE CASCADE, 
+    amenity_id INTEGER NOT NULL REFERENCES amenities(id) ON DELETE CASCADE,
+    PRIMARY KEY (property_id, amenity_id)
+);
 
 INSERT INTO "users" ("first_name", "last_name", "email", "password_hash", "host")
 VALUES
@@ -54,14 +66,14 @@ VALUES
     (1, 'Modern Center City Apartment', 'Bright apartment near restaurants and public transportation.', '1500 Market Street', 'Apartment 8B', 'Philadelphia', 'Pennsylvania', '19102', 'United States', 4, 2, 1.5, 2, 175.00, 'Apartment', FALSE, '15:00', '11:00'),
     (1, 'Cozy Old City Loft', 'Historic loft close to shops and nightlife.', '225 Arch Street', NULL, 'Philadelphia', 'Pennsylvania', '19106', 'United States', 2, 1, 1.0, 1, 140.00, 'Apartment', FALSE, '16:00', '10:00'),
     (1, 'Spacious University City Home', 'Large home near Drexel and Penn.', '3200 Powelton Avenue', NULL, 'Philadelphia', 'Pennsylvania', '19104', 'United States', 6, 3, 2.5, 4, 250.00, 'House', TRUE, '15:00', '11:00');
-    
--- CREATE TABLE reviews (
---     id SERIAL PRIMARY KEY,
---     rating NUMERIC(2, 1) NOT NULL,
---     comment TEXT,
---     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
---     user_id INTEGER NOT NULL REFERENCES users(id),
---     property_id INTEGER NOT NULL REFERENCES properties(id),
---     booking_id INTEGER UNIQUE NOT NULL REFERENCES bookings(id)
--- )
+INSERT INTO "amenities" ("name")
+VALUES
+    ('Fireplace'),
+    ('TV');
+
+INSERT INTO "property_amenities" ("property_id", "amenity_id")
+VALUES
+    (1, 1),
+    (2, 1),
+    (2, 2);
