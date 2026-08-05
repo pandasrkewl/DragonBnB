@@ -1,47 +1,249 @@
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-body{
-    font-family:Arial, Helvetica, sans-serif;
-    background:#f5f5f5;
-    color:#222;
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f5f5f5;
+  color: #222;
 }
 
-header{
-    background:#1e3a8a;
-    color:white;
-    padding:20px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
+main {
+  width: 90%;
+  max-width: 1200px;
+  margin: 40px auto;
 }
 
-nav{
-    display:flex;
-    gap:20px;
+footer {
+  text-align: center;
+  padding: 20px;
+  margin-top: 50px;
 }
 
-nav a{
-    color:white;
-    text-decoration:none;
-    font-weight:bold;
+.main-header {
+  background: #07294d; /* Drexel Blue */
+  color: white;
+  padding: 12px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 80px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-nav a:hover{
-    text-decoration:underline;
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
 }
 
-main{
-    width:90%;
-    max-width:1200px;
-    margin:40px auto;
+.logo-icon {
+  height: 40px;
+  width: auto;
 }
 
-footer{
-    text-align:center;
-    padding:20px;
-    margin-top:50px;
+.logo-text {
+  color: #ffc600; /* Drexel Gold */
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+}
+
+.search-bar {
+  background: white;
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  padding: 6px 6px 6px 24px;
+  color: #333;
+  max-width: 600px;
+  width: 100%;
+}
+
+.search-segment {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.segment-icon {
+  width: 18px;
+  height: 18px;
+  opacity: 0.8;
+}
+
+.segment-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.segment-text .label {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #111;
+  margin-bottom: 2px;
+}
+
+.segment-text input {
+  border: none;
+  outline: none;
+  font-size: 0.85rem;
+  color: #666;
+  background: transparent;
+  width: 100%;
+}
+
+.segment-text input::placeholder {
+  color: #aaa;
+}
+
+.divider {
+  width: 1px;
+  height: 32px;
+  background-color: #ddd;
+  margin: 0 16px;
+}
+
+.search-btn {
+  background: #ffc600; /* Drexel Gold */
+  border: none;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+.search-btn:hover {
+  background: #d4a400;
+}
+
+.search-btn img {
+  width: 20px;
+  height: 20px;
+}
+
+.host-nav-links {
+  display: flex;
+  gap: 24px;
+}
+
+.host-link {
+  color: white;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding-bottom: 6px;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.host-link:hover {
+  color: #ffc600;
+}
+
+.host-link.active {
+  color: #ffc600;
+  border-bottom: 3px solid #ffc600;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.link-property {
+  color: white;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.link-property:hover {
+  text-decoration: underline;
+}
+
+.favorites-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: white;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.favorites-link img {
+  width: 20px;
+  height: 20px;
+}
+
+.btn {
+  padding: 10px 24px;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.btn-login {
+  color: #ffc600;
+  background: transparent;
+  border: 2px solid #ffc600;
+}
+
+.btn-login:hover {
+  background: rgba(255, 198, 0, 0.1);
+}
+
+.btn-signup {
+  background: #ffc600;
+  color: #07294d;
+  border: 2px solid #ffc600;
+}
+
+.btn-signup:hover {
+  background: #d4a400;
+  border-color: #d4a400;
+}
+
+.profile-menu {
+  background: #ffc600;
+  border: none;
+  border-radius: 50px;
+  padding: 6px 6px 6px 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.profile-menu:hover {
+  background: #d4a400;
+}
+
+.hamburger {
+  width: 16px;
+  height: 16px;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: white;
 }
