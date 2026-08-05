@@ -24,8 +24,8 @@ function createElement(tag, attributes = {}, children = []) {
 
 export function createNavbar({
   userMode = "guest",
-  isRegisteredHost = false, // NEW: Does the user have properties?
-  activeHostTab = null, // NEW: Index of the active tab (0, 1, 2, 3)
+  isRegisteredHost = false,
+  activeHostTab = null,
   profilePic = "../../../assets/placeholders/default_user.jpg",
 }) {
   const header = createElement("header", { className: "main-header" });
@@ -46,9 +46,7 @@ export function createNavbar({
 
   header.appendChild(logoLink);
 
-  // --- Center Section ---
   if (userMode === "host") {
-    // Array of host tabs for easy indexing
     const hostTabs = [
       { text: "Today", href: "/host/today" },
       { text: "Calendar", href: "/host/calendar" },
@@ -57,7 +55,6 @@ export function createNavbar({
     ];
 
     const hostNavLinks = hostTabs.map((tab, index) => {
-      // If the index matches the passed active tab, give it the 'active' class
       const className =
         index === activeHostTab ? "host-link active" : "host-link";
       return createElement("a", {
@@ -74,7 +71,6 @@ export function createNavbar({
     );
     header.appendChild(hostNav);
   } else {
-    // Search Bar Logic Remains the Same
     const searchBar = createElement("div", { className: "search-bar" });
 
     const whereSegment = createElement("div", { className: "search-segment" }, [
@@ -138,19 +134,17 @@ export function createNavbar({
     header.appendChild(searchBar);
   }
 
-  // --- Right Actions Section ---
   const rightActions = createElement("div", { className: "nav-actions" });
 
-  // 1. Determine dynamic Host/Tenant text and link
   let toggleModeText = "Become a host";
   let toggleModeHref = "/host/become";
 
   if (userMode === "host") {
     toggleModeText = "Switch to traveling";
-    toggleModeHref = "/"; // Send them back to the main search page
+    toggleModeHref = "/";
   } else if (userMode === "tenant" && isRegisteredHost) {
     toggleModeText = "Switch to hosting";
-    toggleModeHref = "/host/today"; // Send them to host dashboard
+    toggleModeHref = "/host/today";
   }
 
   const toggleModeLink = createElement("a", {
@@ -159,7 +153,6 @@ export function createNavbar({
     textContent: toggleModeText,
   });
 
-  // 2. Profile Dropdown (Shared between Tenant and Host)
   const profileDropdown = createElement(
     "button",
     { className: "profile-menu" },
@@ -177,7 +170,6 @@ export function createNavbar({
     ],
   );
 
-  // 3. Assemble Right Actions based on Mode
   if (userMode === "guest") {
     rightActions.append(
       toggleModeLink,
