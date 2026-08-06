@@ -146,10 +146,6 @@ INSERT INTO users (
     host,
     image_url
 )
-SELECT setval(
-    'users_id_seq',
-    (SELECT MAX(id) FROM users)
-);
 VALUES
     (1, 'Max', 'Chiu', 'maxkchiu@gmail.com', 'admin', TRUE, '1.jpg'),
     (2, 'Larry', 'Wu', 'larrywu@test.com', 'admin', FALSE, NULL),
@@ -175,6 +171,11 @@ VALUES
     (22, 'Michael', 'King', 'michael.king@example.com', 'admin', TRUE, NULL),
     (23, 'Ella', 'Wright', 'e.wwright@example.com', 'admin', FALSE, NULL),
     (24, 'Jack', 'Scott', 'jack.scott@example.com', 'admin', TRUE, NULL);
+
+SELECT setval(
+    'users_id_seq',
+    (SELECT MAX(id) FROM users)
+);
 
 INSERT INTO properties (
     id,
