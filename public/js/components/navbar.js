@@ -196,9 +196,33 @@ export function createNavbar({
         document.createTextNode(" Favorites"),
       ],
     );
-    rightActions.append(toggleModeLink, favoritesLink, profileDropdown);
+  
+    const logoutLink = createElement("a", {
+      href: "/logout",
+      className: "btn btn-logout",
+      textContent: "Logout",
+    });
+  
+    rightActions.append(
+      toggleModeLink,
+      favoritesLink,
+      profileDropdown,
+      logoutLink
+    );
+  
   } else if (userMode === "host") {
-    rightActions.append(toggleModeLink, profileDropdown);
+  
+    const logoutLink = createElement("a", {
+      href: "/logout",
+      className: "btn btn-logout",
+      textContent: "Logout",
+    });
+  
+    rightActions.append(
+      toggleModeLink,
+      profileDropdown,
+      logoutLink
+    );
   }
 
   header.appendChild(rightActions);

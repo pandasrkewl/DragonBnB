@@ -1,7 +1,36 @@
 import { createNavbar } from "../components/navbar.js";
 
-const navElement = createNavbar({
-  userMode: "host",
-});
+async function loadNavbar() {
+  try {
+    const response = await fetch("/api/me");
+    const user = await response.json();
 
-document.getElementById("navbar-container").appendChild(navElement);
+    let userMode = "guest";
+
+    if (user) {
+      userMode = user.host ? "host" : "tenant";
+    }
+
+    const navElement = createNavbar({
+      userMode,
+      isRegisteredHost: user?.host ?? false,
+    });
+
+    document
+      .getElementById("navbar-container")
+      .appendChild(navElement);
+
+  } catch (err) {
+    console.error(err);
+
+    const navElement = createNavbar({
+      userMode: "guest",
+    });
+
+    document
+      .getElementById("navbar-container")
+      .appendChild(navElement);
+  }
+}
+
+loadNavbar();
