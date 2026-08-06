@@ -65,3 +65,8 @@ app.get("/api/me", (req, res) => {
     }
     res.json(req.session.user);
 });
+
+app.get("/logout", (req, res) => {
+    req.session.destroy();
+    res.redirect("/");
+});
