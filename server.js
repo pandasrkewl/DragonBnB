@@ -2,6 +2,7 @@ const express = require("express");
 const session = require("express-session");
 const bcrypt = require("bcrypt");
 const pool = require("./db");
+const { getProperties } = require("./scripts/queryDb")
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -53,6 +54,27 @@ app.post("/signup", async (req, res) => {
         console.error(err);
         res.status(500).send("Internal server error.");
     }
+});
+
+app.get("/api/properties", async (req, res) => {
+  try {
+    const city = req.query.city || "Philadelphia";
+    const sortBy = req.query.sortBy || "rating";
+    const limit = Number(req.query.limit) || 10;
+
+    const properties = await getProperties({
+      city,
+      sortBy, 
+      limit
+    });
+    res.json(properties);
+  } catch (error) {
+    console.log("Error: getting properties", error);
+
+    res.status(500).json({
+      error: "Could not get properties"
+    });
+  }
 });
 
 app.listen(PORT, () => {
