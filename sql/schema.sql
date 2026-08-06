@@ -458,8 +458,8 @@ VALUES
 
 INSERT INTO "property_images" ("property_id", "image_url", "display_order")
 VALUES
-    (1, '/placeholders/default_home.jpg', 1),
-    (2, '/images/properties/4-frontdoor.png', 1);
+    (1, '/assets/placeholders/default_home.jpg', 1),
+    (2, '/assets/images/properties/4-frontdoor.png', 1);
 
 INSERT INTO "wishlists" ("user_id", "property_id", "list_name")
 VALUES
