@@ -146,6 +146,10 @@ INSERT INTO users (
     host,
     image_url
 )
+SELECT setval(
+    'users_id_seq',
+    (SELECT MAX(id) FROM users)
+);
 VALUES
     (1, 'Max', 'Chiu', 'maxkchiu@gmail.com', 'admin', TRUE, '1.jpg'),
     (2, 'Larry', 'Wu', 'larrywu@test.com', 'admin', FALSE, NULL),
