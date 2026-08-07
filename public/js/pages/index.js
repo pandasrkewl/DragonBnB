@@ -42,6 +42,7 @@ async function loadNavbar() {
 }
 
 loadNavbar();
+navBarContainer.appendChild(navElement);
 
 const popularRail = createRail({rail_id: "popular-rail", rail_name: "Popular stays near Drexel"});
 const affordableRail = createRail({rail_id: "affordable-rail", rail_name: "Affordable stays near Drexel"});

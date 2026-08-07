@@ -54,7 +54,10 @@ main h2{
     margin-bottom:20px;
 }
 
-/* Signup Form */
+
+/* ===========================
+   Signup Form
+=========================== */
 
 form{
     background:white;
@@ -90,8 +93,8 @@ form input[type="password"]{
     font-weight:normal;
 }
 
+
 button{
-    width:100%;
     padding:12px;
     background:#1e3a8a;
     color:white;
@@ -105,11 +108,18 @@ button:hover{
     background:#163172;
 }
 
+form button{
+    width:100%;
+    margin-top:20px;
+}
+
+
 footer{
     text-align:center;
     padding:20px;
     margin-top:50px;
 }
+
 
 
 /* ===========================
@@ -194,6 +204,7 @@ footer{
 }
 
 
+
 /* ===========================
    Host Listing Forms
 =========================== */
@@ -272,4 +283,134 @@ footer{
 .preview-card img{
     width:100%;
     border-radius:8px;
+}
+
+
+
+/* ===========================
+   Navbar Profile Dropdown
+=========================== */
+
+.nav-actions{
+    display:flex;
+    align-items:center;
+    gap:20px;
+    position:relative;
+}
+
+
+.profile-dropdown-container{
+    position:relative;
+    display:inline-block;
+}
+
+
+/* Profile Button */
+
+button.profile-menu{
+    width:auto;
+    height:45px;
+
+    padding:5px 12px;
+
+    background:white;
+    color:#222;
+
+    border:1px solid #ddd;
+    border-radius:25px;
+
+    display:flex;
+    align-items:center;
+    gap:10px;
+
+    cursor:pointer;
+}
+
+
+button.profile-menu:hover{
+    background:#f5f5f5;
+}
+
+
+.profile-menu .hamburger{
+    width:20px;
+    height:20px;
+}
+
+
+.profile-menu .avatar{
+    width:32px;
+    height:32px;
+
+    border-radius:50%;
+    object-fit:cover;
+}
+
+
+
+/* Dropdown */
+
+.profile-dropdown{
+
+    position:absolute;
+
+    top:55px;
+    right:0;
+
+    width:170px;
+
+    background:white;
+
+    border-radius:12px;
+
+    box-shadow:0 8px 20px rgba(0,0,0,.2);
+
+    display:none;
+
+    overflow:hidden;
+
+    z-index:99999;
+}
+
+
+.profile-dropdown.show{
+    display:block;
+}
+
+
+/* Logout */
+
+.dropdown-item{
+
+    display:block;
+
+    padding:14px 18px;
+
+    color:#222;
+
+    text-decoration:none;
+
+    font-weight:500;
+}
+
+
+.dropdown-item:hover{
+    background:#f5f5f5;
+}
+
+
+.dropdown-item,
+.dropdown-item:visited,
+.dropdown-item:hover,
+.dropdown-item:active,
+.dropdown-item:focus{
+
+    color:#222;
+
+    text-decoration:none;
+}
+
+
+.dropdown-item:focus{
+    outline:none;
 }

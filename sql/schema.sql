@@ -215,19 +215,7 @@ VALUES
 (11, 18, 'Historic Home', 'Charming historic district stay', '19 King St', NULL, 'Charleston', 'SC', '29401', 'United States', 4, 2, 2.0, 2, 220.00, 0.00, 0, 'House', TRUE, '13:00', '10:00', '2026-04-03T20:41:26-05:00'),
 (12, 20, 'Ski Chalet', 'Walk to ski lifts', '17 Alpine Ln', NULL, 'Park City', 'UT', '84060', 'United States', 12, 5, 4.0, 8, 510.00, 0.00, 0, 'House', FALSE, '17:30', '11:30', '2026-05-27T09:56:44+08:00'),
 (13, 8, 'Garden Cottage', 'Private backyard cottage', '5 Rose Ct', NULL, 'Portland', 'OR', '97205', 'United States', 3, 1, 1.0, 2, 160.00, 0.00, 0, 'Room', TRUE, '15:00', '10:30', '2026-07-11T15:22:09+12:00'),
-(14, 22, 'Luxury Penthouse', 'Top-floor skyline views', '800 High St', NULL, 'Chicago', 'IL', '60601', 'United States', 5, 2, 2.0, 2, 390.00, 0.00, 0, 'Apartment', FALSE, '14:00', '11:00', '2026-08-24T13:47:51-03:00'),
-(15, 4, 'Drexel Campus Studio', 'Compact studio within walking distance of Drexel University.', '3401 Lancaster Avenue', 'Unit 3A', 'Philadelphia', 'PA', '19104', 'United States', 2, 1, 1.0, 1, 110.00, 4.80, 18, 'Apartment', FALSE, '15:00', '11:00', CURRENT_TIMESTAMP),
-(16, 6, 'University City Student Apartment', 'Affordable apartment near Drexel and public transportation.', '3600 Spring Garden Street', NULL, 'Philadelphia', 'PA', '19104', 'United States', 4, 2, 1.0, 2, 125.00, 4.65, 14, 'Apartment', FALSE, '15:00', '11:00', CURRENT_TIMESTAMP),
-(17, 8, 'Powelton Village Guest Suite', 'Private guest suite in a quiet neighborhood near campus.', '3325 Baring Street', NULL, 'Philadelphia', 'PA', '19104', 'United States', 2, 1, 1.0, 1, 135.00, 4.90, 27, 'Room', FALSE, '16:00', '10:00', CURRENT_TIMESTAMP),
-(18, 10, 'Modern Apartment Near 30th Street', 'Modern apartment close to trains, Drexel, and Penn.', '3025 Market Street', 'Unit 5C', 'Philadelphia', 'PA', '19104', 'United States', 4, 2, 2.0, 2, 195.00, 4.72, 21, 'Apartment', TRUE, '15:00', '11:00', CURRENT_TIMESTAMP),
-(19, 12, 'Atlantic City Boardwalk Condo', 'Modern condo within walking distance of the boardwalk and beach.', '1200 Pacific Avenue', 'Unit 8A', 'Atlantic City', 'NJ', '08401', 'United States', 4, 2, 2.0, 2, 230.00, 4.88, 34, 'Apartment', FALSE, '15:00', '11:00', CURRENT_TIMESTAMP),
-(20, 14, 'Cozy Atlantic City Beach House', 'Comfortable beach house near restaurants and casinos.', '215 South Raleigh Avenue', NULL, 'Atlantic City', 'NJ', '08401', 'United States', 6, 3, 2.0, 4, 275.00, 4.76, 28, 'House', TRUE, '16:00', '11:00', CURRENT_TIMESTAMP),
-(21, 16, 'Affordable Boardwalk Studio', 'Budget-friendly studio close to the Atlantic City Boardwalk.', '801 Atlantic Avenue', 'Unit 4B', 'Atlantic City', 'NJ', '08401', 'United States', 2, 1, 1.0, 1, 120.00, 4.35, 16, 'Apartment', FALSE, '15:00', '10:00', CURRENT_TIMESTAMP),
-(22, 18, 'Ocean View Atlantic City Suite', 'Bright suite with ocean views and easy beach access.', '3101 Boardwalk', 'Suite 907', 'Atlantic City', 'NJ', '08401', 'United States', 4, 1, 1.5, 2, 210.00, 4.91, 42, 'Apartment', FALSE, '16:00', '11:00', CURRENT_TIMESTAMP),
-(23, 20, 'Spacious Atlantic City Townhouse', 'Large townhouse for groups near the boardwalk.', '28 North California Avenue', NULL, 'Atlantic City', 'NJ', '08401', 'United States', 8, 4, 3.0, 5, 340.00, 4.82, 31, 'House', TRUE, '15:00', '11:00', CURRENT_TIMESTAMP),
-(24, 22, 'Casino District Apartment', 'Central apartment near casinos, shopping, and nightlife.', '1501 Boardwalk', 'Unit 12C', 'Atlantic City', 'NJ', '08401', 'United States', 3, 1, 1.0, 2, 165.00, 4.60, 22, 'Apartment', FALSE, '15:30', '10:30', CURRENT_TIMESTAMP),
-(25, 24, 'Luxury Atlantic City Penthouse', 'Top-floor penthouse with skyline and ocean views.', '100 South North Carolina Avenue', 'Penthouse 2', 'Atlantic City', 'NJ', '08401', 'United States', 6, 3, 3.0, 4, 450.00, 4.97, 57, 'Apartment', FALSE, '16:00', '11:00', CURRENT_TIMESTAMP),
-(26, 4, 'Quiet Atlantic City Guest Home', 'Relaxing guest home away from the busiest boardwalk areas.', '505 North Massachusetts Avenue', NULL, 'Atlantic City', 'NJ', '08401', 'United States', 5, 2, 1.5, 3, 185.00, 4.54, 19, 'House', TRUE, '15:00', '10:30', CURRENT_TIMESTAMP);
+(14, 22, 'Luxury Penthouse', 'Top-floor skyline views', '800 High St', NULL, 'Chicago', 'IL', '60601', 'United States', 5, 2, 2.0, 2, 390.00, 0.00, 0, 'Apartment', FALSE, '14:00', '11:00', '2026-08-24T13:47:51-03:00');
 
 INSERT INTO amenities(
     id,
@@ -463,8 +451,11 @@ VALUES
 
 INSERT INTO "property_images" ("property_id", "image_url", "display_order")
 VALUES
-    (1, '/assets/placeholders/default_home.jpg', 1),
-    (2, '/assets/images/properties/4-frontdoor.png', 1);
+    (1, '/placeholders/default_home.jpg', 1),
+    (1, '/images/properties/property1-bedroom.jpg', 2),
+    (2, '/images/properties/property2-main.jpg', 1),
+    (3, '/images/properties/property3-main.jpg', 1),
+    (4, '/images/properties/4-frontdoor.png', 1);
 
 INSERT INTO "wishlists" ("user_id", "property_id", "list_name")
 VALUES
@@ -488,3 +479,8 @@ VALUES
     (3, 5, 'Are pets allowed at this property?', '2026-07-10 16:00:00'),
     (4, 1, 'Can I bring a dog?', '2026-07-20 11:10:00'),
     (4, 2, 'No', '2026-07-20 11:15:00');
+
+SELECT setval(
+    'users_id_seq',
+    (SELECT MAX(id) FROM users)
+);
