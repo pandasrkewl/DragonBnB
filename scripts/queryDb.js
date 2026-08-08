@@ -111,9 +111,24 @@ async function getPropertyById(listingId) {
     return result.rows[0];
 }
 
+async function getPropertyImages(listingId) {
+    const result = await pool.query(
+        `SELECT 
+            image_url,
+            display_order
+        FROM property_images
+        WHERE property_id = $1
+        ORDER BY display_order ASC`,
+        [listingId]
+    );
+
+    return result.rows;
+}
+
 
 module.exports = {
     getUser,
     getProperties,
-    getPropertyById
+    getPropertyById,
+    getPropertyImages
 };

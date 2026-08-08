@@ -457,9 +457,36 @@ VALUES
     (4, 5, 'Spacious home with plenty of room.', '2026-07-18', 5, 3, 4);
 
 INSERT INTO "property_images" ("property_id", "image_url", "display_order")
+
 VALUES
+
     (1, '/assets/placeholders/default_home.jpg', 1),
-    (2, '/assets/images/properties/4-frontdoor.png', 1);
+    (1, '/assets/images/properties/4-frontdoor.png', 2),
+    (1, '/assets/placeholders/default_home.jpg', 3),
+    (1, '/assets/images/properties/4-frontdoor.png', 4),
+    (1, '/assets/placeholders/default_home.jpg', 5),
+    (1, '/assets/images/properties/4-frontdoor.png', 6),
+    (1, '/assets/placeholders/default_home.jpg', 7),
+    (1, '/assets/images/properties/4-frontdoor.png', 8),
+    (1, '/assets/placeholders/default_home.jpg', 9),
+    (1, '/assets/images/properties/4-frontdoor.png', 10),
+    (2, '/assets/images/properties/4-frontdoor.png', 1),
+    (3, '/assets/placeholders/default_home.jpg', 1),
+    (4, '/assets/images/properties/4-frontdoor.png', 1),
+    (5, '/assets/placeholders/default_home.jpg', 1),
+    (6, '/assets/images/properties/4-frontdoor.png', 1),
+    (7, '/assets/placeholders/default_home.jpg', 1),
+    (8, '/assets/images/properties/4-frontdoor.png', 1),
+    (9, '/assets/placeholders/default_home.jpg', 1),
+    (10, '/assets/images/properties/4-frontdoor.png', 1),
+    (11, '/assets/placeholders/default_home.jpg', 1),
+    (12, '/assets/images/properties/4-frontdoor.png', 1),
+    (13, '/assets/placeholders/default_home.jpg', 1),
+    (14, '/assets/images/properties/4-frontdoor.png', 1),
+    (15, '/assets/placeholders/default_home.jpg', 1),
+    (16, '/assets/images/properties/4-frontdoor.png', 1),
+    (17, '/assets/placeholders/default_home.jpg', 1),
+    (18, '/assets/images/properties/4-frontdoor.png', 1);
 
 INSERT INTO "wishlists" ("user_id", "property_id", "list_name")
 VALUES
