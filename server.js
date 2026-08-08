@@ -23,7 +23,7 @@ function isInvalidDateRange(checkIn, checkOut) {
 
 app.get("/api/properties", async (req, res) => {
   try {
-    const location = req.query.location || req.query.city || "";
+    const location = req.query.location || "";
     const sortBy = req.query.sortBy || "rating";
     const limit =
       req.query.limit === undefined ? null : Number(req.query.limit);
