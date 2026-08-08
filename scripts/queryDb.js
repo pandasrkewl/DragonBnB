@@ -125,10 +125,68 @@ async function getPropertyImages(listingId) {
     return result.rows;
 }
 
+async function getPropertyAmenities(listingId) {
+    const result = await pool.query(
+        `SELECT 
+            a.name, 
+            a.basics,
+            a.bathroom,
+            a.bedroom_and_laundry,
+            a.entertainment,
+            a.family,
+            a.heating_and_cooling,
+            a.home_safety, 
+            a.internet_and_office,
+            a.kitchen_and_dining,
+            a.location_features,
+            a.outdoor,
+            a.parking_and_facilities,
+            a.services
+        FROM amenities a
+        JOIN property_amenities pa
+            ON a.id = pa.amenity_id
+        WHERE pa.property_id = $1`,
+        [listingId]
+    );
+
+    return result.rows;
+}
+
+async function getPropertyReviews(listingId) {
+    const result = await pool.query(
+        `SELECT
+            r.id,
+            r.rating,
+            r.comment,
+            r.created_at,
+            
+            u.id AS user_id,
+            u.first_name AS user_first_name,
+            u.last_name as user_last_name,
+            COALESCE(
+                u.image_url,
+                '/assets/placeholders/default_user.jpg'
+            ) AS user_image_url
+        
+        FROM reviews r
+        JOIN users u
+            on r.user_id = u.id
+        
+        WHERE r.property_id = $1
+
+        ORDER BY r.created_at DESC`,
+        [listingId]
+    );
+
+    return result.rows;
+}
+
 
 module.exports = {
     getUser,
     getProperties,
     getPropertyById,
-    getPropertyImages
+    getPropertyImages,
+    getPropertyAmenities,
+    getPropertyReviews
 };

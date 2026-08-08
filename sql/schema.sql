@@ -459,7 +459,6 @@ VALUES
 INSERT INTO "property_images" ("property_id", "image_url", "display_order")
 
 VALUES
-
     (1, '/assets/placeholders/default_home.jpg', 1),
     (1, '/assets/images/properties/4-frontdoor.png', 2),
     (1, '/assets/placeholders/default_home.jpg', 3),

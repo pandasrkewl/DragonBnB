@@ -54,3 +54,35 @@ export function loadPropertyImages(url) {
       console.error(error);
     });
 }
+
+export function loadPropertyAmenities(url) {
+   fetch(url)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Could not load amenities");
+      }
+      return response.json();
+    })
+    .then((amenities) => {
+      console.log(amenities);
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+}
+
+export function loadPropertyReviews(url) {
+   fetch(url)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Could not load reviews");
+      }
+      return response.json();
+    })
+    .then((reviews) => {
+      console.log(reviews);
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+}
