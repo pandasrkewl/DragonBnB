@@ -24,15 +24,12 @@ export function loadProperties(url, railId) {
 };
 
 export function loadPropertyById(url) {
- fetch(url)
+ return fetch(url)
     .then((response) => {
       if (!response.ok) {
         throw new Error("Could not load property");
       }
       return response.json();
-    })
-    .then((property) => {
-      console.log(property);
     })
     .catch((error) => {
       console.error(error);
@@ -40,15 +37,12 @@ export function loadPropertyById(url) {
 };
 
 export function loadPropertyImages(url) {
-   fetch(url)
+   return fetch(url)
     .then((response) => {
       if (!response.ok) {
         throw new Error("Could not load images");
       }
       return response.json();
-    })
-    .then((images) => {
-      console.log(images);
     })
     .catch((error) => {
       console.error(error);
@@ -56,15 +50,12 @@ export function loadPropertyImages(url) {
 }
 
 export function loadPropertyAmenities(url) {
-   fetch(url)
+   return fetch(url)
     .then((response) => {
       if (!response.ok) {
         throw new Error("Could not load amenities");
       }
       return response.json();
-    })
-    .then((amenities) => {
-      console.log(amenities);
     })
     .catch((error) => {
       console.error(error);
@@ -72,15 +63,12 @@ export function loadPropertyAmenities(url) {
 }
 
 export function loadPropertyReviews(url) {
-   fetch(url)
+   return fetch(url)
     .then((response) => {
       if (!response.ok) {
         throw new Error("Could not load reviews");
       }
       return response.json();
-    })
-    .then((reviews) => {
-      console.log(reviews);
     })
     .catch((error) => {
       console.error(error);

@@ -7,7 +7,7 @@ const navBarContainer = document.getElementById("navbar-container");
 const catalog = document.getElementById("catalog");
 
 const navElement = createNavbar({
-  userMode: "host",
+  userMode: "guest",
 });
 
 navBarContainer.appendChild(navElement);
