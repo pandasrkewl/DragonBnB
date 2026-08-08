@@ -16,7 +16,7 @@ export function createPropertyCard(property) {
     });
     const favoriteButton = createElement("button", {className:"favorite-btn", textContent: "♡", "aria-label": "Add to wishlist"});
 
-    const name = createElement("p", {className: "name", textContent: property.title})
+    const name = createElement("p", {className: "name", textContent: `${property.property_type} in ${property.city}`})
     const description = createElement("p", {className: "description", textContent: `$${property.price_per_night} per night · ★ ${property.rating}`})
   
     imageContainer.append(image, favoriteButton);
