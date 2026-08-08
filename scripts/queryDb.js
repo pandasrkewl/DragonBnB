@@ -30,7 +30,7 @@ async function getProperties({
     limit = 10
 }) {
     const allowedSorts = {
-        rating: "p.rating DESC",
+        rating: "rating DESC",
         price_low: "p.price_per_night ASC",
         newest: "p.created_at DESC"
     };
@@ -44,8 +44,19 @@ async function getProperties({
             p.city,
             p.state,
             p.price_per_night,
-            p.rating,
-            p.review_count,
+            COALESCE(
+                (
+                    SELECT ROUND(AVG(r.rating), 2)
+                    FROM reviews r
+                    WHERE r.property_id = p.id
+                ),
+                0    
+            ) AS rating,
+            (
+                SELECT COUNT(*)
+                FROM reviews r
+                WHERE r.property_id = p.id
+            ) AS review_count,
             p.property_type,
             COALESCE(
                 (
@@ -85,8 +96,19 @@ async function getPropertyById(listingId) {
             p.bathrooms,
             p.beds,
             p.price_per_night,
-            p.rating,
-            p.review_count,
+            COALESCE(
+                (
+                    SELECT ROUND(AVG(r.rating), 2)
+                    FROM reviews r
+                    WHERE r.property_id = p.id
+                ),
+                0    
+            ) AS rating,
+            (
+                SELECT COUNT(*)
+                FROM reviews r
+                WHERE r.property_id = p.id
+            ) AS review_count,
             p.property_type,
             p.pets_allowed,
             p.check_in_time,
