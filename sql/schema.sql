@@ -16,7 +16,7 @@ CREATE TABLE users (
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
     host BOOLEAN DEFAULT FALSE,
-    image_url VARCHAR(255) DEFAULT 'placeholders/default_user.jpg'
+    image_url VARCHAR(255) DEFAULT '/assets/placeholders/default_user.jpg'
 );
 
 CREATE TABLE properties (

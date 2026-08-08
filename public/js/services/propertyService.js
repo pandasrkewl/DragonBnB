@@ -22,3 +22,19 @@ export function loadProperties(url, railId) {
       console.error(error);
     });
 }
+
+export function loadPropertyById(url) {
+ fetch(url)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Could not load property");
+      }
+      return response.json();
+    })
+    .then((property) => {
+      console.log(property);
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+}

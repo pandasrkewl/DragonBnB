@@ -1,10 +1,6 @@
 import { createElement } from "../reusable/functions.js";
 
 export function createPropertyCard(property) {
-    const cardLink = createElement("a", {
-        href: `/listing?id=${property.id}`,
-        className: "property-card-link",
-    });
     
     const column = createElement("div", {className: "column"});
 

@@ -54,8 +54,8 @@ async function getProperties({
                     WHERE pi.property_id = p.id
                     ORDER BY pi.display_order ASC
                     LIMIT 1
-            ),
-            '/placeholders/default_home.jpg'
+                ),
+                '/assets/placeholders/default_home.jpg'
             ) AS image_url
         FROM properties p
         WHERE p.city ILIKE $1
@@ -68,7 +68,52 @@ async function getProperties({
     return result.rows;
 }
 
+async function getPropertyById(listingId) {
+    const result = await pool.query(
+        `SELECT
+            p.id,
+            p.title,
+            p.description,
+            p.address_line_1,
+            p.address_line_2,
+            p.city,
+            p.state,
+            p.postal_code,
+            p.country,
+            p.max_guests,
+            p.bedrooms,
+            p.bathrooms,
+            p.beds,
+            p.price_per_night,
+            p.rating,
+            p.review_count,
+            p.property_type,
+            p.pets_allowed,
+            p.check_in_time,
+            p.check_out_time,
+
+            u.id AS host_id,
+            u.first_name AS host_first_name,
+            u.last_name AS host_last_name, 
+            COALESCE(
+                u.image_url,
+                '/assets/placeholders/default_user.jpg'
+            ) AS host_image_url
+
+        FROM properties p
+        JOIN users u
+            ON p.host_id = u.id
+
+        WHERE p.id = $1`,
+        [listingId]
+    );
+
+    return result.rows[0];
+}
+
+
 module.exports = {
     getUser,
-    getProperties
+    getProperties,
+    getPropertyById
 };
