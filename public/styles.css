@@ -23,7 +23,7 @@ nav a{
     font-weight:bold;
 }
 
-#catalog {
+#catalog{
     width: 90%;
     max-width: 1200px;
     margin: 40px auto;
@@ -363,4 +363,191 @@ footer{
   border-radius: 50%;
   object-fit: cover;
   background: white;
+}
+
+#listing-body {
+    width: 80%;
+    max-width: 1200px;
+    margin: 20px auto;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.property-listing-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.property-listing-title {
+  font-weight: 500;
+  font-size: 25px;
+}
+
+.property-listing-top {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.listing-favorite-btn {
+  font-size: 30px;
+}
+
+.listing-favorite {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+}
+
+.property-gallery {
+  position: relative;
+  width: 100%;
+  height: 500px;
+  overflow: hidden;
+  border-radius: 20px;
+}
+
+.property-gallery-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+
+
+.gallery-btn-left, .gallery-btn-right {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border: 1px black solid;
+  border-radius: 50%;
+  background: white;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.gallery-btn-left {
+  left: 15px;
+}
+
+.gallery-btn-right {
+  right: 15px;
+}
+
+.property-gallery {
+  position: relative;
+}
+
+.image-count {
+  position: absolute;
+  right: 15px;
+  bottom: 15px;
+
+  background: white;
+  padding: 6px 10px;
+  border-radius: 8px;
+
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.property-summary-title {
+  font-weight: 500;
+}
+
+.property-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+#left-body-container > div {
+  padding: 17px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.host-section {
+  display: flex;
+  gap: 10px;
+}
+
+.host-image {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+}
+
+.host-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.host-name {
+  font-size: 14px;
+}
+
+.host-details {
+  font-size: 12px;
+  color: gray;
+}
+
+.property-description-text {
+  line-height: 1.6;
+  max-height: 130px;
+  overflow: hidden;
+}
+
+.show-more-btn {
+  margin-top: 10px;
+  background: none;
+  border: none;
+  font-weight: bold;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  background: rgba(0, 0, 0, 0.5);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  z-index: 1000;
+}
+
+.modal-title {
+  padding-bottom: 10px;
+}
+
+.modal {
+  background: white;
+  width: 600px;
+  max-height: 80%;
+  overflow-y: auto;
+  padding: 30px;
+  border-radius: 10px;
+  position: relative;
+}
+
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+
+  border: none;
+  background: none;
+  font-size: 25px;
+  cursor: pointer;
 }
