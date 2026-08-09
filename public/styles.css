@@ -366,6 +366,58 @@ footer{
 }
 
 
-.user_image{
+
+/* https://stackoverflow.com/a/25685393 */
+.user-image{
     border-radius: 50%;
+    max-width:5%;
+    max-height:5%;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: cover;
+}
+
+.sub-nav-bar{
+    display:flex;
+    justify-content:center;
+}
+
+
+/* buttons */
+button {
+    border-radius: 25%;
+    margin: 5px;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.option-button-selected{
+    background-color: darkslategray;
+    color: white;
+    border-color: black;
+    padding: 10px;
+}
+
+.option-button-unselected{
+    background-color: white;
+    color: black;
+    border-color: black;
+    padding: 10px;
+}
+
+/* divs */
+
+.center-div{
+    display:flex;
+    justify-content:center;
+    align-items: center;
+    flex-direction:column;
+    min-height: 80vh; 
+}
+
+/* messages */
+
+.wrap-text{
+    width:300px;
+    text-align:center;
 }

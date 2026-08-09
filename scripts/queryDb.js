@@ -1,11 +1,11 @@
 const pool = require("../db.js");
 
-async function getUser(email) {
+async function getUser(id) {
     const result = await pool.query(
         "SELECT id, first_name, last_name, email, image_url, host " +
         "FROM users " +
-        "WHERE email = $1",
-        [email]
+        "WHERE id = $1",
+        [id]
     );
 
     let user = result.rows[0];
