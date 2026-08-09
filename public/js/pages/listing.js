@@ -3,6 +3,9 @@ import { createPropertyListingTop } from "../components/propertyListingTop.js";
 import { createPropertySummary } from "../components/propertySummary.js";
 import { createHostSection } from "../components/hostSection.js";
 import { createPropertyDescription } from "../components/propertyDescription.js";
+import { createAmenitiesSection } from "../components/propertyAmenities.js";
+import { createPropertyReviews } from "../components/propertyReviews.js";
+import { createBookingCard } from "../components/bookingCard.js";
 
 import { loadPropertyById, loadPropertyImages, loadPropertyAmenities, loadPropertyReviews } from "../services/propertyService.js"
 
@@ -34,7 +37,11 @@ const top = createPropertyListingTop(property, images);
 const bodyLeftSummary = createPropertySummary(property);
 const bodyLeftHost = createHostSection(property);
 const bodyLeftDescription = createPropertyDescription(property);
+const bodyLeftAmenities = createAmenitiesSection(amenities);
+const reviewsSection = createPropertyReviews(property, reviews);
+const bookingCard = createBookingCard(property);
 
 topContainer.append(top);
-leftBodyContainer.append(bodyLeftSummary, bodyLeftHost, bodyLeftDescription);
+leftBodyContainer.append(bodyLeftSummary, bodyLeftHost, bodyLeftDescription, bodyLeftAmenities, reviewsSection);
+rightBodyContainer.append(bookingCard);
 

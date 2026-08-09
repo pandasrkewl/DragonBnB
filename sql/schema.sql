@@ -443,14 +443,24 @@ VALUES
     (1, 1, 2, '2026-03-01', '2026-03-03', 400.00, 'completed'),
     (2, 1, 2, '2026-05-10', '2026-05-13', 525.00, 'completed'),
     (3, 2, 3, '2026-06-01', '2026-06-03', 280.00, 'completed'),
-    (4, 3, 5, '2026-07-15', '2026-07-18', 750.00, 'completed');
+    (4, 3, 5, '2026-07-15', '2026-07-18', 750.00, 'completed'),
+    (5, 1, 3, '2026-01-10', '2026-01-12', 350.00, 'completed'),
+    (6, 1, 5, '2026-02-14', '2026-02-16', 350.00, 'completed'),
+    (7, 1, 7, '2026-04-05', '2026-04-08', 525.00, 'completed'),
+    (8, 1, 9, '2026-06-12', '2026-06-15', 525.00, 'completed');
 
 INSERT INTO "reviews" ("id", "rating", "comment", "created_at", "user_id", "property_id", "booking_id")
 VALUES
     (1, 4, 'Cozy', '2026-03-02', 2, 1, 1),
     (2, 5, 'Great location and very clean apartment.', '2026-05-13', 2, 1, 2),
     (3, 4, 'Nice loft and easy check-in process.', '2026-06-03', 3, 2, 3),
-    (4, 5, 'Spacious home with plenty of room.', '2026-07-18', 5, 3, 4);
+    (4, 5, 'Spacious home with plenty of room.', '2026-07-18', 5, 3, 4),
+    (5, 5, 'Super big and beautiful location', '2026-05-13', 2, 1, 5),
+    (6, 5, 'Super big and beautiful location', '2026-05-13', 2, 1, 6),
+    (7, 5, 'Super big and beautiful location', '2026-05-13', 2, 1, 7),
+    (8, 5, 'Super big and beautiful location', '2026-05-13', 2, 1, 8);
+
+    
 
 INSERT INTO "property_images" ("property_id", "image_url", "display_order")
 
