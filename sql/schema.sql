@@ -15,7 +15,8 @@ CREATE TABLE users (
     last_name VARCHAR(100) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
-    host BOOLEAN DEFAULT FALSE
+    host BOOLEAN DEFAULT FALSE,
+    image_url VARCHAR(255) DEFAULT 'placeholders/default_user.jpg'
 );
 
 CREATE TABLE properties (
@@ -106,7 +107,7 @@ CREATE TABLE reviews (
 CREATE TABLE property_images (
     id SERIAL PRIMARY KEY,
     property_id INTEGER NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
-    image_url TEXT NOT NULL,
+    image_url TEXT NOT NULL DEFAULT 'placeholders/default_home.jpg',
     display_order INTEGER NOT NULL DEFAULT 0
 );
 
@@ -142,33 +143,34 @@ INSERT INTO users (
     last_name,
     email,
     password_hash,
-    host
+    host,
+    image_url
 )
 VALUES
-    (1, 'Max', 'Chiu', 'maxkchiu@gmail.com', 'admin', TRUE),
-    (2, 'Larry', 'Wu', 'larrywu@test.com', 'admin', FALSE),
-    (3, 'Peter', 'Parker', 'notspiderman@marvel.com', 'admin', FALSE),
-    (4, 'Tony', 'Stark', 'iamironman@dead.com', 'admin', TRUE),
-    (5, 'Emma', 'Johnson', 'emma.johnson@example.com', 'admin', FALSE),
-    (6, 'Noah', 'Williams', 'noah.williams@example.com', 'admin', TRUE),
-    (7, 'Olivia', 'Brown', 'olivia.brown@example.com', 'admin', FALSE),
-    (8, 'Liam', 'Davis', 'liam.davis@example.com', 'admin', TRUE),
-    (9, 'Ava', 'Martinez', 'ava.martinez@example.com', 'admin', FALSE),
-    (10, 'Ethan', 'Wilson', 'ethan.wilson@example.com', 'admin', TRUE),
-    (11, 'Sophia', 'Anderson', 'sophia.anderson@example.com', 'admin', FALSE),
-    (12, 'James', 'Thomas', 'james.thomas@example.com', 'admin', TRUE),
-    (13, 'Mia', 'Taylor', 'mia.taylor@example.com', 'admin', FALSE),
-    (14, 'Benjamin', 'Moore', 'benjamin.moore@example.com', 'admin', TRUE),
-    (15, 'Charlotte', 'Jackson', 'charlotte.jackson@example.com', 'admin', FALSE),
-    (16, 'Lucas', 'Martin', 'lucas.martin@example.com', 'admin', TRUE),
-    (17, 'Amelia', 'Lee', 'amelia.lee@example.com', 'admin', FALSE),
-    (18, 'Henry', 'Walker', 'henry.walker@example.com', 'admin', TRUE),
-    (19, 'Evelyn', 'Hall', 'evelyn.hall@example.com', 'admin', FALSE),
-    (20, 'Daniel', 'Allen', 'daniel.allen@example.com', 'admin', TRUE),
-    (21, 'Harper', 'Young', 'harper.young@example.com', 'admin', FALSE),
-    (22, 'Michael', 'King', 'michael.king@example.com', 'admin', TRUE),
-    (23, 'Ella', 'Wright', 'e.wwright@example.com', 'admin', FALSE),
-    (24, 'Jack', 'Scott', 'jack.scott@example.com', 'admin', TRUE);
+    (1, 'Max', 'Chiu', 'maxkchiu@gmail.com', 'admin', TRUE, '1.jpg'),
+    (2, 'Larry', 'Wu', 'larrywu@test.com', 'admin', FALSE, NULL),
+    (3, 'Peter', 'Parker', 'notspiderman@marvel.com', 'admin', FALSE, NULL),
+    (4, 'Tony', 'Stark', 'iamironman@dead.com', 'admin', TRUE, NULL),
+    (5, 'Emma', 'Johnson', 'emma.johnson@example.com', 'admin', FALSE, NULL),
+    (6, 'Noah', 'Williams', 'noah.williams@example.com', 'admin', TRUE, NULL),
+    (7, 'Olivia', 'Brown', 'olivia.brown@example.com', 'admin', FALSE, NULL),
+    (8, 'Liam', 'Davis', 'liam.davis@example.com', 'admin', TRUE, NULL),
+    (9, 'Ava', 'Martinez', 'ava.martinez@example.com', 'admin', FALSE, NULL),
+    (10, 'Ethan', 'Wilson', 'ethan.wilson@example.com', 'admin', TRUE, NULL),
+    (11, 'Sophia', 'Anderson', 'sophia.anderson@example.com', 'admin', FALSE, NULL),
+    (12, 'James', 'Thomas', 'james.thomas@example.com', 'admin', TRUE, NULL),
+    (13, 'Mia', 'Taylor', 'mia.taylor@example.com', 'admin', FALSE, NULL),
+    (14, 'Benjamin', 'Moore', 'benjamin.moore@example.com', 'admin', TRUE, NULL),
+    (15, 'Charlotte', 'Jackson', 'charlotte.jackson@example.com', 'admin', FALSE, NULL),
+    (16, 'Lucas', 'Martin', 'lucas.martin@example.com', 'admin', TRUE, NULL),
+    (17, 'Amelia', 'Lee', 'amelia.lee@example.com', 'admin', FALSE, NULL),
+    (18, 'Henry', 'Walker', 'henry.walker@example.com', 'admin', TRUE, NULL),
+    (19, 'Evelyn', 'Hall', 'evelyn.hall@example.com', 'admin', FALSE, NULL),
+    (20, 'Daniel', 'Allen', 'daniel.allen@example.com', 'admin', TRUE, NULL),
+    (21, 'Harper', 'Young', 'harper.young@example.com', 'admin', FALSE, NULL),
+    (22, 'Michael', 'King', 'michael.king@example.com', 'admin', TRUE, NULL),
+    (23, 'Ella', 'Wright', 'e.wwright@example.com', 'admin', FALSE, NULL),
+    (24, 'Jack', 'Scott', 'jack.scott@example.com', 'admin', TRUE, NULL);
 
 INSERT INTO properties (
     id,
@@ -197,8 +199,8 @@ INSERT INTO properties (
 VALUES
 (1, 1, 'Modern Center City Apartment', 'Bright apartment near restaurants and public transportation.', '1500 Market Street', 'Apartment 8B', 'Philadelphia', 'Pennsylvania', '19102', 'United States', 4, 2, 1.5, 2, 175.00, 0.00, 0, 'Apartment', FALSE, '15:00', '11:00', CURRENT_TIMESTAMP),
 (2, 1, 'Cozy Old City Loft', 'Historic loft close to shops and nightlife.', '225 Arch Street', NULL, 'Philadelphia', 'Pennsylvania', '19106', 'United States', 2, 1, 1.0, 1, 140.00, 0.00, 0, 'Apartment', FALSE, '16:00', '10:00', CURRENT_TIMESTAMP),
-(3, 1, 'Spacious University City Home', 'Large home near Drexel and Penn.', '3200 Powelton Avenue', NULL, 'Philadelphia', 'Pennsylvania', '19104', 'United States', 6, 3, 2.5, 4, 250.00, 0.00, 0, 'House', TRUE, '15:00', '11:00', CURRENT_TIMESTAMP),
-(4, 16, 'Suburban Family House', 'Rooms to live in, Suburban Virginia', '6139 Shiplett Blvd.', NULL, 'Burke', 'VA', '22015', 'United States', 2, 2, 1.0, 2, 200.00, 4.00, 2, 'Room', FALSE, '14:00', '10:00', '2025-01-12T08:17:43-07:00'),
+(3, 16, 'Spacious University City Home', 'Large home near Drexel and Penn.', '3200 Powelton Avenue', NULL, 'Philadelphia', 'Pennsylvania', '19104', 'United States', 6, 3, 2.5, 4, 250.00, 0.00, 0, 'House', TRUE, '15:00', '11:00', CURRENT_TIMESTAMP),
+(4, 1, 'Suburban Family House', 'Rooms to live in, Suburban Virginia', '6139 Shiplett Blvd.', NULL, 'Burke', 'VA', '22015', 'United States', 2, 2, 1.0, 2, 200.00, 4.00, 2, 'Room', FALSE, '14:00', '10:00', '2025-01-12T08:17:43-07:00'),
 (5, 4, 'Beachfront Villa', 'Luxury oceanfront villa with pool', '12 Ocean Dr', NULL, 'Miami', 'FL', '33139', 'United States', 8, 4, 3.0, 5, 420.00, 0.00, 0, 'House', TRUE, '15:30', '11:00', '2025-03-28T19:52:11+01:00'),
 (6, 6, 'Cozy Loft', 'Downtown loft near attractions', '101 Market St', NULL, 'Philadelphia', 'PA', '19107', 'United States', 2, 1, 1.0, 1, 145.00, 0.00, 0, 'Apartment', FALSE, '16:00', '10:30', '2025-06-05T14:08:55-04:00'),
 (7, 24, 'Mountain Cabin', 'Quiet cabin with fireplace', '88 Pine Rd', NULL, 'Aspen', 'CO', '81611', 'United States', 6, 3, 2.0, 4, 275.00, 0.00, 0, 'House', TRUE, '17:00', '11:00', '2025-09-19T22:34:19+09:00'),
@@ -208,7 +210,19 @@ VALUES
 (11, 18, 'Historic Home', 'Charming historic district stay', '19 King St', NULL, 'Charleston', 'SC', '29401', 'United States', 4, 2, 2.0, 2, 220.00, 0.00, 0, 'House', TRUE, '13:00', '10:00', '2026-04-03T20:41:26-05:00'),
 (12, 20, 'Ski Chalet', 'Walk to ski lifts', '17 Alpine Ln', NULL, 'Park City', 'UT', '84060', 'United States', 12, 5, 4.0, 8, 510.00, 0.00, 0, 'House', FALSE, '17:30', '11:30', '2026-05-27T09:56:44+08:00'),
 (13, 8, 'Garden Cottage', 'Private backyard cottage', '5 Rose Ct', NULL, 'Portland', 'OR', '97205', 'United States', 3, 1, 1.0, 2, 160.00, 0.00, 0, 'Room', TRUE, '15:00', '10:30', '2026-07-11T15:22:09+12:00'),
-(14, 22, 'Luxury Penthouse', 'Top-floor skyline views', '800 High St', NULL, 'Chicago', 'IL', '60601', 'United States', 5, 2, 2.0, 2, 390.00, 0.00, 0, 'Apartment', FALSE, '14:00', '11:00', '2026-08-24T13:47:51-03:00');
+(14, 22, 'Luxury Penthouse', 'Top-floor skyline views', '800 High St', NULL, 'Chicago', 'IL', '60601', 'United States', 5, 2, 2.0, 2, 390.00, 0.00, 0, 'Apartment', FALSE, '14:00', '11:00', '2026-08-24T13:47:51-03:00'),
+(15, 4, 'Drexel Campus Studio', 'Compact studio within walking distance of Drexel University.', '3401 Lancaster Avenue', 'Unit 3A', 'Philadelphia', 'PA', '19104', 'United States', 2, 1, 1.0, 1, 110.00, 4.80, 18, 'Apartment', FALSE, '15:00', '11:00', CURRENT_TIMESTAMP),
+(16, 6, 'University City Student Apartment', 'Affordable apartment near Drexel and public transportation.', '3600 Spring Garden Street', NULL, 'Philadelphia', 'PA', '19104', 'United States', 4, 2, 1.0, 2, 125.00, 4.65, 14, 'Apartment', FALSE, '15:00', '11:00', CURRENT_TIMESTAMP),
+(17, 8, 'Powelton Village Guest Suite', 'Private guest suite in a quiet neighborhood near campus.', '3325 Baring Street', NULL, 'Philadelphia', 'PA', '19104', 'United States', 2, 1, 1.0, 1, 135.00, 4.90, 27, 'Room', FALSE, '16:00', '10:00', CURRENT_TIMESTAMP),
+(18, 10, 'Modern Apartment Near 30th Street', 'Modern apartment close to trains, Drexel, and Penn.', '3025 Market Street', 'Unit 5C', 'Philadelphia', 'PA', '19104', 'United States', 4, 2, 2.0, 2, 195.00, 4.72, 21, 'Apartment', TRUE, '15:00', '11:00', CURRENT_TIMESTAMP),
+(19, 12, 'Atlantic City Boardwalk Condo', 'Modern condo within walking distance of the boardwalk and beach.', '1200 Pacific Avenue', 'Unit 8A', 'Atlantic City', 'NJ', '08401', 'United States', 4, 2, 2.0, 2, 230.00, 4.88, 34, 'Apartment', FALSE, '15:00', '11:00', CURRENT_TIMESTAMP),
+(20, 14, 'Cozy Atlantic City Beach House', 'Comfortable beach house near restaurants and casinos.', '215 South Raleigh Avenue', NULL, 'Atlantic City', 'NJ', '08401', 'United States', 6, 3, 2.0, 4, 275.00, 4.76, 28, 'House', TRUE, '16:00', '11:00', CURRENT_TIMESTAMP),
+(21, 16, 'Affordable Boardwalk Studio', 'Budget-friendly studio close to the Atlantic City Boardwalk.', '801 Atlantic Avenue', 'Unit 4B', 'Atlantic City', 'NJ', '08401', 'United States', 2, 1, 1.0, 1, 120.00, 4.35, 16, 'Apartment', FALSE, '15:00', '10:00', CURRENT_TIMESTAMP),
+(22, 18, 'Ocean View Atlantic City Suite', 'Bright suite with ocean views and easy beach access.', '3101 Boardwalk', 'Suite 907', 'Atlantic City', 'NJ', '08401', 'United States', 4, 1, 1.5, 2, 210.00, 4.91, 42, 'Apartment', FALSE, '16:00', '11:00', CURRENT_TIMESTAMP),
+(23, 20, 'Spacious Atlantic City Townhouse', 'Large townhouse for groups near the boardwalk.', '28 North California Avenue', NULL, 'Atlantic City', 'NJ', '08401', 'United States', 8, 4, 3.0, 5, 340.00, 4.82, 31, 'House', TRUE, '15:00', '11:00', CURRENT_TIMESTAMP),
+(24, 22, 'Casino District Apartment', 'Central apartment near casinos, shopping, and nightlife.', '1501 Boardwalk', 'Unit 12C', 'Atlantic City', 'NJ', '08401', 'United States', 3, 1, 1.0, 2, 165.00, 4.60, 22, 'Apartment', FALSE, '15:30', '10:30', CURRENT_TIMESTAMP),
+(25, 24, 'Luxury Atlantic City Penthouse', 'Top-floor penthouse with skyline and ocean views.', '100 South North Carolina Avenue', 'Penthouse 2', 'Atlantic City', 'NJ', '08401', 'United States', 6, 3, 3.0, 4, 450.00, 4.97, 57, 'Apartment', FALSE, '16:00', '11:00', CURRENT_TIMESTAMP),
+(26, 4, 'Quiet Atlantic City Guest Home', 'Relaxing guest home away from the busiest boardwalk areas.', '505 North Massachusetts Avenue', NULL, 'Atlantic City', 'NJ', '08401', 'United States', 5, 2, 1.5, 3, 185.00, 4.54, 19, 'House', TRUE, '15:00', '10:30', CURRENT_TIMESTAMP);
 
 INSERT INTO amenities(
     id,
@@ -444,10 +458,8 @@ VALUES
 
 INSERT INTO "property_images" ("property_id", "image_url", "display_order")
 VALUES
-    (1, '/images/property1-main.jpg', 1),
-    (1, '/images/property1-bedroom.jpg', 2),
-    (2, '/images/property2-main.jpg', 1),
-    (3, '/images/property3-main.jpg', 1);
+    (1, '/assets/placeholders/default_home.jpg', 1),
+    (2, '/assets/images/properties/4-frontdoor.png', 1);
 
 INSERT INTO "wishlists" ("user_id", "property_id", "list_name")
 VALUES
