@@ -145,7 +145,7 @@ INSERT INTO users (
     image_url
 )
 VALUES
-    (1, 'Max', 'Chiu', 'maxkchiu@gmail.com', 'admin', TRUE, '1.jpg'),
+    (1, 'Max', 'Chiu', 'maxkchiu@gmail.com', 'admin', TRUE, 'assets/images/users/1.jpg'),
     (2, 'Larry', 'Wu', 'larrywu@test.com', 'admin', FALSE, NULL),
     (3, 'Peter', 'Parker', 'notspiderman@marvel.com', 'admin', FALSE, NULL),
     (4, 'Tony', 'Stark', 'iamironman@dead.com', 'admin', TRUE, NULL),

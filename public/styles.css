@@ -751,3 +751,19 @@ footer{
   margin-top: 15px;
   color: gray;
 }
+
+.message-host {
+  margin-left: auto;
+  padding: 10px 16px;
+  background: white;
+  color: #222;
+  border: 1px solid #222;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.message-host:hover {
+  background: #f0f0f0;
+}

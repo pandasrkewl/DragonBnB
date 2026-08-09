@@ -20,13 +20,18 @@ export function createHostSection(property) {
         textContent: `Hosted by ${property.host_first_name} ${property.host_last_name}`
     });
 
+    const messageHost = createElement("button", {
+        className: "message-host",
+        textContent: "Message"
+    });
+
     const hostDetails = createElement("p", {
         className: "host-details",
         textContent: "Host"
     });
 
     hostInfo.append(hostName, hostDetails);
-    hostContainer.append(hostImage, hostInfo);
+    hostContainer.append(hostImage, hostInfo, messageHost);
 
     return hostContainer;
 }
