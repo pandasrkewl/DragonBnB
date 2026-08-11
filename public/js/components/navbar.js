@@ -131,9 +131,12 @@ export function createNavbar({
     textContent: toggleModeText,
   });
 
-  const profileDropdown = createElement(
+  const profileButton = createElement(
     "button",
-    { className: "profile-menu" },
+    {
+      className: "profile-menu",
+      type: "button",
+    },
     [
       createElement("img", {
         src: "../../../assets/icons/menu.svg",
@@ -145,8 +148,35 @@ export function createNavbar({
         alt: "Profile",
         className: "avatar",
       }),
-    ],
+    ]
   );
+
+  const dropdownMenu = createElement(
+    "div",
+    { className: "profile-dropdown" },
+    [
+      createElement("a", {
+        href: "/logout",
+        className: "dropdown-item",
+        textContent: "Logout",
+      }),
+    ]
+  );
+
+  const profileDropdown = createElement(
+    "div",
+    { className: "profile-dropdown-container" },
+    [profileButton, dropdownMenu]
+  );
+
+  profileButton.addEventListener("click", (e) => {
+    e.stopPropagation();
+    dropdownMenu.classList.toggle("show");
+  });
+
+  document.addEventListener("click", () => {
+    dropdownMenu.classList.remove("show");
+  });
 
   if (userMode === "guest") {
     rightActions.append(
@@ -174,9 +204,17 @@ export function createNavbar({
         document.createTextNode(" Favorites"),
       ],
     );
-    rightActions.append(toggleModeLink, favoritesLink, profileDropdown);
+    rightActions.append(
+      toggleModeLink,
+      favoritesLink,
+      profileDropdown,
+    );
+  
   } else if (userMode === "host") {
-    rightActions.append(toggleModeLink, profileDropdown);
+    rightActions.append(
+      toggleModeLink,
+      profileDropdown,
+    );
   }
 
   header.appendChild(rightActions);

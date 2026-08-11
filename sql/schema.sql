@@ -170,6 +170,11 @@ VALUES
     (23, 'Ella', 'Wright', 'e.wwright@example.com', 'admin', FALSE, NULL),
     (24, 'Jack', 'Scott', 'jack.scott@example.com', 'admin', TRUE, NULL);
 
+SELECT setval(
+    'users_id_seq',
+    (SELECT MAX(id) FROM users)
+);
+
 INSERT INTO properties (
     id,
     host_id,
@@ -515,3 +520,8 @@ VALUES
     (3, 5, 'Are pets allowed at this property?', '2026-07-10 16:00:00'),
     (4, 1, 'Can I bring a dog?', '2026-07-20 11:10:00'),
     (4, 2, 'No', '2026-07-20 11:15:00');
+
+SELECT setval(
+    'users_id_seq',
+    (SELECT MAX(id) FROM users)
+);

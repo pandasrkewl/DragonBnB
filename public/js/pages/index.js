@@ -6,10 +6,42 @@ import {loadProperties} from "../services/propertyService.js"
 const navBarContainer = document.getElementById("navbar-container");
 const catalog = document.getElementById("catalog");
 
-const navElement = createNavbar({
-  userMode: "guest",
-});
+async function loadNavbar() {
+  try {
+    const response = await fetch("/api/me");
+    const user = await response.json();
 
+    let userMode = "guest";
+
+    if (user) {
+      userMode = user.host ? "host" : "tenant";
+    }
+
+    const navElement = createNavbar({
+      userMode,
+      isRegisteredHost: user?.host ?? false,
+    });
+
+    document
+      .getElementById("navbar-container")
+      .appendChild(navElement);
+
+  } catch (err) {
+    console.error(err);
+
+    const navElement = createNavbar({
+      userMode: "guest",
+    });
+
+    document
+      .getElementById("navbar-container")
+      .appendChild(navElement);
+  }
+
+  navBarContainer.appendChild(navElement);
+}
+
+loadNavbar();
 navBarContainer.appendChild(navElement);
 
 const popularRail = createRail({rail_id: "popular-rail", rail_name: "Popular stays near Drexel"});
