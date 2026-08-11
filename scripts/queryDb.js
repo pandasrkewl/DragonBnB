@@ -30,7 +30,7 @@ async function getProperties({
     limit = 10
 }) {
     const allowedSorts = {
-        rating: "p.rating DESC",
+        rating: "rating DESC",
         price_low: "p.price_per_night ASC",
         newest: "p.created_at DESC"
     };
@@ -44,8 +44,19 @@ async function getProperties({
             p.city,
             p.state,
             p.price_per_night,
-            p.rating,
-            p.review_count,
+            COALESCE(
+                (
+                    SELECT ROUND(AVG(r.rating), 2)
+                    FROM reviews r
+                    WHERE r.property_id = p.id
+                ),
+                0    
+            ) AS rating,
+            (
+                SELECT COUNT(*)
+                FROM reviews r
+                WHERE r.property_id = p.id
+            ) AS review_count,
             p.property_type,
             COALESCE(
                 (
@@ -54,8 +65,8 @@ async function getProperties({
                     WHERE pi.property_id = p.id
                     ORDER BY pi.display_order ASC
                     LIMIT 1
-            ),
-            '/assets/placeholders/default_home.jpg'
+                ),
+                '/assets/placeholders/default_home.jpg'
             ) AS image_url
         FROM properties p
         WHERE p.city ILIKE $1
@@ -68,7 +79,136 @@ async function getProperties({
     return result.rows;
 }
 
+async function getPropertyById(listingId) {
+    const result = await pool.query(
+        `SELECT
+            p.id,
+            p.title,
+            p.description,
+            p.address_line_1,
+            p.address_line_2,
+            p.city,
+            p.state,
+            p.postal_code,
+            p.country,
+            p.max_guests,
+            p.bedrooms,
+            p.bathrooms,
+            p.beds,
+            p.price_per_night,
+            COALESCE(
+                (
+                    SELECT ROUND(AVG(r.rating), 2)
+                    FROM reviews r
+                    WHERE r.property_id = p.id
+                ),
+                0    
+            ) AS rating,
+            (
+                SELECT COUNT(*)
+                FROM reviews r
+                WHERE r.property_id = p.id
+            ) AS review_count,
+            p.property_type,
+            p.pets_allowed,
+            p.check_in_time,
+            p.check_out_time,
+
+            u.id AS host_id,
+            u.first_name AS host_first_name,
+            u.last_name AS host_last_name, 
+            COALESCE(
+                u.image_url,
+                '/assets/placeholders/default_user.jpg'
+            ) AS host_image_url
+
+        FROM properties p
+        JOIN users u
+            ON p.host_id = u.id
+
+        WHERE p.id = $1`,
+        [listingId]
+    );
+
+    return result.rows[0];
+}
+
+async function getPropertyImages(listingId) {
+    const result = await pool.query(
+        `SELECT 
+            image_url,
+            display_order
+        FROM property_images
+        WHERE property_id = $1
+        ORDER BY display_order ASC`,
+        [listingId]
+    );
+
+    return result.rows;
+}
+
+async function getPropertyAmenities(listingId) {
+    const result = await pool.query(
+        `SELECT 
+            a.name, 
+            a.basics,
+            a.bathroom,
+            a.bedroom_and_laundry,
+            a.entertainment,
+            a.family,
+            a.heating_and_cooling,
+            a.home_safety, 
+            a.internet_and_office,
+            a.kitchen_and_dining,
+            a.location_features,
+            a.outdoor,
+            a.parking_and_facilities,
+            a.services
+        FROM amenities a
+        JOIN property_amenities pa
+            ON a.id = pa.amenity_id
+        WHERE pa.property_id = $1`,
+        [listingId]
+    );
+
+    return result.rows;
+}
+
+async function getPropertyReviews(listingId) {
+    const result = await pool.query(
+        `SELECT
+            r.id,
+            r.rating,
+            r.comment,
+            r.created_at,
+            
+            u.id AS user_id,
+            u.first_name AS user_first_name,
+            u.last_name as user_last_name,
+            COALESCE(
+                u.image_url,
+                '/assets/placeholders/default_user.jpg'
+            ) AS user_image_url
+        
+        FROM reviews r
+        JOIN users u
+            on r.user_id = u.id
+        
+        WHERE r.property_id = $1
+
+        ORDER BY r.created_at DESC`,
+        [listingId]
+    );
+
+    return result.rows;
+}
+
+
 module.exports = {
     getUser,
-    getProperties
+    getProperties,
+    getPropertyById,
+    getPropertyImages,
+    getPropertyAmenities,
+    getPropertyReviews
 };

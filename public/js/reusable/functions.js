@@ -24,3 +24,35 @@ export function createElement(tag, attributes = {}, children = []) {
 
   return el;
 }
+
+export function createModal(titleText, bodyElement) {
+    const overlay = createElement("div", {
+        className: "modal-overlay"
+    });
+    const modal = createElement("div", {
+        className: "modal"
+    });
+    const closeButton = createElement("button", {
+        className: "modal-close",
+        textContent: "×"
+    });
+    const title = createElement("h2", {
+        className: "modal-title",
+        textContent: titleText
+    });
+    modal.append(
+        closeButton,
+        title,
+        bodyElement
+    );
+    overlay.append(modal);
+    closeButton.addEventListener("click", () => {
+        overlay.remove();
+    });
+    overlay.addEventListener("click", (event) => {
+        if (event.target === overlay) {
+            overlay.remove();
+        }
+    });
+    return overlay;
+}
