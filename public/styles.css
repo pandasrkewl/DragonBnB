@@ -366,20 +366,10 @@ footer{
 }
 
 
+/* images */
 
-/* https://stackoverflow.com/a/25685393 */
-.user-image{
-    border-radius: 50%;
-    max-width:5%;
-    max-height:5%;
-    background-repeat: no-repeat;
-    background-position: center center;
-    background-size: cover;
-}
-
-.sub-nav-bar{
-    display:flex;
-    justify-content:center;
+.center-image{
+  max-width: 30%;
 }
 
 
@@ -405,6 +395,11 @@ button {
     padding: 10px;
 }
 
+#todayButton:hover,
+#upcomingButton:hover {
+    background-color: #d0d0d0;
+}
+
 /* divs */
 
 .center-div{
@@ -413,6 +408,11 @@ button {
     align-items: center;
     flex-direction:column;
     min-height: 80vh; 
+}
+
+.sub-nav-bar{
+    display:flex;
+    justify-content:center;
 }
 
 /* messages */
