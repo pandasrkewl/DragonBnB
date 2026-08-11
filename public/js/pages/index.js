@@ -7,6 +7,7 @@ const navBarContainer = document.getElementById("navbar-container");
 const catalog = document.getElementById("catalog");
 
 async function loadNavbar() {
+  let navElement = document.createElement("div");
   try {
     const response = await fetch("/api/me");
     const user = await response.json();
@@ -17,7 +18,7 @@ async function loadNavbar() {
       userMode = user.host ? "host" : "tenant";
     }
 
-    const navElement = createNavbar({
+    navElement = createNavbar({
       userMode,
       isRegisteredHost: user?.host ?? false,
     });
@@ -29,20 +30,20 @@ async function loadNavbar() {
   } catch (err) {
     console.error(err);
 
-    const navElement = createNavbar({
+    navElement = createNavbar({
       userMode: "guest",
     });
 
     document
       .getElementById("navbar-container")
       .appendChild(navElement);
+
   }
 
   navBarContainer.appendChild(navElement);
 }
 
 loadNavbar();
-navBarContainer.appendChild(navElement);
 
 const popularRail = createRail({rail_id: "popular-rail", rail_name: "Popular stays near Drexel"});
 const affordableRail = createRail({rail_id: "affordable-rail", rail_name: "Affordable stays near Drexel"});
