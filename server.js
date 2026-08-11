@@ -4,7 +4,6 @@ const { getProperties, getPropertyById, getPropertyImages, getPropertyAmenities,
 const session = require("express-session");
 const bcrypt = require("bcrypt");
 const pool = require("./db");
-const { getProperties } = require("./scripts/queryDb");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
