@@ -55,7 +55,7 @@ async function getProperties({
                     ORDER BY pi.display_order ASC
                     LIMIT 1
             ),
-            '/placeholders/default_home.jpg'
+            '/assets/placeholders/default_home.jpg'
             ) AS image_url
         FROM properties p
         WHERE p.city ILIKE $1
