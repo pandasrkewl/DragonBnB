@@ -23,13 +23,6 @@ nav a {
 }
 
 #catalog {
-  width: 90%;
-  max-width: 1200px;
-  margin: 40px auto;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-#catalog{
     width: 90%;
     max-width: 1200px;
     margin: 40px auto;
