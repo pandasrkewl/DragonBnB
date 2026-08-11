@@ -249,6 +249,17 @@ export function createNavbar({
       dateError.classList.toggle("visible", Boolean(message));
     }
 
+    const guestError = createElement("p", {
+      className: "search-error",
+      textContent: "",
+    });
+    guestsPanel.appendChild(guestError);
+
+    function setGuestError(message) {
+      guestError.textContent = message;
+      guestError.classList.toggle("visible", Boolean(message));
+    }
+
     function isValidDateRange() {
       if (!checkInInput.value || !checkOutInput.value) {
         setDateError("");
@@ -266,6 +277,19 @@ export function createNavbar({
 
     function syncGuestSummary() {
       const totalGuests = guestCounts.adults + guestCounts.children;
+
+      const hasMinorsOrPets =
+        guestCounts.children > 0 ||
+        guestCounts.infants > 0 ||
+        guestCounts.pets > 0;
+      if (hasMinorsOrPets && guestCounts.adults === 0) {
+        setGuestError(
+          "At least one adult must accompany children, infants, or pets.",
+        );
+      } else {
+        setGuestError("");
+      }
+
       if (totalGuests > 0) {
         guestValue.textContent = `${totalGuests} guest${totalGuests > 1 ? "s" : ""}`;
       } else {
@@ -403,6 +427,18 @@ export function createNavbar({
         return;
       }
 
+      const hasMinorsOrPets =
+        guestCounts.children > 0 ||
+        guestCounts.infants > 0 ||
+        guestCounts.pets > 0;
+      if (hasMinorsOrPets && guestCounts.adults === 0) {
+        setGuestError(
+          "At least one adult must accompany children, infants, or pets.",
+        );
+        openPanel("guests");
+        return;
+      }
+
       const params = new URLSearchParams();
       const locationValueText = locationInput.value.trim();
       if (locationValueText) {
@@ -496,25 +532,21 @@ export function createNavbar({
         alt: "Profile",
         className: "avatar",
       }),
-    ]
+    ],
   );
 
-  const dropdownMenu = createElement(
-    "div",
-    { className: "profile-dropdown" },
-    [
-      createElement("a", {
-        href: "/logout",
-        className: "dropdown-item",
-        textContent: "Logout",
-      }),
-    ]
-  );
+  const dropdownMenu = createElement("div", { className: "profile-dropdown" }, [
+    createElement("a", {
+      href: "/logout",
+      className: "dropdown-item",
+      textContent: "Logout",
+    }),
+  ]);
 
   const profileDropdown = createElement(
     "div",
     { className: "profile-dropdown-container" },
-    [profileButton, dropdownMenu]
+    [profileButton, dropdownMenu],
   );
 
   profileButton.addEventListener("click", (e) => {
@@ -552,17 +584,9 @@ export function createNavbar({
         document.createTextNode(" Favorites"),
       ],
     );
-    rightActions.append(
-      toggleModeLink,
-      favoritesLink,
-      profileDropdown,
-    );
-  
+    rightActions.append(toggleModeLink, favoritesLink, profileDropdown);
   } else if (userMode === "host") {
-    rightActions.append(
-      toggleModeLink,
-      profileDropdown,
-    );
+    rightActions.append(toggleModeLink, profileDropdown);
   }
 
   header.appendChild(rightActions);
