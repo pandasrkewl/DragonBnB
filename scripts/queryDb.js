@@ -84,23 +84,40 @@ async function getProperties({
         p.city,
         p.state,
         p.price_per_night,
-        p.rating,
-        p.review_count,
+
+        COALESCE(
+            (
+                SELECT ROUND(AVG(r.rating), 2)
+                FROM reviews r
+                WHERE r.property_id = p.id
+            ),
+            0
+        ) AS rating,
+
+        (
+            SELECT COUNT(*)
+            FROM reviews r
+            WHERE r.property_id = p.id
+        ) AS review_count,
+
         p.property_type,
         p.max_guests,
+
         COALESCE(
-        (
-            SELECT pi.image_url
-            FROM property_images pi
-            WHERE pi.property_id = p.id
-            ORDER BY pi.display_order ASC
-            LIMIT 1
-        ),
-        '/placeholders/default_home.jpg'
+            (
+                SELECT pi.image_url
+                FROM property_images pi
+                WHERE pi.property_id = p.id
+                ORDER BY pi.display_order ASC
+                LIMIT 1
+            ),
+            '/placeholders/default_home.jpg'
         ) AS image_url
+
     FROM properties p
     ${whereClause}
-    ORDER BY ${orderBy}${Number.isFinite(limit) && limit > 0 ? `\n    LIMIT $${values.length + 1}` : ""}`;
+    ORDER BY ${orderBy}
+    ${Number.isFinite(limit) && limit > 0 ? `LIMIT $${paramIndex}` : ""}`;
 
     const queryParams = [...values];
     if (Number.isFinite(limit) && limit > 0) {
