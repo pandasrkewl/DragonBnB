@@ -45,6 +45,7 @@ async function getProperties({
     const values = [];
     let paramIndex = 1;
 
+    
     if (searchValue) {
         filters.push(`p.city ILIKE $${paramIndex}`);
         values.push(`%${searchValue}%`);
@@ -112,20 +113,20 @@ async function getProperties({
 }
 
 async function getPropertyCities({ query = "" }) {
-  const searchValue = query.trim();
-  const whereClause = searchValue ? "WHERE city ILIKE $1" : "";
-  const values = searchValue ? [`%${searchValue}%`] : [];
+    const searchValue = query.trim();
+    const whereClause = searchValue ? "WHERE city ILIKE $1" : "";
+    const values = searchValue ? [`%${searchValue}%`] : [];
 
-  const result = await pool.query(
-    `SELECT DISTINCT city
-    FROM properties
-    ${whereClause}
-    ORDER BY city
-    LIMIT 8`,
-    values,
-  );
+    const result = await pool.query(
+        `SELECT DISTINCT city
+        FROM properties
+        ${whereClause}
+        ORDER BY city
+        LIMIT 8`,
+        values,
+    );
 
-  return result.rows.map((row) => row.city);
+    return result.rows.map((row) => row.city);
 }
 
 async function getPropertyById(listingId) {
