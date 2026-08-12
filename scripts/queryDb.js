@@ -39,114 +39,76 @@ async function getProperties({
         newest: "p.created_at DESC"
     };
 
-  const orderBy = allowedSorts[sortBy] || allowedSorts.rating;
-  const searchValue = location || "";
-  const filters = [];
-  const values = [];
-  let paramIndex = 1;
+    const orderBy = allowedSorts[sortBy] || allowedSorts.rating;
+    const searchValue = location || "";
+    const filters = [];
+    const values = [];
+    let paramIndex = 1;
 
-    const result = await pool.query(
-        `SELECT
-            p.id,
-            p.title,
-            p.city,
-            p.state,
-            p.price_per_night,
-            COALESCE(
-                (
-                    SELECT ROUND(AVG(r.rating), 2)
-                    FROM reviews r
-                    WHERE r.property_id = p.id
-                ),
-                0    
-            ) AS rating,
-            (
-                SELECT COUNT(*)
-                FROM reviews r
-                WHERE r.property_id = p.id
-            ) AS review_count,
-            p.property_type,
-            COALESCE(
-                (
-                    SELECT pi.image_url
-                    FROM property_images pi
-                    WHERE pi.property_id = p.id
-                    ORDER BY pi.display_order ASC
-                    LIMIT 1
-                ),
-                '/assets/placeholders/default_home.jpg'
-            ) AS image_url
-        FROM properties p
-        WHERE p.city ILIKE $1
-        ORDER BY ${orderBy}
-        LIMIT $2
-        `,
-        [`%${city}%`, limit]
-    );
-  if (searchValue) {
-    filters.push(`p.city ILIKE $${paramIndex}`);
-    values.push(`%${searchValue}%`);
-    paramIndex += 1;
-  }
+    if (searchValue) {
+        filters.push(`p.city ILIKE $${paramIndex}`);
+        values.push(`%${searchValue}%`);
+        paramIndex += 1;
+    }
 
-  if (Number(guests) > 0) {
-    filters.push(`p.max_guests >= $${paramIndex}`);
-    values.push(Number(guests));
-    paramIndex += 1;
-  }
+    if (Number(guests) > 0) {
+        filters.push(`p.max_guests >= $${paramIndex}`);
+        values.push(Number(guests));
+        paramIndex += 1;
+    }
 
-  if (Number(pets) > 0) {
-    filters.push(`p.pets_allowed = TRUE`);
-  }
+    if (Number(pets) > 0) {
+        filters.push(`p.pets_allowed = TRUE`);
+    }
 
-  if (checkIn && checkOut) {
-    filters.push(`NOT EXISTS (
-      SELECT 1
-      FROM bookings b
-      WHERE b.property_id = p.id
-        AND b.status IN ('confirmed', 'pending')
-        AND b.start_date < $${paramIndex}
-        AND b.end_date > $${paramIndex + 1}
-    )`);
-    values.push(checkOut);
-    values.push(checkIn);
-    paramIndex += 2;
-  }
+    if (checkIn && checkOut) {
+        filters.push(`NOT EXISTS (
+            SELECT 1
+            FROM bookings b
+            WHERE b.property_id = p.id
+            AND b.status IN ('confirmed', 'pending')
+            AND b.start_date < $${paramIndex}
+            AND b.end_date > $${paramIndex + 1}
+        )`);
+        values.push(checkOut);
+        values.push(checkIn);
+        paramIndex += 2;
+    }
 
-  const whereClause = filters.length ? `WHERE ${filters.join(" AND ")}` : "";
+    const whereClause = filters.length ? `WHERE ${filters.join(" AND ")}` : "";
 
-  const queryText = `SELECT
-      p.id,
-      p.title,
-      p.city,
-      p.state,
-      p.price_per_night,
-      p.rating,
-      p.review_count,
-      p.property_type,
-      p.max_guests,
-      COALESCE(
+    const queryText = `SELECT
+        p.id,
+        p.title,
+        p.city,
+        p.state,
+        p.price_per_night,
+        p.rating,
+        p.review_count,
+        p.property_type,
+        p.max_guests,
+        COALESCE(
         (
-          SELECT pi.image_url
-          FROM property_images pi
-          WHERE pi.property_id = p.id
-          ORDER BY pi.display_order ASC
-          LIMIT 1
+            SELECT pi.image_url
+            FROM property_images pi
+            WHERE pi.property_id = p.id
+            ORDER BY pi.display_order ASC
+            LIMIT 1
         ),
         '/placeholders/default_home.jpg'
-      ) AS image_url
+        ) AS image_url
     FROM properties p
     ${whereClause}
     ORDER BY ${orderBy}${Number.isFinite(limit) && limit > 0 ? `\n    LIMIT $${values.length + 1}` : ""}`;
 
-  const queryParams = [...values];
-  if (Number.isFinite(limit) && limit > 0) {
-    queryParams.push(limit);
-  }
+    const queryParams = [...values];
+    if (Number.isFinite(limit) && limit > 0) {
+        queryParams.push(limit);
+    }
 
-  const result = await pool.query(queryText, queryParams);
+    const result = await pool.query(queryText, queryParams);
 
-  return result.rows;
+    return result.rows;
 }
 
 async function getPropertyCities({ query = "" }) {

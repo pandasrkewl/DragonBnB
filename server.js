@@ -1,7 +1,6 @@
 const path = require("path");
 const express = require("express");
-const { getProperties, getPropertyById, getPropertyImages, getPropertyAmenities, getPropertyReviews } = require("./scripts/queryDb")
-const { getProperties, getPropertyCities } = require("./scripts/queryDb");
+const { getProperties, getPropertyCities, getPropertyById, getPropertyImages, getPropertyAmenities, getPropertyReviews } = require("./scripts/queryDb")
 const session = require("express-session");
 const bcrypt = require("bcrypt");
 const pool = require("./db");
