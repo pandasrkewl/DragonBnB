@@ -61,14 +61,14 @@ const atlanticCityRail = createRail({
 catalog.append(popularRail, affordableRail, atlanticCityRail);
 
 loadProperties(
-  "/api/properties?city=Philadelphia&sortBy=rating&limit=8",
+  "/api/properties?location=Philadelphia&sortBy=rating&limit=8",
   "popular-rail",
 );
 loadProperties(
-  "/api/properties?city=Philadelphia&sortBy=price_low&limit=8",
+  "/api/properties?location=Philadelphia&sortBy=price_low&limit=8",
   "affordable-rail",
 );
 loadProperties(
-  "/api/properties?city=Atlantic%20City&sortBy=rating&limit=8",
+  "/api/properties?location=Atlantic%20City&sortBy=rating&limit=8",
   "atlantic-city-rail",
 );

@@ -81,7 +81,7 @@ async function getProperties({
         ORDER BY ${orderBy}
         LIMIT $2
         `,
-        [`%${city}%`, limit]
+        [`%${location}%`, limit]
     );
   if (searchValue) {
     filters.push(`p.city ILIKE $${paramIndex}`);
@@ -121,8 +121,19 @@ async function getProperties({
       p.city,
       p.state,
       p.price_per_night,
-      p.rating,
-      p.review_count,
+      COALESCE(
+          (
+              SELECT ROUND(AVG(r.rating), 2)
+              FROM reviews r
+              WHERE r.property_id = p.id
+          ),
+          0    
+      ) AS rating,
+      (
+          SELECT COUNT(*)
+          FROM reviews r
+          WHERE r.property_id = p.id
+      ) AS review_count,
       p.property_type,
       p.max_guests,
       COALESCE(
