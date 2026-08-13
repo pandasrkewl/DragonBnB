@@ -38,8 +38,6 @@ CREATE TABLE properties (
     beds INTEGER NOT NULL,
 
     price_per_night NUMERIC(10, 2) NOT NULL,
-    rating NUMERIC(3, 2) NOT NULL DEFAULT 0,
-    review_count INTEGER NOT NULL DEFAULT 0,
     property_type VARCHAR(50) NOT NULL,
     pets_allowed BOOLEAN DEFAULT FALSE,
     check_in_time TIME,
@@ -147,7 +145,7 @@ INSERT INTO users (
     image_url
 )
 VALUES
-    (1, 'Max', 'Chiu', 'maxkchiu@gmail.com', 'admin', TRUE, '1.jpg'),
+    (1, 'Max', 'Chiu', 'maxkchiu@gmail.com', 'admin', TRUE, 'assets/images/users/1.jpg'),
     (2, 'Larry', 'Wu', 'larrywu@test.com', 'admin', FALSE, NULL),
     (3, 'Peter', 'Parker', 'notspiderman@marvel.com', 'admin', FALSE, NULL),
     (4, 'Tony', 'Stark', 'iamironman@dead.com', 'admin', TRUE, NULL),
@@ -193,8 +191,6 @@ INSERT INTO properties (
     bathrooms,
     beds,
     price_per_night,
-    rating,
-    review_count,
     property_type,
     pets_allowed,
     check_in_time,
@@ -202,20 +198,32 @@ INSERT INTO properties (
     created_at
 )
 VALUES
-(1, 1, 'Modern Center City Apartment', 'Bright apartment near restaurants and public transportation.', '1500 Market Street', 'Apartment 8B', 'Philadelphia', 'Pennsylvania', '19102', 'United States', 4, 2, 1.5, 2, 175.00, 0.00, 0, 'Apartment', FALSE, '15:00', '11:00', CURRENT_TIMESTAMP),
-(2, 1, 'Cozy Old City Loft', 'Historic loft close to shops and nightlife.', '225 Arch Street', NULL, 'Philadelphia', 'Pennsylvania', '19106', 'United States', 2, 1, 1.0, 1, 140.00, 0.00, 0, 'Apartment', FALSE, '16:00', '10:00', CURRENT_TIMESTAMP),
-(3, 16, 'Spacious University City Home', 'Large home near Drexel and Penn.', '3200 Powelton Avenue', NULL, 'Philadelphia', 'Pennsylvania', '19104', 'United States', 6, 3, 2.5, 4, 250.00, 0.00, 0, 'House', TRUE, '15:00', '11:00', CURRENT_TIMESTAMP),
-(4, 1, 'Suburban Family House', 'Rooms to live in, Suburban Virginia', '6139 Shiplett Blvd.', NULL, 'Burke', 'VA', '22015', 'United States', 2, 2, 1.0, 2, 200.00, 4.00, 2, 'Room', FALSE, '14:00', '10:00', '2025-01-12T08:17:43-07:00'),
-(5, 4, 'Beachfront Villa', 'Luxury oceanfront villa with pool', '12 Ocean Dr', NULL, 'Miami', 'FL', '33139', 'United States', 8, 4, 3.0, 5, 420.00, 0.00, 0, 'House', TRUE, '15:30', '11:00', '2025-03-28T19:52:11+01:00'),
-(6, 6, 'Cozy Loft', 'Downtown loft near attractions', '101 Market St', NULL, 'Philadelphia', 'PA', '19107', 'United States', 2, 1, 1.0, 1, 145.00, 0.00, 0, 'Apartment', FALSE, '16:00', '10:30', '2025-06-05T14:08:55-04:00'),
-(7, 24, 'Mountain Cabin', 'Quiet cabin with fireplace', '88 Pine Rd', NULL, 'Aspen', 'CO', '81611', 'United States', 6, 3, 2.0, 4, 275.00, 0.00, 0, 'House', TRUE, '17:00', '11:00', '2025-09-19T22:34:19+09:00'),
-(8, 10, 'City Studio', 'Affordable studio', '55 Center Ave', NULL, 'New York', 'NY', '10001', 'United States', 2, 1, 1.0, 1, 135.00, 0.00, 0, 'Apartment', FALSE, '14:30', '10:00', '2025-11-07T06:45:02+10:00'),
-(9, 14, 'Lake House', 'Private dock and kayaks', '9 Lake View', NULL, 'Traverse City', 'MI', '49684', 'United States', 10, 5, 3.0, 7, 350.00, 0.00, 0, 'House', TRUE, '15:00', '12:00', '2025-12-22T11:29:37+05:30'),
-(10, 12, 'Desert Retreat', 'Modern home with hot tub', '700 Cactus Way', NULL, 'Scottsdale', 'AZ', '85251', 'United States', 6, 3, 2.0, 3, 290.00, 0.00, 0, 'House', FALSE, '16:30', '11:00', '2026-02-14T17:13:58+02:00'),
-(11, 18, 'Historic Home', 'Charming historic district stay', '19 King St', NULL, 'Charleston', 'SC', '29401', 'United States', 4, 2, 2.0, 2, 220.00, 0.00, 0, 'House', TRUE, '13:00', '10:00', '2026-04-03T20:41:26-05:00'),
-(12, 20, 'Ski Chalet', 'Walk to ski lifts', '17 Alpine Ln', NULL, 'Park City', 'UT', '84060', 'United States', 12, 5, 4.0, 8, 510.00, 0.00, 0, 'House', FALSE, '17:30', '11:30', '2026-05-27T09:56:44+08:00'),
-(13, 8, 'Garden Cottage', 'Private backyard cottage', '5 Rose Ct', NULL, 'Portland', 'OR', '97205', 'United States', 3, 1, 1.0, 2, 160.00, 0.00, 0, 'Room', TRUE, '15:00', '10:30', '2026-07-11T15:22:09+12:00'),
-(14, 22, 'Luxury Penthouse', 'Top-floor skyline views', '800 High St', NULL, 'Chicago', 'IL', '60601', 'United States', 5, 2, 2.0, 2, 390.00, 0.00, 0, 'Apartment', FALSE, '14:00', '11:00', '2026-08-24T13:47:51-03:00');
+(1, 1, 'Modern Center City Apartment', 'Welcome to this modern Center City apartment located in the heart of Philadelphia. The apartment is bright, comfortable, and within walking distance of restaurants, shops, public transportation, and many of the city''s major attractions. The space: The apartment includes a spacious living room, full kitchen, dining area, two bedrooms, and a modern bathroom. Large windows provide plenty of natural light throughout the day. The kitchen is fully equipped with a refrigerator, stove, microwave, coffee maker, dishes, and basic cooking supplies. Guests are welcome to prepare meals during their stay. The living room includes comfortable seating and a smart TV for relaxing after a long day exploring the city. Both bedrooms include fresh linens, pillows, and storage space for clothing. Extra blankets are available if needed. Other things to note: Please be respectful of neighbors and keep noise to a reasonable level during the evening. Smoking is not permitted inside the apartment. Public transportation is located nearby, making it easy to reach University City, Old City, South Philadelphia, and other areas of the city.', '1500 Market Street', 'Apartment 8B', 'Philadelphia', 'Pennsylvania', '19102', 'United States', 4, 2, 1.5, 2, 175.00, 'Apartment', FALSE, '15:00', '11:00', CURRENT_TIMESTAMP),
+(2, 1, 'Cozy Old City Loft', 'Historic loft close to shops and nightlife.', '225 Arch Street', NULL, 'Philadelphia', 'Pennsylvania', '19106', 'United States', 2, 1, 1.0, 1, 140.00, 'Apartment', FALSE, '16:00', '10:00', CURRENT_TIMESTAMP),
+(3, 16, 'Spacious University City Home', 'Large home near Drexel and Penn.', '3200 Powelton Avenue', NULL, 'Philadelphia', 'Pennsylvania', '19104', 'United States', 6, 3, 2.5, 4, 250.00, 'House', TRUE, '15:00', '11:00', CURRENT_TIMESTAMP),
+(4, 1, 'Suburban Family House', 'Rooms to live in, Suburban Virginia', '6139 Shiplett Blvd.', NULL, 'Burke', 'VA', '22015', 'United States', 2, 2, 1.0, 2, 200.00, 'Room', FALSE, '14:00', '10:00', '2025-01-12T08:17:43-07:00'),
+(5, 4, 'Beachfront Villa', 'Luxury oceanfront villa with pool', '12 Ocean Dr', NULL, 'Miami', 'FL', '33139', 'United States', 8, 4, 3.0, 5, 420.00, 'House', TRUE, '15:30', '11:00', '2025-03-28T19:52:11+01:00'),
+(6, 6, 'Cozy Loft', 'Downtown loft near attractions', '101 Market St', NULL, 'Philadelphia', 'PA', '19107', 'United States', 2, 1, 1.0, 1, 145.00, 'Apartment', FALSE, '16:00', '10:30', '2025-06-05T14:08:55-04:00'),
+(7, 24, 'Mountain Cabin', 'Quiet cabin with fireplace', '88 Pine Rd', NULL, 'Aspen', 'CO', '81611', 'United States', 6, 3, 2.0, 4, 275.00, 'House', TRUE, '17:00', '11:00', '2025-09-19T22:34:19+09:00'),
+(8, 10, 'City Studio', 'Affordable studio', '55 Center Ave', NULL, 'New York', 'NY', '10001', 'United States', 2, 1, 1.0, 1, 135.00, 'Apartment', FALSE, '14:30', '10:00', '2025-11-07T06:45:02+10:00'),
+(9, 14, 'Lake House', 'Private dock and kayaks', '9 Lake View', NULL, 'Traverse City', 'MI', '49684', 'United States', 10, 5, 3.0, 7, 350.00, 'House', TRUE, '15:00', '12:00', '2025-12-22T11:29:37+05:30'),
+(10, 12, 'Desert Retreat', 'Modern home with hot tub', '700 Cactus Way', NULL, 'Scottsdale', 'AZ', '85251', 'United States', 6, 3, 2.0, 3, 290.00, 'House', FALSE, '16:30', '11:00', '2026-02-14T17:13:58+02:00'),
+(11, 18, 'Historic Home', 'Charming historic district stay', '19 King St', NULL, 'Charleston', 'SC', '29401', 'United States', 4, 2, 2.0, 2, 220.00, 'House', TRUE, '13:00', '10:00', '2026-04-03T20:41:26-05:00'),
+(12, 20, 'Ski Chalet', 'Walk to ski lifts', '17 Alpine Ln', NULL, 'Park City', 'UT', '84060', 'United States', 12, 5, 4.0, 8, 510.00, 'House', FALSE, '17:30', '11:30', '2026-05-27T09:56:44+08:00'),
+(13, 8, 'Garden Cottage', 'Private backyard cottage', '5 Rose Ct', NULL, 'Portland', 'OR', '97205', 'United States', 3, 1, 1.0, 2, 160.00, 'Room', TRUE, '15:00', '10:30', '2026-07-11T15:22:09+12:00'),
+(14, 22, 'Luxury Penthouse', 'Top-floor skyline views', '800 High St', NULL, 'Chicago', 'IL', '60601', 'United States', 5, 2, 2.0, 2, 390.00, 'Apartment', FALSE, '14:00', '11:00', '2026-08-24T13:47:51-03:00'),
+(15, 4, 'Drexel Campus Studio', 'Compact studio within walking distance of Drexel University.', '3401 Lancaster Avenue', 'Unit 3A', 'Philadelphia', 'PA', '19104', 'United States', 2, 1, 1.0, 1, 110.00, 'Apartment', FALSE, '15:00', '11:00', CURRENT_TIMESTAMP),
+(16, 6, 'University City Student Apartment', 'Affordable apartment near Drexel and public transportation.', '3600 Spring Garden Street', NULL, 'Philadelphia', 'PA', '19104', 'United States', 4, 2, 1.0, 2, 125.00, 'Apartment', FALSE, '15:00', '11:00', CURRENT_TIMESTAMP),
+(17, 8, 'Powelton Village Guest Suite', 'Private guest suite in a quiet neighborhood near campus.', '3325 Baring Street', NULL, 'Philadelphia', 'PA', '19104', 'United States', 2, 1, 1.0, 1, 135.00, 'Room', FALSE, '16:00', '10:00', CURRENT_TIMESTAMP),
+(18, 10, 'Modern Apartment Near 30th Street', 'Modern apartment close to trains, Drexel, and Penn.', '3025 Market Street', 'Unit 5C', 'Philadelphia', 'PA', '19104', 'United States', 4, 2, 2.0, 2, 195.00, 'Apartment', TRUE, '15:00', '11:00', CURRENT_TIMESTAMP),
+(19, 12, 'Atlantic City Boardwalk Condo', 'Modern condo within walking distance of the boardwalk and beach.', '1200 Pacific Avenue', 'Unit 8A', 'Atlantic City', 'NJ', '08401', 'United States', 4, 2, 2.0, 2, 230.00, 'Apartment', FALSE, '15:00', '11:00', CURRENT_TIMESTAMP),
+(20, 14, 'Cozy Atlantic City Beach House', 'Comfortable beach house near restaurants and casinos.', '215 South Raleigh Avenue', NULL, 'Atlantic City', 'NJ', '08401', 'United States', 6, 3, 2.0, 4, 275.00, 'House', TRUE, '16:00', '11:00', CURRENT_TIMESTAMP),
+(21, 16, 'Affordable Boardwalk Studio', 'Budget-friendly studio close to the Atlantic City Boardwalk.', '801 Atlantic Avenue', 'Unit 4B', 'Atlantic City', 'NJ', '08401', 'United States', 2, 1, 1.0, 1, 120.00, 'Apartment', FALSE, '15:00', '10:00', CURRENT_TIMESTAMP),
+(22, 18, 'Ocean View Atlantic City Suite', 'Bright suite with ocean views and easy beach access.', '3101 Boardwalk', 'Suite 907', 'Atlantic City', 'NJ', '08401', 'United States', 4, 1, 1.5, 2, 210.00, 'Apartment', FALSE, '16:00', '11:00', CURRENT_TIMESTAMP),
+(23, 20, 'Spacious Atlantic City Townhouse', 'Large townhouse for groups near the boardwalk.', '28 North California Avenue', NULL, 'Atlantic City', 'NJ', '08401', 'United States', 8, 4, 3.0, 5, 340.00, 'House', TRUE, '15:00', '11:00', CURRENT_TIMESTAMP),
+(24, 22, 'Casino District Apartment', 'Central apartment near casinos, shopping, and nightlife.', '1501 Boardwalk', 'Unit 12C', 'Atlantic City', 'NJ', '08401', 'United States', 3, 1, 1.0, 2, 165.00, 'Apartment', FALSE, '15:30', '10:30', CURRENT_TIMESTAMP),
+(25, 24, 'Luxury Atlantic City Penthouse', 'Top-floor penthouse with skyline and ocean views.', '100 South North Carolina Avenue', 'Penthouse 2', 'Atlantic City', 'NJ', '08401', 'United States', 6, 3, 3.0, 4, 450.00, 'Apartment', FALSE, '16:00', '11:00', CURRENT_TIMESTAMP),
+(26, 4, 'Quiet Atlantic City Guest Home', 'Relaxing guest home away from the busiest boardwalk areas.', '505 North Massachusetts Avenue', NULL, 'Atlantic City', 'NJ', '08401', 'United States', 5, 2, 1.5, 3, 185.00, 'House', TRUE, '15:00', '10:30', CURRENT_TIMESTAMP);
 
 INSERT INTO amenities(
     id,
@@ -440,22 +448,55 @@ VALUES
     (1, 1, 2, '2026-03-01', '2026-03-03', 400.00, 'completed'),
     (2, 1, 2, '2026-05-10', '2026-05-13', 525.00, 'completed'),
     (3, 2, 3, '2026-06-01', '2026-06-03', 280.00, 'completed'),
-    (4, 3, 5, '2026-07-15', '2026-07-18', 750.00, 'completed');
+    (4, 3, 5, '2026-07-15', '2026-07-18', 750.00, 'completed'),
+    (5, 1, 3, '2026-01-10', '2026-01-12', 350.00, 'completed'),
+    (6, 1, 5, '2026-02-14', '2026-02-16', 350.00, 'completed'),
+    (7, 1, 7, '2026-04-05', '2026-04-08', 525.00, 'completed'),
+    (8, 1, 9, '2026-06-12', '2026-06-15', 525.00, 'completed');
 
 INSERT INTO "reviews" ("id", "rating", "comment", "created_at", "user_id", "property_id", "booking_id")
 VALUES
     (1, 4, 'Cozy', '2026-03-02', 2, 1, 1),
     (2, 5, 'Great location and very clean apartment.', '2026-05-13', 2, 1, 2),
     (3, 4, 'Nice loft and easy check-in process.', '2026-06-03', 3, 2, 3),
-    (4, 5, 'Spacious home with plenty of room.', '2026-07-18', 5, 3, 4);
+    (4, 5, 'Spacious home with plenty of room.', '2026-07-18', 5, 3, 4),
+    (5, 5, 'Super big and beautiful location', '2026-05-13', 2, 1, 5),
+    (6, 5, 'Super big and beautiful location', '2026-05-13', 2, 1, 6),
+    (7, 5, 'Super big and beautiful location', '2026-05-13', 2, 1, 7),
+    (8, 5, 'Super big and beautiful location', '2026-05-13', 2, 1, 8);
+
+    
 
 INSERT INTO "property_images" ("property_id", "image_url", "display_order")
+
 VALUES
-    (1, '/placeholders/default_home.jpg', 1),
-    (1, '/images/properties/property1-bedroom.jpg', 2),
-    (2, '/images/properties/property2-main.jpg', 1),
-    (3, '/images/properties/property3-main.jpg', 1),
-    (4, '/images/properties/4-frontdoor.png', 1);
+    (1, '/assets/placeholders/default_home.jpg', 1),
+    (1, '/assets/images/properties/4-frontdoor.png', 2),
+    (1, '/assets/placeholders/default_home.jpg', 3),
+    (1, '/assets/images/properties/4-frontdoor.png', 4),
+    (1, '/assets/placeholders/default_home.jpg', 5),
+    (1, '/assets/images/properties/4-frontdoor.png', 6),
+    (1, '/assets/placeholders/default_home.jpg', 7),
+    (1, '/assets/images/properties/4-frontdoor.png', 8),
+    (1, '/assets/placeholders/default_home.jpg', 9),
+    (1, '/assets/images/properties/4-frontdoor.png', 10),
+    (2, '/assets/images/properties/4-frontdoor.png', 1),
+    (3, '/assets/placeholders/default_home.jpg', 1),
+    (4, '/assets/images/properties/4-frontdoor.png', 1),
+    (5, '/assets/placeholders/default_home.jpg', 1),
+    (6, '/assets/images/properties/4-frontdoor.png', 1),
+    (7, '/assets/placeholders/default_home.jpg', 1),
+    (8, '/assets/images/properties/4-frontdoor.png', 1),
+    (9, '/assets/placeholders/default_home.jpg', 1),
+    (10, '/assets/images/properties/4-frontdoor.png', 1),
+    (11, '/assets/placeholders/default_home.jpg', 1),
+    (12, '/assets/images/properties/4-frontdoor.png', 1),
+    (13, '/assets/placeholders/default_home.jpg', 1),
+    (14, '/assets/images/properties/4-frontdoor.png', 1),
+    (15, '/assets/placeholders/default_home.jpg', 1),
+    (16, '/assets/images/properties/4-frontdoor.png', 1),
+    (17, '/assets/placeholders/default_home.jpg', 1),
+    (18, '/assets/images/properties/4-frontdoor.png', 1);
 
 INSERT INTO "wishlists" ("user_id", "property_id", "list_name")
 VALUES
