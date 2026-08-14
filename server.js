@@ -1,9 +1,28 @@
 const path = require("path");
 const express = require("express");
-const { getProperties, getPropertyCities, getPropertyById, getPropertyImages, getPropertyAmenities, getPropertyReviews } = require("./scripts/queryDb")
+const {
+  getProperties,
+  getPropertyCities,
+  getPropertyById,
+  getPropertyImages,
+  getPropertyAmenities,
+  getPropertyReviews,
+  getUserConversations,
+  getConversationById,
+  getConversationMessages,
+  createOrGetConversation,
+  sendMessage,
+  markMessagesAsRead,
+  getUnreadMessageCount,
+  getUnreadCountForConversation,
+} = require("./scripts/queryDb");
 const session = require("express-session");
 const bcrypt = require("bcrypt");
 const pool = require("./db");
+const {
+  requireLogin,
+  verifyUserInConversation,
+} = require("./middleware/authMiddleware");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -32,9 +51,9 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      maxAge: 1000 * 60 * 60 * 24 // 1 day
-    }
-  })
+      maxAge: 1000 * 60 * 60 * 24, // 1 day
+    },
+  }),
 );
 
 app.post("/signup", async (req, res) => {
@@ -43,7 +62,7 @@ app.post("/signup", async (req, res) => {
     const normalizedEmail = email.trim().toLowerCase();
     const existingUser = await pool.query(
       "SELECT id FROM users WHERE email = $1",
-      [normalizedEmail]
+      [normalizedEmail],
     );
 
     if (existingUser.rows.length > 0) {
@@ -62,8 +81,8 @@ app.post("/signup", async (req, res) => {
         last_name,
         normalizedEmail,
         hashedPassword,
-        host ? true : false
-      ]
+        host ? true : false,
+      ],
     );
     req.session.user = result.rows[0];
     res.redirect("/");
@@ -111,29 +130,29 @@ app.get("/api/properties", async (req, res) => {
   }
 });
 
-app.get("/api/properties/:id", async(req, res) => {
+app.get("/api/properties/:id", async (req, res) => {
   try {
     const listingId = req.params.id;
     const property = await getPropertyById(listingId);
     if (!property) {
-      return res.status(404).json({error: "Property not found"});
+      return res.status(404).json({ error: "Property not found" });
     }
     res.json(property);
   } catch (error) {
     console.log("Error: getting properties", error);
     res.status(500).json({
-      error: "Could not get property"
+      error: "Could not get property",
     });
   }
 });
 
-app.get("/api/properties/:id/images", async(req, res) => {
+app.get("/api/properties/:id/images", async (req, res) => {
   try {
     const listingId = Number(req.params.id);
 
     if (!Number.isInteger(listingId) || listingId <= 0) {
       return res.status(400).json({
-        error: "Invalid property id"
+        error: "Invalid property id",
       });
     }
 
@@ -143,18 +162,18 @@ app.get("/api/properties/:id/images", async(req, res) => {
   } catch (error) {
     console.log("Error: getting images", error);
     res.status(500).json({
-      error: "Could not get property"
+      error: "Could not get property",
     });
   }
 });
 
-app.get("/api/properties/:id/amenities", async(req, res) => {
+app.get("/api/properties/:id/amenities", async (req, res) => {
   try {
     const listingId = Number(req.params.id);
 
     if (!Number.isInteger(listingId) || listingId <= 0) {
       return res.status(400).json({
-        error: "Invalid property id"
+        error: "Invalid property id",
       });
     }
 
@@ -164,18 +183,18 @@ app.get("/api/properties/:id/amenities", async(req, res) => {
   } catch (error) {
     console.log("Error: getting amenities", error);
     res.status(500).json({
-      error: "Could not get amenities"
+      error: "Could not get amenities",
     });
   }
 });
 
-app.get("/api/properties/:id/reviews", async(req, res) => {
+app.get("/api/properties/:id/reviews", async (req, res) => {
   try {
     const listingId = Number(req.params.id);
 
     if (!Number.isInteger(listingId) || listingId <= 0) {
       return res.status(400).json({
-        error: "Invalid property id"
+        error: "Invalid property id",
       });
     }
 
@@ -185,13 +204,20 @@ app.get("/api/properties/:id/reviews", async(req, res) => {
   } catch (error) {
     console.log("Error: getting reviews", error);
     res.status(500).json({
-      error: "Could not get reviews"
+      error: "Could not get reviews",
     });
   }
 });
 
 app.get("/listing", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "listing.html"));
+});
+
+app.get("/messages", (req, res) => {
+  if (!req.session.user) {
+    return res.redirect("/login.html");
+  }
+  res.sendFile(path.join(__dirname, "public", "messages.html"));
 });
 
 app.get("/api/search-suggestions", async (req, res) => {
@@ -209,6 +235,187 @@ app.get("/api/search-suggestions", async (req, res) => {
     res.status(500).json({ error: "Could not get suggestions" });
   }
 });
+
+// Messaging Endpoints
+
+app.get("/api/conversations", requireLogin, async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+    const conversations = await getUserConversations(userId);
+    res.json(conversations);
+  } catch (error) {
+    console.error("Error fetching conversations:", error);
+    res.status(500).json({ error: "Failed to fetch conversations" });
+  }
+});
+
+app.get(
+  "/api/conversations/:conversationId",
+  requireLogin,
+  async (req, res) => {
+    try {
+      const { conversationId } = req.params;
+      const { limit = 50, offset = 0 } = req.query;
+      const userId = req.session.user.id;
+
+      const isAuthorized = await verifyUserInConversation(
+        userId,
+        conversationId,
+        pool,
+      );
+      if (!isAuthorized) {
+        return res.status(403).json({ error: "Unauthorized" });
+      }
+
+      await markMessagesAsRead(conversationId, userId);
+
+      const conversation = await getConversationById(conversationId);
+      if (!conversation) {
+        return res.status(404).json({ error: "Conversation not found" });
+      }
+
+      const messages = await getConversationMessages(
+        conversationId,
+        parseInt(limit),
+        parseInt(offset),
+      );
+
+      res.json({ conversation, messages });
+    } catch (error) {
+      console.error("Error fetching conversation:", error);
+      res.status(500).json({ error: "Failed to fetch conversation" });
+    }
+  },
+);
+
+app.post("/api/messages", requireLogin, async (req, res) => {
+  try {
+    const { conversationId, content } = req.body;
+    const senderId = req.session.user.id;
+
+    if (!conversationId || !content || !content.trim()) {
+      return res.status(400).json({ error: "Invalid request" });
+    }
+
+    const isAuthorized = await verifyUserInConversation(
+      senderId,
+      conversationId,
+      pool,
+    );
+    if (!isAuthorized) {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
+
+    const message = await sendMessage(conversationId, senderId, content.trim());
+
+    res.json({ success: true, message });
+  } catch (error) {
+    console.error("Error sending message:", error);
+    res.status(500).json({ error: "Failed to send message" });
+  }
+});
+
+app.post("/api/conversations", requireLogin, async (req, res) => {
+  try {
+    const { hostId, guestId, propertyId } = req.body;
+    const userId = req.session.user.id;
+
+    if (userId !== hostId && userId !== guestId) {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
+
+    if (!hostId || !guestId || !propertyId) {
+      return res.status(400).json({ error: "Invalid request" });
+    }
+
+    const conversationId = await createOrGetConversation(
+      hostId,
+      guestId,
+      propertyId,
+    );
+
+    const conversation = await getConversationById(conversationId);
+
+    res.json({ success: true, conversation, conversationId });
+  } catch (error) {
+    console.error("Error creating conversation:", error);
+    res.status(500).json({ error: "Failed to create conversation" });
+  }
+});
+
+app.put(
+  "/api/conversations/:conversationId/read",
+  requireLogin,
+  async (req, res) => {
+    try {
+      const { conversationId } = req.params;
+      const userId = req.session.user.id;
+
+      const isAuthorized = await verifyUserInConversation(
+        userId,
+        conversationId,
+        pool,
+      );
+      if (!isAuthorized) {
+        return res.status(403).json({ error: "Unauthorized" });
+      }
+
+      await markMessagesAsRead(conversationId, userId);
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error marking messages as read:", error);
+      res.status(500).json({ error: "Failed to mark messages as read" });
+    }
+  },
+);
+
+app.get("/api/me/unread-messages", requireLogin, async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+    const unreadCount = await getUnreadMessageCount(userId);
+    res.json({ unreadCount });
+  } catch (error) {
+    console.error("Error fetching unread count:", error);
+    res.status(500).json({ error: "Failed to fetch unread count" });
+  }
+});
+
+app.post(
+  "/api/properties/:propertyId/contact-host",
+  requireLogin,
+  async (req, res) => {
+    try {
+      const { propertyId } = req.params;
+      const { message: messageContent } = req.body;
+      const guestId = req.session.user.id;
+
+      if (!messageContent || !messageContent.trim()) {
+        return res.status(400).json({ error: "Message content is required" });
+      }
+
+      const property = await getPropertyById(propertyId);
+      if (!property) {
+        return res.status(404).json({ error: "Property not found" });
+      }
+
+      const hostId = property.host_id;
+
+      const conversationId = await createOrGetConversation(
+        hostId,
+        guestId,
+        propertyId,
+      );
+
+      await sendMessage(conversationId, guestId, messageContent.trim());
+
+      res.json({ success: true, conversationId });
+    } catch (error) {
+      console.error("Error contacting host:", error);
+      res.status(500).json({ error: "Failed to send message" });
+    }
+  },
+);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
