@@ -35,9 +35,9 @@ nav a:hover{
 }
 
 main{
-    width:90%;
-    max-width:1200px;
-    margin:40px auto;
+    width: 95%;
+    max-width: 1300px;
+    margin: 40px auto;
 }
 
 main h2{
@@ -531,6 +531,7 @@ button.profile-menu:hover{
   align-items: center;
   padding: 6px 6px 6px 24px;
   color: #333;
+  height: 70px;
   max-width: 680px;
   width: 100%;
   box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
@@ -609,10 +610,12 @@ button.profile-menu:hover{
   display: flex;
   align-items: center;
   justify-content: center;
+  align-self: center;
   cursor: pointer;
   transition: background 0.2s ease;
   flex-shrink: 0;
   margin-left: 8px;
+  transform: translateY(-6px);
 }
 
 .search-btn:hover {
@@ -979,6 +982,11 @@ button.profile-menu:hover{
     width: calc(100vw - 32px);
     left: 0;
     right: 0;
+  }
+
+  /* Avoid vertical nudge on small screens */
+  .search-btn {
+    transform: none;
   }
 
   .guest-dropdown {
