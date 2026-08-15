@@ -737,6 +737,7 @@ export function createNavbar({
       className: "dropdown-item",
       textContent: "Messages",
     }),
+    createElement("a", {
       href: "/profile",
       className: "dropdown-item",
       textContent: "Profile",
