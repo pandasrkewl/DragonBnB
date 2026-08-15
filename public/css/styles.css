@@ -875,26 +875,7 @@ button.profile-menu:hover{
   transition: all 0.2s ease;
 }
 
-.btn-login {
-  color: #ffc600;
-  background: transparent;
-  border: 2px solid #ffc600;
-}
 
-.btn-login:hover {
-  background: rgba(255, 198, 0, 0.1);
-}
-
-.btn-signup {
-  background: #ffc600;
-  color: #07294d;
-  border: 2px solid #ffc600;
-}
-
-.btn-signup:hover {
-  background: #d4a400;
-  border-color: #d4a400;
-}
 
 .profile-menu {
   background: #ffc600;
@@ -1507,3 +1488,561 @@ button.profile-menu:hover{
     text-align:center;
 }
 
+/* Shared Modal */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(0, 0, 0, 0.5);
+
+  z-index: 9999;
+}
+
+.modal {
+  position: relative;
+
+  width: 100%;
+  max-width: 430px;
+
+  padding: 24px;
+
+  background: white;
+  border-radius: 16px;
+
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+
+  width: 32px;
+  height: 32px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  border-radius: 50%;
+
+  background: transparent;
+  color: #222222;
+
+  font-size: 28px;
+  font-weight: 500;
+
+  cursor: pointer;
+}
+
+.modal-close:hover {
+  background: #f5f5f5;
+  color: #000000;
+}
+
+.modal-title {
+  margin: 5px 0 25px;
+
+  text-align: center;
+
+  font-size: 22px;
+}
+
+
+/* SIGN UP */
+
+.signup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.signup-form input {
+  width: 100%;
+  box-sizing: border-box;
+
+  padding: 14px;
+
+  border: 1px solid #b0b0b0;
+  border-radius: 8px;
+
+  font-size: 15px;
+}
+
+.signup-form input:focus {
+  outline: none;
+  border-color: #07294d;
+}
+
+
+/* LOGIN */
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.login-form input {
+  width: 100%;
+  box-sizing: border-box;
+
+  padding: 14px;
+
+  border: 1px solid #b0b0b0;
+  border-radius: 8px;
+
+  font-size: 15px;
+}
+
+.login-form input:focus {
+  outline: none;
+  border-color: #07294d;
+}
+
+
+/* AUTH SUBMIT BUTTONS */
+
+.signup-submit,
+.login-submit {
+  width: 100%;
+
+  padding: 14px;
+
+  border: none;
+  border-radius: 8px;
+
+  background: #ffc600;
+  color: #07294d;
+
+  font-size: 16px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: background 0.2s ease;
+}
+
+.signup-submit:hover,
+.login-submit:hover {
+  background: #e6b200;
+}
+
+.signup-submit:disabled,
+.login-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+
+/* AUTH ERROR MESSAGES */
+
+.signup-error,
+.login-error {
+  display: none;
+
+  margin: 0;
+
+  color: #c13515;
+
+  font-size: 14px;
+}
+
+.signup-error.visible,
+.login-error.visible {
+  display: block;
+}
+
+
+/* NAVBAR LOGIN / SIGN UP BUTTONS */
+
+.btn-login,
+.btn-signup {
+  padding: 10px 18px;
+
+  border-radius: 8px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+
+/* Log In */
+
+.btn-login {
+  background: transparent;
+  color: white;
+
+  border: 1px solid #ffc600;
+}
+
+.btn-login:hover {
+  background: #ffc600;
+  color: #07294d;
+}
+
+
+/* Sign Up */
+
+.btn-signup {
+  background: #ffc600;
+  color: #07294d;
+
+  border: 1px solid #ffc600;
+}
+
+.btn-signup:hover {
+  background: #e6b200;
+  border-color: #e6b200;
+}
+
+.profile-action {
+  border: none;
+  background: none;
+
+  color: #07294d;
+
+  font-weight: 600;
+  text-decoration: underline;
+
+  cursor: pointer;
+}
+
+.profile-action:hover {
+  color: #ffc600;
+}
+
+/* =========================================================
+   NAVBAR
+   ========================================================= */
+
+#navbar-container {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+
+  width: 100%;
+}
+
+.main-header {
+  width: 100%;
+  height: 80px;
+  box-sizing: border-box;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 12px 32px;
+
+  background: #07294d; /* Drexel Blue */
+  color: white;
+
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+/* =========================================================
+   PROFILE PAGE
+   ========================================================= */
+
+   .profile-page {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 60px 24px 80px;
+  
+    background: #f7f7f7;
+  
+    min-height: calc(100vh - 80px);
+  }
+  
+  .profile-container {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .profile-header {
+    margin-bottom: 30px;
+  }
+  
+  .profile-header h1 {
+    margin: 0 0 8px;
+  
+    font-size: 32px;
+    font-weight: 700;
+  
+    color: #07294d;
+  }
+  
+  .profile-header p {
+    margin: 0;
+  
+    color: #666;
+    font-size: 15px;
+  }
+  
+  
+  /* Main profile card */
+  
+  .profile-section {
+    background: white;
+  
+    border-radius: 18px;
+  
+    border: 1px solid #e5e5e5;
+  
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  
+    overflow: hidden;
+  }
+  
+  
+  /* Individual rows */
+  
+  .profile-row {
+    min-height: 90px;
+  
+    padding: 22px 28px;
+  
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  
+    border-bottom: 1px solid #eeeeee;
+  }
+  
+  .profile-row:last-child {
+    border-bottom: none;
+  }
+  
+  
+  /* Text inside row */
+  
+  .profile-info {
+    display: flex;
+    flex-direction: column;
+  
+    gap: 6px;
+  }
+  
+  .profile-label {
+    font-size: 14px;
+    font-weight: 700;
+  
+    color: #555;
+  }
+  
+  .profile-value {
+    font-size: 16px;
+    color: #222;
+  }
+  
+  
+  /* Profile action buttons */
+  
+  .profile-action {
+    padding: 8px 14px;
+  
+    border: none;
+    background: transparent;
+  
+    color: #07294d;
+  
+    font-size: 14px;
+    font-weight: 700;
+  
+    text-decoration: underline;
+  
+    cursor: pointer;
+  
+    border-radius: 8px;
+  
+    transition: all 0.2s ease;
+  }
+  
+  .profile-action:hover {
+    background: #f5f5f5;
+    color: #07294d;
+  }
+  
+  
+ /* =========================================================
+   PROFILE PAGE
+   ========================================================= */
+
+.profile-page {
+  width: 100%;
+  max-width: 900px;
+  margin: 50px auto;
+  padding: 0 24px;
+}
+
+.profile-container {
+  background: white;
+  border-radius: 20px;
+  padding: 35px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.profile-container h1 {
+  font-size: 30px;
+  margin-bottom: 30px;
+}
+
+.profile-section {
+  border-top: 1px solid #e5e5e5;
+}
+
+.profile-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 24px 0;
+
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.profile-label {
+  display: block;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  color: #222;
+
+  margin-bottom: 6px;
+}
+
+.profile-value {
+  display: block;
+
+  color: #666;
+
+  font-size: 15px;
+}
+
+.profile-action {
+  border: none;
+  background: none;
+
+  color: #07294d;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  text-decoration: underline;
+
+  cursor: pointer;
+
+  padding: 8px;
+}
+
+.profile-action:hover {
+  color: #ffc600;
+}
+
+
+/* =========================================================
+   PROFILE MODALS
+   ========================================================= */
+
+.profile-modal {
+  position: relative;
+
+  width: 100%;
+  max-width: 450px;
+
+  background: white;
+
+  border-radius: 18px;
+
+  padding: 30px;
+
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.profile-modal h2 {
+  margin-bottom: 25px;
+
+  font-size: 22px;
+  text-align: center;
+}
+
+.profile-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.profile-modal-form label {
+  display: flex;
+  flex-direction: column;
+
+  gap: 7px;
+
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.profile-modal-form input {
+  width: 100%;
+
+  padding: 12px 14px;
+
+  border: 1px solid #ccc;
+  border-radius: 8px;
+
+  font-size: 15px;
+
+  box-sizing: border-box;
+}
+
+.profile-modal-form input:focus {
+  outline: none;
+
+  border-color: #07294d;
+
+  box-shadow: 0 0 0 2px rgba(7, 41, 77, 0.1);
+}
+
+.profile-save-button {
+  width: 100%;
+
+  margin-top: 5px;
+
+  padding: 13px;
+
+  border: none;
+  border-radius: 8px;
+
+  background: #ffc600;
+  color: #07294d;
+
+  font-size: 15px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.profile-save-button:hover {
+  background: #e6b200;
+}
+
+.profile-modal-error {
+  margin: 0;
+
+  color: #c13515;
+
+  font-size: 14px;
+}
