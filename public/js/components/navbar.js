@@ -702,7 +702,7 @@ export function createNavbar({
     toggleModeHref = "/";
   } else if (userMode === "tenant" && isRegisteredHost) {
     toggleModeText = "Switch to hosting";
-    toggleModeHref = "/host/today";
+    toggleModeHref = "/host/today.html";
   }
 
   const toggleModeLink = createElement("a", {

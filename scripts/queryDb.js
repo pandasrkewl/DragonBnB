@@ -413,35 +413,45 @@ async function markMessagesAsRead(conversationId, userId) {
 }
 
 async function getBookingsForToday(hostId) {
-    const result = await pool.query(
-        `SELECT 
-            bookings.start_date, 
-            bookings.end_date, 
-            bookings.user_id AS tenant_id 
-        FROM bookings 
-        JOIN properties 
-            ON properties.id=bookings.property_id 
-        WHERE properties.host_id=$1 AND
-            CURRENT_TIMESTAMP BETWEEN bookings.start_date AND bookings.end_date;`,
-        [userId]
-    );
+  const result = await pool.query(
+    `SELECT 
+      bookings.start_date,
+      bookings.end_date,
+      bookings.user_id AS tenant_id,
+      users.image_url,
+      users.first_name,
+      users.last_name
+    FROM bookings
+    JOIN properties
+      ON properties.id = bookings.property_id
+    JOIN users
+      ON users.id = bookings.user_id
+    WHERE properties.host_id = $1
+      AND CURRENT_DATE BETWEEN bookings.start_date AND bookings.end_date;`,
+    [hostId]
+  );
 
     return result.rows;
 }
 
 async function getBookingsUpcoming(hostId) {
-    const result = await pool.query(
-        `SELECT 
-            bookings.start_date, 
-            bookings.end_date, 
-            bookings.user_id AS tenant_id 
-        FROM bookings 
-        JOIN properties 
-            ON properties.id=bookings.property_id 
-        WHERE properties.host_id=$1 AND
-            CURRENT_TIMESTAMP < bookings.start_date;`,
-        [userId]
-    );
+  const result = await pool.query(
+    `SELECT 
+      bookings.start_date,
+      bookings.end_date,
+      bookings.user_id AS tenant_id,
+      users.image_url,
+      users.first_name,
+      users.last_name
+    FROM bookings
+    JOIN properties
+      ON properties.id = bookings.property_id
+    JOIN users
+      ON users.id = bookings.user_id
+    WHERE properties.host_id = $1
+      AND CURRENT_DATE < bookings.start_date;`,
+    [hostId]
+  );
 
     return result.rows;
 }
@@ -492,8 +502,8 @@ module.exports = {
   getPropertyImages,
   getPropertyAmenities,
   getPropertyReviews,
-    getBookingsForToday,
-    getBookingsUpcoming,
+  getBookingsForToday,
+  getBookingsUpcoming,
   getUserConversations,
   getConversationById,
   getConversationMessages,
