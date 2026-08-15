@@ -119,17 +119,21 @@ footer{
     margin-bottom:30px;
 }
 
-.listing-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));
-    gap:25px;
+.listing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 350px));
+    gap: 25px;
+    width: 100%;
+    justify-content: center;
 }
 
-.listing-card{
-    background:white;
-    border-radius:8px;
-    overflow:hidden;
-    box-shadow:0 2px 8px rgba(0,0,0,.1);
+.listing-card {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .1);
+    min-width: 0;
+    max-width: 300px;
 }
 
 .listing-card img{
