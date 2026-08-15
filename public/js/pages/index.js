@@ -11,21 +11,11 @@ async function loadNavbar() {
   try {
     const response = await fetch("/api/me");
     const user = await response.json();
-
-    let userMode = "guest";
-
-    if (user) {
-      userMode = user.host ? "host" : "tenant";
-    }
-
+    const userMode = user ? "tenant" : "guest";
     navElement = createNavbar({
       userMode: userMode,
       isRegisteredHost: user?.host ?? false,
     });
-
-    document
-      .getElementById("navbar-container")
-      .appendChild(navElement);
 
   } catch (err) {
     console.error(err);
@@ -33,10 +23,6 @@ async function loadNavbar() {
     navElement = createNavbar({
       userMode: "guest",
     });
-
-    document
-      .getElementById("navbar-container")
-      .appendChild(navElement);
 
   }
 
