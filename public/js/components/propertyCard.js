@@ -19,7 +19,9 @@ export function createPropertyCard(property) {
     column.append(imageContainer, name, description);
 
     column.addEventListener("click", () => {
-        window.location.href =  `/listing?id=${property.id}`;
+        const params = new URLSearchParams(window.location.search);
+        params.set("id", property.id);
+        window.location.href = `/listing?${params.toString()}`;    
     });
     
     return column;

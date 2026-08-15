@@ -270,6 +270,29 @@ async function getPropertyReviews(listingId) {
     return result.rows;
 }
 
+async function getPropertyBookings(listingId) {
+    const result = await pool.query(
+        `SELECT
+            b.user_id,
+            b.start_date,
+            b.end_date,
+            b.status,
+            b.property_id
+        
+        FROM bookings b
+        JOIN properties p
+            ON p.id = b.property_id
+        
+        WHERE p.id = $1
+            AND status = 'confirmed'
+
+        ORDER BY b.start_date ASC`,
+        [listingId]
+    );
+
+    return result.rows;
+}
+
 
 module.exports = {
     getUser,
@@ -278,5 +301,6 @@ module.exports = {
     getPropertyById,
     getPropertyImages,
     getPropertyAmenities,
-    getPropertyReviews
+    getPropertyReviews,
+    getPropertyBookings
 };
