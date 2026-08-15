@@ -19,7 +19,7 @@ async function loadNavbar() {
     }
 
     navElement = createNavbar({
-      userMode,
+      userMode: userMode,
       isRegisteredHost: user?.host ?? false,
     });
 
