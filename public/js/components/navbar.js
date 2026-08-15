@@ -243,10 +243,10 @@ export function createNavbar({
 
   if (userMode === "host") {
     const hostTabs = [
-      { text: "Today", href: "/host/today" },
-      { text: "Calendar", href: "/host/calendar" },
-      { text: "Listings", href: "/host/listings" },
-      { text: "Messages", href: "/host/messages" },
+      { text: "Today", href: "/host/today.html" },
+      { text: "Calendar", href: "/host/calendar.html" },
+      { text: "Listings", href: "/host/listings.html" },
+      { text: "Messages", href: "/host/messages.html" },
     ];
 
     const hostNavLinks = hostTabs.map((tab, index) => {
@@ -672,6 +672,11 @@ export function createNavbar({
   );
 
   const dropdownMenu = createElement("div", { className: "profile-dropdown" }, [
+    createElement("a", {
+      href: "/messages",
+      className: "dropdown-item",
+      textContent: "Messages",
+    }),
     createElement("a", {
       href: "/profile",
       className: "dropdown-item",

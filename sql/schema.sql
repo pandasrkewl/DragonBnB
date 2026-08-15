@@ -117,23 +117,31 @@ CREATE TABLE wishlists (
     UNIQUE (user_id, property_id, list_name)
 );
 
--- NGL im not sure what the messaging schemas are gonna be like placeholders
-
 CREATE TABLE conversations (
     id SERIAL PRIMARY KEY,
-    guest_id INTEGER NOT NULL REFERENCES users(id),
-    host_id INTEGER NOT NULL REFERENCES users(id),
-    property_id INTEGER NOT NULL REFERENCES properties(id),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    guest_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    host_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    property_id INTEGER NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_message_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(host_id, guest_id, property_id)
 );
 
 CREATE TABLE messages (
     id SERIAL PRIMARY KEY, 
     conversation_id INTEGER NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
-    sender_id INTEGER NOT NULL REFERENCES users(id),
+    sender_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     message TEXT NOT NULL, 
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    read BOOLEAN DEFAULT FALSE,
+    read_at TIMESTAMP
 );
+
+CREATE INDEX idx_conversations_host_id ON conversations(host_id);
+CREATE INDEX idx_conversations_guest_id ON conversations(guest_id);
+CREATE INDEX idx_messages_conversation_id ON messages(conversation_id);
+CREATE INDEX idx_messages_sender_id ON messages(sender_id);
+CREATE INDEX idx_messages_read ON messages(read);
 
 INSERT INTO users (
     id,
@@ -507,22 +515,25 @@ VALUES
     (2, 3, 'Large Homes'),
     (3, 2, 'Weekend Stays');
 
-INSERT INTO "conversations" ("guest_id", "host_id", "property_id")
+INSERT INTO "conversations" ("guest_id", "host_id", "property_id", "last_message_at")
 VALUES
-    (2, 1, 1),
-    (3, 1, 2),
-    (5, 1, 3),
-    (2, 1, 1);
+    (2, 1, 1, '2026-03-01 09:20:00'),
+    (3, 1, 2, '2026-06-01 14:45:00'),
+    (5, 1, 3, '2026-07-10 16:00:00'),
+    (7, 16, 3, '2026-08-01 10:30:00'),
+    (9, 4, 5, '2026-07-15 15:45:00');
 
-INSERT INTO "messages" ("conversation_id", "sender_id", "message", "created_at")
+INSERT INTO "messages" ("conversation_id", "sender_id", "message", "created_at", "read", "read_at")
 VALUES
-    (1, 2, 'Hi, is the apartment available for these dates?', '2026-03-01 09:15:00'),
-    (1, 1, 'Yes, it is currently available.', '2026-03-01 09:20:00'),
-    (2, 3, 'Does the loft include parking?', '2026-06-01 14:30:00'),
-    (2, 1, 'There is paid parking nearby.', '2026-06-01 14:45:00'),
-    (3, 5, 'Are pets allowed at this property?', '2026-07-10 16:00:00'),
-    (4, 1, 'Can I bring a dog?', '2026-07-20 11:10:00'),
-    (4, 2, 'No', '2026-07-20 11:15:00');
+    (1, 2, 'Hi, is the apartment available for these dates?', '2026-03-01 09:15:00', TRUE, '2026-03-01 09:18:00'),
+    (1, 1, 'Yes, it is currently available.', '2026-03-01 09:20:00', TRUE, '2026-03-01 09:22:00'),
+    (2, 3, 'Does the loft include parking?', '2026-06-01 14:30:00', TRUE, '2026-06-01 14:32:00'),
+    (2, 1, 'There is paid parking nearby.', '2026-06-01 14:45:00', TRUE, '2026-06-01 14:47:00'),
+    (3, 5, 'Are pets allowed at this property?', '2026-07-10 16:00:00', TRUE, '2026-07-10 16:05:00'),
+    (4, 7, 'Hi! I''m interested in booking your home.', '2026-08-01 10:00:00', TRUE, '2026-08-01 10:15:00'),
+    (4, 16, 'Great! When would you like to stay?', '2026-08-01 10:30:00', FALSE, NULL),
+    (5, 9, 'Can I bring a dog?', '2026-07-15 15:30:00', TRUE, '2026-07-15 15:35:00'),
+    (5, 4, 'Of course! Dogs are welcome here.', '2026-07-15 15:45:00', FALSE, NULL);
 
 SELECT setval(
     'users_id_seq',
