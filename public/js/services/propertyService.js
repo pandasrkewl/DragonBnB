@@ -74,3 +74,16 @@ export function loadPropertyReviews(url) {
       console.error(error);
     });
 }
+
+export function loadPropertyBookings(url) {
+   return fetch(url)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Could not load bookings");
+      }
+      return response.json();
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+}

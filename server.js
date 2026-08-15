@@ -7,6 +7,7 @@ const {
   getPropertyImages,
   getPropertyAmenities,
   getPropertyReviews,
+  getPropertyBookings,
   getUserConversations,
   getConversationById,
   getConversationMessages,
@@ -276,6 +277,27 @@ app.get("/api/properties/:id/reviews", async (req, res) => {
     console.log("Error: getting reviews", error);
     res.status(500).json({
       error: "Could not get reviews",
+    });
+  }
+});
+
+app.get("/api/properties/:id/bookings", async(req, res) => {
+  try {
+    const listingId = Number(req.params.id);
+
+    if (!Number.isInteger(listingId) || listingId <= 0) {
+      return res.status(400).json({
+        error: "Invalid property id"
+      });
+    }
+
+    const bookings = await getPropertyBookings(listingId);
+
+    res.json(bookings);
+  } catch (error) {
+    console.log("Error: getting bookings", error);
+    res.status(500).json({
+      error: "Could not get bookings"
     });
   }
 });
