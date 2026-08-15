@@ -544,6 +544,7 @@ button.profile-menu:hover{
   gap: 12px;
   flex: 1;
   min-width: 0;
+  height: 70px;
   padding: 10px 12px;
   border-radius: 999px;
   cursor: pointer;
