@@ -1,100 +1,111 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <head>
+        <meta charset="UTF-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0"
+        />
 
-    <title>Profile | DrexelBnB</title>
+        <title>Profile | DrexelBnB</title>
 
-    <link rel="stylesheet" href="css/styles.css">
-</head>
+        <link
+            rel="stylesheet"
+            href="css/styles.css"
+        />
+    </head>
 
-<body>
+    <body>
+        <div id="navbar-container"></div>
 
-<div id="navbar-container"></div>
+        <main class="profile-page">
+            <section class="profile-container">
+                <h1>Profile</h1>
 
-<main class="profile-page">
+                <div class="profile-section">
+                    <!-- FULL NAME -->
+                    <div class="profile-row">
+                        <div>
+                            <span class="profile-label">Full name</span>
+                            <span
+                                class="profile-value"
+                                id="profile-name"
+                            >
+                                Loading...
+                            </span>
+                        </div>
 
-    <section class="profile-container">
+                        <button
+                            type="button"
+                            class="profile-action"
+                            id="name-button"
+                        >
+                            Edit
+                        </button>
+                    </div>
 
-        <h1>Profile</h1>
+                    <!-- DATE OF BIRTH -->
+                    <div class="profile-row">
+                        <div>
+                            <span class="profile-label">Date of birth</span>
+                            <span
+                                class="profile-value"
+                                id="profile-dob"
+                            >
+                                Add date of birth
+                            </span>
+                        </div>
 
-        <div class="profile-section">
+                        <button
+                            type="button"
+                            class="profile-action"
+                            id="dob-button"
+                        >
+                            Add
+                        </button>
+                    </div>
 
-            <!-- FULL NAME -->
-            <div class="profile-row">
-                <div>
-                    <span class="profile-label">Full name</span>
-                    <span class="profile-value" id="profile-name">
-                        Loading...
-                    </span>
+                    <!-- EMAIL -->
+                    <div class="profile-row">
+                        <div>
+                            <span class="profile-label">Email</span>
+                            <span
+                                class="profile-value"
+                                id="profile-email"
+                            >
+                                Loading...
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- PASSWORD -->
+                    <div class="profile-row">
+                        <div>
+                            <span class="profile-label">Password</span>
+
+                            <span
+                                class="profile-value"
+                                id="profile-password"
+                            >
+                                ••••••••••
+                            </span>
+                        </div>
+
+                        <button
+                            type="button"
+                            class="profile-action"
+                            id="password-button"
+                        >
+                            Change
+                        </button>
+                    </div>
                 </div>
+            </section>
+        </main>
 
-                <button
-                    type="button"
-                    class="profile-action"
-                    id="name-button">
-                    Edit
-                </button>
-            </div>
-
-
-            <!-- DATE OF BIRTH -->
-            <div class="profile-row">
-                <div>
-                    <span class="profile-label">Date of birth</span>
-                    <span class="profile-value" id="profile-dob">
-                        Add date of birth
-                    </span>
-                </div>
-
-                <button
-                    type="button"
-                    class="profile-action"
-                    id="dob-button">
-                    Add
-                </button>
-            </div>
-
-
-            <!-- EMAIL -->
-            <div class="profile-row">
-                <div>
-                    <span class="profile-label">Email</span>
-                    <span class="profile-value" id="profile-email">
-                        Loading...
-                    </span>
-                </div>
-            </div>
-
-
-            <!-- PASSWORD -->
-            <div class="profile-row">
-                <div>
-                    <span class="profile-label">Password</span>
-
-                    <span
-                        class="profile-value"
-                        id="profile-password">
-                        ••••••••••
-                    </span>
-                </div>
-
-                <button
-                    type="button"
-                    class="profile-action"
-                    id="password-button">
-                    Change
-                </button>
-            </div>
-
-        </div>
-
-    </section>
-
-</main>
-
-<script type="module" src="js/pages/profile.js"></script>
-
-</body>
+        <script
+            type="module"
+            src="js/pages/profile.js"
+        ></script>
+    </body>
 </html>

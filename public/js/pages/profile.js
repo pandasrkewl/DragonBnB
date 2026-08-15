@@ -1,121 +1,111 @@
-import { createNavbar } from "../components/navbar.js";
+import { createNavbar } from '../components/navbar.js';
 
-const navbarContainer = document.getElementById("navbar-container");
+const navbarContainer = document.getElementById('navbar-container');
 
 async function loadProfile() {
-  try {
-    const response = await fetch("/api/me");
+    try {
+        const response = await fetch('/api/me');
 
-    if (!response.ok) {
-      throw new Error("Unable to load user.");
+        if (!response.ok) {
+            throw new Error('Unable to load user.');
+        }
+
+        const user = await response.json();
+
+        if (!user) {
+            window.location.href = '/';
+            return;
+        }
+
+        // -------------------------
+        // NAVBAR
+        // -------------------------
+
+        const navbar = createNavbar({
+            userMode: user.host ? 'host' : 'tenant',
+            isRegisteredHost: user.host ?? false,
+        });
+
+        navbarContainer.appendChild(navbar);
+
+        // -------------------------
+        // PROFILE INFORMATION
+        // -------------------------
+
+        document.getElementById('profile-name').textContent =
+            `${user.first_name} ${user.last_name}`;
+
+        document.getElementById('profile-email').textContent = user.email;
+
+        // -------------------------
+        // DATE OF BIRTH
+        // -------------------------
+
+        const dobElement = document.getElementById('profile-dob');
+        const dobButton = document.getElementById('dob-button');
+
+        if (user.date_of_birth) {
+            dobElement.textContent = formatDate(user.date_of_birth);
+            dobButton.textContent = 'Edit';
+        } else {
+            dobElement.textContent = 'Add date of birth';
+            dobButton.textContent = 'Add';
+        }
+
+        dobButton.addEventListener('click', () => {
+            openDobModal(user);
+        });
+
+        // -------------------------
+        // FULL NAME
+        // -------------------------
+
+        const nameButton = document.getElementById('name-button');
+
+        nameButton.addEventListener('click', () => {
+            openNameModal(user);
+        });
+
+        // -------------------------
+        // PASSWORD
+        // -------------------------
+
+        const passwordButton = document.getElementById('password-button');
+
+        passwordButton.addEventListener('click', () => {
+            openPasswordModal();
+        });
+    } catch (error) {
+        console.error('Error loading profile:', error);
     }
-
-    const user = await response.json();
-
-    if (!user) {
-      window.location.href = "/";
-      return;
-    }
-
-    // -------------------------
-    // NAVBAR
-    // -------------------------
-
-    const navbar = createNavbar({
-      userMode: user.host ? "host" : "tenant",
-      isRegisteredHost: user.host ?? false,
-    });
-
-    navbarContainer.appendChild(navbar);
-
-
-    // -------------------------
-    // PROFILE INFORMATION
-    // -------------------------
-
-    document.getElementById("profile-name").textContent =
-      `${user.first_name} ${user.last_name}`;
-
-    document.getElementById("profile-email").textContent =
-      user.email;
-
-
-    // -------------------------
-    // DATE OF BIRTH
-    // -------------------------
-
-    const dobElement = document.getElementById("profile-dob");
-    const dobButton = document.getElementById("dob-button");
-
-    if (user.date_of_birth) {
-      dobElement.textContent = formatDate(user.date_of_birth);
-      dobButton.textContent = "Edit";
-    } else {
-      dobElement.textContent = "Add date of birth";
-      dobButton.textContent = "Add";
-    }
-
-    dobButton.addEventListener("click", () => {
-      openDobModal(user);
-    });
-
-
-    // -------------------------
-    // FULL NAME
-    // -------------------------
-
-    const nameButton = document.getElementById("name-button");
-
-    nameButton.addEventListener("click", () => {
-      openNameModal(user);
-    });
-
-
-    // -------------------------
-    // PASSWORD
-    // -------------------------
-
-    const passwordButton =
-      document.getElementById("password-button");
-
-    passwordButton.addEventListener("click", () => {
-      openPasswordModal();
-    });
-
-  } catch (error) {
-    console.error("Error loading profile:", error);
-  }
 }
-
 
 // =========================================================
 // FORMAT DATE
 // =========================================================
 
 function formatDate(value) {
-  const date = new Date(`${value}T00:00:00`);
+    const date = new Date(`${value}T00:00:00`);
 
-  return new Intl.DateTimeFormat("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  }).format(date);
+    return new Intl.DateTimeFormat('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    }).format(date);
 }
-
 
 // =========================================================
 // FULL NAME MODAL
 // =========================================================
 
 function openNameModal(user) {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
 
-  const overlay = document.createElement("div");
-  overlay.className = "modal-overlay";
+    const modal = document.createElement('div');
+    modal.className = 'profile-modal';
 
-  const modal = document.createElement("div");
-  modal.className = "profile-modal";
-
-  modal.innerHTML = `
+    modal.innerHTML = `
     <button class="modal-close" type="button">&times;</button>
 
     <h2>Edit your name</h2>
@@ -127,7 +117,7 @@ function openNameModal(user) {
         <input
           type="text"
           id="edit-first-name"
-          value="${user.first_name || ""}"
+          value="${user.first_name || ''}"
         >
       </label>
 
@@ -136,7 +126,7 @@ function openNameModal(user) {
         <input
           type="text"
           id="edit-last-name"
-          value="${user.last_name || ""}"
+          value="${user.last_name || ''}"
         >
       </label>
 
@@ -152,87 +142,73 @@ function openNameModal(user) {
     </div>
   `;
 
-  overlay.appendChild(modal);
-  document.body.appendChild(overlay);
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
 
-  modal
-    .querySelector(".modal-close")
-    .addEventListener("click", () => {
-      overlay.remove();
+    modal.querySelector('.modal-close').addEventListener('click', () => {
+        overlay.remove();
     });
 
-  modal
-    .querySelector("#save-name")
-    .addEventListener("click", async () => {
+    modal.querySelector('#save-name').addEventListener('click', async () => {
+        const firstName = modal.querySelector('#edit-first-name').value.trim();
 
-      const firstName =
-        modal.querySelector("#edit-first-name").value.trim();
+        const lastName = modal.querySelector('#edit-last-name').value.trim();
 
-      const lastName =
-        modal.querySelector("#edit-last-name").value.trim();
+        const error = modal.querySelector('.profile-modal-error');
 
-      const error =
-        modal.querySelector(".profile-modal-error");
-
-      if (!firstName || !lastName) {
-        error.textContent = "Both names are required.";
-        return;
-      }
-
-      try {
-
-        const response = await fetch("/api/profile/name", {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            first_name: firstName,
-            last_name: lastName
-          })
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-          throw new Error(
-            result.error || "Unable to update name."
-          );
+        if (!firstName || !lastName) {
+            error.textContent = 'Both names are required.';
+            return;
         }
 
-        user.first_name = firstName;
-        user.last_name = lastName;
+        try {
+            const response = await fetch('/api/profile/name', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    first_name: firstName,
+                    last_name: lastName,
+                }),
+            });
 
-        document.getElementById("profile-name").textContent =
-          `${firstName} ${lastName}`;
+            const result = await response.json();
 
-        overlay.remove();
+            if (!response.ok) {
+                throw new Error(result.error || 'Unable to update name.');
+            }
 
-      } catch (err) {
-        modal.querySelector(".profile-modal-error").textContent =
-          err.message;
-    }
+            user.first_name = firstName;
+            user.last_name = lastName;
+
+            document.getElementById('profile-name').textContent =
+                `${firstName} ${lastName}`;
+
+            overlay.remove();
+        } catch (err) {
+            modal.querySelector('.profile-modal-error').textContent =
+                err.message;
+        }
     });
 }
-
 
 // =========================================================
 // DATE OF BIRTH MODAL
 // =========================================================
 
 function openDobModal(user) {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
 
-  const overlay = document.createElement("div");
-  overlay.className = "modal-overlay";
+    const modal = document.createElement('div');
+    modal.className = 'profile-modal';
 
-  const modal = document.createElement("div");
-  modal.className = "profile-modal";
-
-  modal.innerHTML = `
+    modal.innerHTML = `
     <button class="modal-close" type="button">&times;</button>
 
     <h2>
-      ${user.date_of_birth ? "Edit date of birth" : "Add date of birth"}
+      ${user.date_of_birth ? 'Edit date of birth' : 'Add date of birth'}
     </h2>
 
     <div class="profile-modal-form">
@@ -243,7 +219,7 @@ function openDobModal(user) {
         <input
           type="date"
           id="edit-dob"
-          value="${user.date_of_birth || ""}"
+          value="${user.date_of_birth || ''}"
         >
       </label>
 
@@ -259,80 +235,68 @@ function openDobModal(user) {
     </div>
   `;
 
-  overlay.appendChild(modal);
-  document.body.appendChild(overlay);
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
 
-  modal
-    .querySelector(".modal-close")
-    .addEventListener("click", () => {
-      overlay.remove();
+    modal.querySelector('.modal-close').addEventListener('click', () => {
+        overlay.remove();
     });
 
-  modal
-    .querySelector("#save-dob")
-    .addEventListener("click", async () => {
+    modal.querySelector('#save-dob').addEventListener('click', async () => {
+        const dob = modal.querySelector('#edit-dob').value;
 
-      const dob =
-        modal.querySelector("#edit-dob").value;
+        const error = modal.querySelector('.profile-modal-error');
 
-      const error =
-        modal.querySelector(".profile-modal-error");
-
-      if (!dob) {
-        error.textContent = "Please select a date.";
-        return;
-      }
-
-      try {
-
-        const response = await fetch("/api/profile/dob", {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            date_of_birth: dob
-          })
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-          throw new Error(
-            result.error || "Unable to update date of birth."
-          );
+        if (!dob) {
+            error.textContent = 'Please select a date.';
+            return;
         }
 
-        user.date_of_birth = dob;
+        try {
+            const response = await fetch('/api/profile/dob', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    date_of_birth: dob,
+                }),
+            });
 
-        document.getElementById("profile-dob").textContent =
-          formatDate(dob);
+            const result = await response.json();
 
-        document.getElementById("dob-button").textContent =
-          "Edit";
+            if (!response.ok) {
+                throw new Error(
+                    result.error || 'Unable to update date of birth.'
+                );
+            }
 
-        overlay.remove();
+            user.date_of_birth = dob;
 
-      } catch (err) {
-        error.textContent = err.message;
-      }
+            document.getElementById('profile-dob').textContent =
+                formatDate(dob);
+
+            document.getElementById('dob-button').textContent = 'Edit';
+
+            overlay.remove();
+        } catch (err) {
+            error.textContent = err.message;
+        }
     });
 }
-
 
 // =========================================================
 // CHANGE PASSWORD MODAL
 // =========================================================
 
 function openPasswordModal() {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
 
-  const overlay = document.createElement("div");
-  overlay.className = "modal-overlay";
+    const modal = document.createElement('div');
+    modal.className = 'profile-modal';
 
-  const modal = document.createElement("div");
-  modal.className = "profile-modal";
-
-  modal.innerHTML = `
+    modal.innerHTML = `
     <button class="modal-close" type="button">&times;</button>
 
     <h2>Change password</h2>
@@ -378,77 +342,69 @@ function openPasswordModal() {
     </div>
   `;
 
-  overlay.appendChild(modal);
-  document.body.appendChild(overlay);
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
 
-  modal
-    .querySelector(".modal-close")
-    .addEventListener("click", () => {
-      overlay.remove();
-    });
-
-  modal
-    .querySelector("#save-password")
-    .addEventListener("click", async () => {
-
-      const currentPassword =
-        modal.querySelector("#current-password").value;
-
-      const newPassword =
-        modal.querySelector("#new-password").value;
-
-      const confirmPassword =
-        modal.querySelector("#confirm-password").value;
-
-      const error =
-        modal.querySelector(".profile-modal-error");
-
-      if (!currentPassword || !newPassword || !confirmPassword) {
-        error.textContent = "Please fill in all fields.";
-        return;
-      }
-
-      if (newPassword !== confirmPassword) {
-        error.textContent = "New passwords do not match.";
-        return;
-      }
-
-      if (newPassword.length < 8) {
-        error.textContent =
-          "New password must be at least 8 characters.";
-        return;
-      }
-
-      try {
-
-        const response = await fetch("/api/profile/password", {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            current_password: currentPassword,
-            new_password: newPassword
-          })
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-          throw new Error(
-            result.error || "Unable to change password."
-          );
-        }
-
+    modal.querySelector('.modal-close').addEventListener('click', () => {
         overlay.remove();
-
-        alert("Password changed successfully.");
-
-      } catch (err) {
-        error.textContent = err.message;
-      }
     });
-}
 
+    modal
+        .querySelector('#save-password')
+        .addEventListener('click', async () => {
+            const currentPassword =
+                modal.querySelector('#current-password').value;
+
+            const newPassword = modal.querySelector('#new-password').value;
+
+            const confirmPassword =
+                modal.querySelector('#confirm-password').value;
+
+            const error = modal.querySelector('.profile-modal-error');
+
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                error.textContent = 'Please fill in all fields.';
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                error.textContent = 'New passwords do not match.';
+                return;
+            }
+
+            if (newPassword.length < 8) {
+                error.textContent =
+                    'New password must be at least 8 characters.';
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/profile/password', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        current_password: currentPassword,
+                        new_password: newPassword,
+                    }),
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        result.error || 'Unable to change password.'
+                    );
+                }
+
+                overlay.remove();
+
+                alert('Password changed successfully.');
+            } catch (err) {
+                error.textContent = err.message;
+            }
+        });
+}
 
 loadProfile();

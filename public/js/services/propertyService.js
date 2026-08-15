@@ -1,76 +1,75 @@
-import { createPropertyCard } from "../components/propertyCard.js";
+import { createPropertyCard } from '../components/propertyCard.js';
 
 export function loadProperties(url, railId) {
+    fetch(url)
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error('Could not load properties');
+            }
+            return response.json();
+        })
 
-  fetch(url)
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Could not load properties");
-      }
-      return response.json();
-    })
+        .then((properties) => {
+            const rail = document.getElementById(railId);
+            properties.forEach((property) => {
+                const card = createPropertyCard(property);
+                rail.appendChild(card);
+            });
+        })
 
-    .then((properties) => {
-      const rail = document.getElementById(railId);
-      properties.forEach((property) => {
-        const card = createPropertyCard(property);
-        rail.appendChild(card);
-      });
-    })
-
-    .catch((error) => {
-      console.error(error);
-    });
-};
+        .catch((error) => {
+            console.error(error);
+        });
+}
 
 export function loadPropertyById(url) {
- return fetch(url)
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Could not load property");
-      }
-      return response.json();
-    })
-    .catch((error) => {
-      console.error(error);
-    });
-};
+    return fetch(url)
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error('Could not load property');
+            }
+            return response.json();
+        })
+        .catch((error) => {
+            console.error(error);
+        });
+}
 
 export function loadPropertyImages(url) {
-   return fetch(url)
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Could not load images");
-      }
-      return response.json();
-    })
-    .catch((error) => {
-      console.error(error);
-    });
+    return fetch(url)
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error('Could not load images');
+            }
+            return response.json();
+        })
+        .catch((error) => {
+            console.error(error);
+        });
 }
 
 export function loadPropertyAmenities(url) {
-   return fetch(url)
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Could not load amenities");
-      }
-      return response.json();
-    })
-    .catch((error) => {
-      console.error(error);
-    });
+    return fetch(url)
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error('Could not load amenities');
+            }
+            return response.json();
+        })
+        .catch((error) => {
+            console.error(error);
+        });
 }
 
 export function loadPropertyReviews(url) {
-   return fetch(url)
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Could not load reviews");
-      }
-      return response.json();
-    })
-    .catch((error) => {
-      console.error(error);
-    });
+    return fetch(url)
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error('Could not load reviews');
+            }
+            return response.json();
+        })
+        .catch((error) => {
+            console.error(error);
+        });
 }

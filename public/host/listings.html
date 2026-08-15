@@ -1,59 +1,66 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Listings | DrexelBnB</title>
-    <link rel="stylesheet" href="../css/styles.css">
-    <link rel="icon" type="image/svg+xml" href="./assets/icons/logo.svg" />
-</head>
-<body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0"
+        />
+        <title>Listings | DrexelBnB</title>
+        <link
+            rel="stylesheet"
+            href="../css/styles.css"
+        />
+        <link
+            rel="icon"
+            type="image/svg+xml"
+            href="./assets/icons/logo.svg"
+        />
+    </head>
+    <body>
+        <header>
+            <div id="navbar-container"></div>
+        </header>
 
-    <header>
-        <div id="navbar-container"></div>
-    </header>
+        <main>
+            <h2>Your Listings</h2>
+            <p class="page-description">
+                Manage all of your rental properties from one place.
+            </p>
 
-    <main>
-    <h2>Your Listings</h2>
-    <p class="page-description">
-    Manage all of your rental properties from one place.
-    </p>
+            <section class="listing-grid">
+                <article class="listing-card">
+                    <img
+                        src="https://placehold.co/350x220"
+                        alt="Property"
+                    />
+                    <div class="listing-content">
+                        <h3>Modern Philly Apartment</h3>
+                        <p class="price">$150 / night</p>
+                        <p>Philadelphia, PA</p>
+                        <div class="button-group">
+                            <button>Edit</button>
+                            <button class="delete-btn">Delete</button>
+                        </div>
+                    </div>
+                </article>
+            </section>
 
-    <section class="listing-grid">
-        <article class="listing-card">
-            <img
-                src="https://placehold.co/350x220"
-                alt="Property">
-            <div class="listing-content">
-                <h3>Modern Philly Apartment</h3>
-                <p class="price">$150 / night</p>
-                <p>
-                    Philadelphia, PA
-                </p>
-                <div class="button-group">
-                    <button>Edit</button>
-                    <button class="delete-btn">
-                        Delete
-                    </button>
-                </div>
+            <div class="center">
+                <a
+                    class="primary-btn"
+                    href="create-listing.html"
+                >
+                    Add Property +
+                </a>
             </div>
-        </article>
-    </section>
+        </main>
 
-    <div class="center">
-        <a
-            class="primary-btn"
-            href="create-listing.html">
+        <footer>CS375 Summer Project</footer>
 
-            Add Property +
-        </a>
-        </div>
-    </main>
-
-    <footer>
-        CS375 Summer Project
-    </footer>
-
-    <script type="module" src="../js/pages/hostListing.js"></script>
-</body>
+        <script
+            type="module"
+            src="../js/pages/hostListing.js"
+        ></script>
+    </body>
 </html>
