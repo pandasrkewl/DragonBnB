@@ -270,6 +270,40 @@ async function getPropertyReviews(listingId) {
     return result.rows;
 }
 
+async function getBookingsForToday(hostId) {
+    const result = await pool.query(
+        `SELECT 
+            bookings.start_date, 
+            bookings.end_date, 
+            bookings.user_id AS tenant_id 
+        FROM bookings 
+        JOIN properties 
+            ON properties.id=bookings.property_id 
+        WHERE properties.host_id=$1 AND
+            CURRENT_TIMESTAMP BETWEEN bookings.start_date AND bookings.end_date;`,
+        [userId]
+    );
+
+    return result.rows;
+}
+
+async function getBookingsUpcoming(hostId) {
+    const result = await pool.query(
+        `SELECT 
+            bookings.start_date, 
+            bookings.end_date, 
+            bookings.user_id AS tenant_id 
+        FROM bookings 
+        JOIN properties 
+            ON properties.id=bookings.property_id 
+        WHERE properties.host_id=$1 AND
+            CURRENT_TIMESTAMP < bookings.start_date;`,
+        [userId]
+    );
+
+    return result.rows;
+}
+
 
 module.exports = {
     getUser,
@@ -278,5 +312,7 @@ module.exports = {
     getPropertyById,
     getPropertyImages,
     getPropertyAmenities,
-    getPropertyReviews
+    getPropertyReviews,
+    getBookingsForToday,
+    getBookingsUpcoming
 };

@@ -445,14 +445,15 @@ VALUES
 
 INSERT INTO "bookings" ("id", "property_id", "user_id", "start_date", "end_date", "total_price", "status")
 VALUES
-    (1, 1, 2, '2026-03-01', '2026-03-03', 400.00, 'completed'),
+    (1, 1, 2, '2026-03-01', '2027-03-03', 100000.00, 'completed'),
     (2, 1, 2, '2026-05-10', '2026-05-13', 525.00, 'completed'),
     (3, 2, 3, '2026-06-01', '2026-06-03', 280.00, 'completed'),
     (4, 3, 5, '2026-07-15', '2026-07-18', 750.00, 'completed'),
     (5, 1, 3, '2026-01-10', '2026-01-12', 350.00, 'completed'),
     (6, 1, 5, '2026-02-14', '2026-02-16', 350.00, 'completed'),
     (7, 1, 7, '2026-04-05', '2026-04-08', 525.00, 'completed'),
-    (8, 1, 9, '2026-06-12', '2026-06-15', 525.00, 'completed');
+    (8, 1, 9, '2026-06-12', '2026-06-15', 525.00, 'completed'),
+    (9, 1, 2, '2027-03-01', '2027-03-03', 400.00, 'confirmed');
 
 INSERT INTO "reviews" ("id", "rating", "comment", "created_at", "user_id", "property_id", "booking_id")
 VALUES

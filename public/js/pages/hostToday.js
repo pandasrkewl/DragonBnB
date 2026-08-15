@@ -1,4 +1,8 @@
 import { createNavbar } from "../components/navbar.js";
+import { 
+  getBookingsForToday,
+  getBookingsUpcoming
+ } from "../../../scripts/queryDb.js";
 
 const navBarContainer = document.getElementById("navbar-container");
 const today = document.getElementById("todayButton");
@@ -15,6 +19,7 @@ const navElement = createNavbar({
 
 navBarContainer.appendChild(navElement);
 
+//Switching between tabs
 const updateHostView = (view) => {
   if (!today || !upcoming || !heading || !subheading || !image) return;
 
