@@ -733,6 +733,12 @@ export function createNavbar({
 
   const dropdownMenu = createElement("div", { className: "profile-dropdown" }, [
     createElement("a", {
+      href: "/profile",
+      className: "dropdown-item",
+      textContent: "Profile",
+    }),
+  
+    createElement("a", {
       href: "/logout",
       className: "dropdown-item",
       textContent: "Logout",

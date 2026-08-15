@@ -28,11 +28,14 @@ function isInvalidDateRange(checkIn, checkOut) {
 }
 app.use(
   session({
-    secret: process.env.SESSION_SECRET,
+    secret: process.env.SESSION_SECRET || "dev-secret",
     resave: false,
     saveUninitialized: false,
     cookie: {
-      maxAge: 1000 * 60 * 60 * 24 // 1 day
+      maxAge: 1000 * 60 * 60 * 24,
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax"
     }
   })
 );
@@ -119,9 +122,19 @@ app.post("/login", async (req, res) => {
       email: user.email,
       host: user.host
     };
-    res.json({
-      success: true,
-      user: req.session.user
+    
+    req.session.save((err) => {
+      if (err) {
+        console.error("Session save error:", err);
+        return res.status(500).json({
+          error: "Could not save session."
+        });
+      }
+    
+      res.json({
+        success: true,
+        user: req.session.user
+      });
     });
   } catch (error) {
     console.error("Login error:", error);
@@ -281,7 +294,28 @@ app.get("/api/me", (req, res) => {
 });
 
 app.get("/logout", (req, res) => {
-  req.session.destroy();
-  res.clearCookie("connect.sid");
-  res.redirect("/");
+  req.session.destroy((err) => {
+    if (err) {
+      console.error("Logout error:", err);
+      return res.status(500).json({
+        error: "Could not log out."
+      });
+    }
+
+    res.clearCookie("connect.sid", {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: false
+    });
+
+    res.redirect("/");
+  });
+});
+
+app.get("/profile", (req, res) => {
+  if (!req.session.user) {
+    return res.redirect("/");
+  }
+
+  res.sendFile(path.join(__dirname, "public", "profile.html"));
 });
