@@ -6,7 +6,35 @@ const navbarContainer = document.getElementById("navbar-container");
 const resultsHeader = document.getElementById("results-header");
 const resultsGrid = document.getElementById("results-grid");
 
-navbarContainer.appendChild(createNavbar({ userMode: "guest" }));
+async function loadNavbar() {
+  try {
+    const response = await fetch("/api/me");
+
+    if (!response.ok) {
+      throw new Error("Unable to check login status.");
+    }
+
+    const user = await response.json();
+
+    const navbar = createNavbar({
+      userMode: user ? (user.host ? "host" : "tenant") : "guest",
+      isRegisteredHost: user?.host ?? false,
+    });
+
+    navbarContainer.appendChild(navbar);
+
+  } catch (error) {
+    console.error("Error loading navbar:", error);
+
+    navbarContainer.appendChild(
+      createNavbar({
+        userMode: "guest",
+      })
+    );
+  }
+}
+
+loadNavbar();
 
 const params = new URLSearchParams(window.location.search);
 const location = params.get("location") || "";
