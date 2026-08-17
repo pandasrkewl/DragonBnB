@@ -42,8 +42,6 @@ const navElement = createNavbar({
 
 navBarContainer.appendChild(navElement);
 
-navBarContainer.appendChild(navElement);
-
 if (!listingId) {
     console.error("Missing property id");
 }
