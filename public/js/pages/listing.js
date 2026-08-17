@@ -26,9 +26,21 @@ const topContainer = document.getElementById("top-container");
 const leftBodyContainer = document.getElementById("left-body-container");
 const rightBodyContainer = document.getElementById("right-body-container");
 
+const response = await fetch("/api/me");
+const user = await response.json();
+
+let userMode = "guest";
+
+if (user) {
+  userMode = user.host ? "host" : "tenant";
+}
+
 const navElement = createNavbar({
-  userMode: "guest",
+  userMode,
+  isRegisteredHost: user?.host ?? false,
 });
+
+navBarContainer.appendChild(navElement);
 
 navBarContainer.appendChild(navElement);
 
