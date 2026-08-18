@@ -32,7 +32,7 @@ const user = await response.json();
 let userMode = "guest";
 
 if (user) {
-  userMode = user.host ? "host" : "tenant";
+  userMode = user? "tenant" : "guest";
 }
 
 const navElement = createNavbar({
