@@ -435,6 +435,50 @@ async function markMessagesAsRead(conversationId, userId) {
   return result.rows;
 }
 
+async function getBookingsForToday(hostId) {
+  const result = await pool.query(
+    `SELECT 
+      bookings.start_date,
+      bookings.end_date,
+      bookings.user_id AS tenant_id,
+      users.image_url,
+      users.first_name,
+      users.last_name
+    FROM bookings
+    JOIN properties
+      ON properties.id = bookings.property_id
+    JOIN users
+      ON users.id = bookings.user_id
+    WHERE properties.host_id = $1
+      AND CURRENT_DATE BETWEEN bookings.start_date AND bookings.end_date;`,
+    [hostId]
+  );
+
+    return result.rows;
+}
+
+async function getBookingsUpcoming(hostId) {
+  const result = await pool.query(
+    `SELECT 
+      bookings.start_date,
+      bookings.end_date,
+      bookings.user_id AS tenant_id,
+      users.image_url,
+      users.first_name,
+      users.last_name
+    FROM bookings
+    JOIN properties
+      ON properties.id = bookings.property_id
+    JOIN users
+      ON users.id = bookings.user_id
+    WHERE properties.host_id = $1
+      AND CURRENT_DATE < bookings.start_date;`,
+    [hostId]
+  );
+
+    return result.rows;
+}
+
 async function getUnreadMessageCount(userId) {
   const result = await pool.query(
     `SELECT COUNT(*) as unread_count
@@ -482,6 +526,8 @@ module.exports = {
   getPropertyAmenities,
   getPropertyReviews,
   getPropertyBookings,
+  getBookingsForToday,
+  getBookingsUpcoming,
   getUserConversations,
   getConversationById,
   getConversationMessages,

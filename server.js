@@ -16,6 +16,8 @@ const {
   markMessagesAsRead,
   getUnreadMessageCount,
   getUnreadCountForConversation,
+  getBookingsForToday,
+  getBookingsUpcoming
 } = require("./scripts/queryDb");
 const session = require("express-session");
 const bcrypt = require("bcrypt");
@@ -520,6 +522,48 @@ app.get("/api/me", (req, res) => {
   }
 
   res.json(req.session.user);
+});
+
+app.use("/host", requireLogin);
+
+app.get("/api/host/bookings/today", requireLogin, async (req, res) => {
+  try {
+    const user = req.session.user;
+
+    if (!user || !user.id) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+
+    if (!user.host) {
+      return res.status(403).json({ error: "Not a host" });
+    }
+
+    const bookings = await getBookingsForToday(user.id);
+    res.json(bookings);
+  } catch (error) {
+    console.error("Error fetching host bookings for today:", error);
+    res.status(500).json({ error: "Could not fetch bookings" });
+  }
+});
+
+app.get("/api/host/bookings/upcoming", requireLogin, async (req, res) => {
+  try {
+    const user = req.session.user;
+
+    if (!user || !user.id) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+
+    if (!user.host) {
+      return res.status(403).json({ error: "Not a host" });
+    }
+
+    const bookings = await getBookingsUpcoming(user.id);
+    res.json(bookings);
+  } catch (error) {
+    console.error("Error fetching upcoming host bookings:", error);
+    res.status(500).json({ error: "Could not fetch upcoming bookings" });
+  }
 });
 
 app.get("/logout", (req, res) => {
