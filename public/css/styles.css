@@ -620,7 +620,6 @@ button.profile-menu:hover{
   transition: background 0.2s ease;
   flex-shrink: 0;
   margin-left: 8px;
-  transform: translateY(-6px);
 }
 
 .search-btn:hover {
