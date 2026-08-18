@@ -635,14 +635,14 @@ export function createNavbar({
   const rightActions = createElement("div", { className: "nav-actions" });
 
   let toggleModeText = "Become a host";
-  let toggleModeHref = "/host/become";
+  let toggleModeHref = "/host/create-listing.html";
 
   if (userMode === "host") {
     toggleModeText = "Switch to traveling";
     toggleModeHref = "/";
   } else if (userMode === "tenant" && isRegisteredHost) {
     toggleModeText = "Switch to hosting";
-    toggleModeHref = "/host/today";
+    toggleModeHref = "/host/today.html";
   }
 
   const toggleModeLink = createElement("a", {
@@ -727,7 +727,6 @@ export function createNavbar({
     });
   
     rightActions.append(
-      toggleModeLink,
       loginButton,
       signupButton
     );
