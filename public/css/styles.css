@@ -453,6 +453,10 @@ button.profile-menu:hover{
   color: gray;
 }
 
+.column .title {
+  color: gray;
+}
+
 .column {
   flex: 0 0 calc((100% - 100px) / 7);
   min-width: 0;

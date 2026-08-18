@@ -2,6 +2,7 @@ import {
   createElement,
   createModal
 } from "../reusable/functions.js";
+import {createGuestPicker} from "./guestPicker.js";
 
 function formatDateLabel(value) {
   if (!value) return "Add dates";
@@ -346,6 +347,9 @@ export function createNavbar({
       className: "suggestion-list",
     });
 
+    const checkIn = createElement("input", {type: "text", className: "date-input", placeholder: "Check in"})
+    const checkOut = createElement("input", {type: "text", className: "date-input", placeholder: "Check out"})
+
     const datePanel = createElement(
       "div",
       { className: "search-dropdown date-dropdown" },
@@ -356,21 +360,23 @@ export function createNavbar({
         createElement("div", { className: "date-picker-grid" }, [
           createElement("label", { className: "date-field" }, [
             createElement("span", { textContent: "Check in" }),
-            createElement("input", {
-              type: "date",
-              className: "date-input",
-            }),
+            checkIn
           ]),
           createElement("label", { className: "date-field" }, [
             createElement("span", { textContent: "Check out" }),
-            createElement("input", {
-              type: "date",
-              className: "date-input",
-            }),
+            checkOut
           ]),
         ]),
       ],
     );
+
+    const checkInCalendar = flatpickr(checkIn, {
+      minDate: "today"
+    });
+
+    const checkOutCalendar = flatpickr(checkOut, {
+      minDate: "today"
+    });
 
     const guestsPanel = createElement(
       "div",
@@ -382,55 +388,9 @@ export function createNavbar({
       ],
     );
 
-    const counters = [
-      { key: "adults", label: "Adults", detail: "Ages 13+" },
-      { key: "children", label: "Children", detail: "Ages 2-12" },
-      { key: "infants", label: "Infants", detail: "Under 2" },
-      { key: "pets", label: "Service pets", detail: "Optional" },
-    ];
-
-    const guestCounts = {
-      adults: 0,
-      children: 0,
-      infants: 0,
-      pets: 0,
-    };
-
-    const guestRows = counters.map(({ key, label, detail }) => {
-      const row = createElement("div", { className: "guest-row" });
-      const textBlock = createElement("div", { className: "guest-copy" }, [
-        createElement("span", { className: "guest-label", textContent: label }),
-        createElement("span", {
-          className: "guest-detail",
-          textContent: detail,
-        }),
-      ]);
-      const counter = createElement("div", { className: "guest-counter" }, [
-        createElement("button", {
-          type: "button",
-          className: "counter-btn",
-          textContent: "−",
-          "data-action": "decrease",
-          "data-key": key,
-        }),
-        createElement("span", {
-          className: "counter-value",
-          textContent: "0",
-          "data-key": key,
-        }),
-        createElement("button", {
-          type: "button",
-          className: "counter-btn counter-btn-plus",
-          textContent: "+",
-          "data-action": "increase",
-          "data-key": key,
-        }),
-      ]);
-      row.append(textBlock, counter);
-      return row;
-    });
-
-    guestRows.forEach((row) => guestsPanel.appendChild(row));
+  const guestPicker = createGuestPicker({}, () => {syncGuestSummary();});
+  const guestCounts = guestPicker.guestCounts;
+  guestsPanel.appendChild(guestPicker.element);
 
     const checkInInput = datePanel.querySelectorAll("input")[0];
     const checkOutInput = datePanel.querySelectorAll("input")[1];
@@ -492,12 +452,6 @@ export function createNavbar({
         guestValue.textContent = "Add guests";
       }
 
-      guestRows.forEach((row) => {
-        const key = row
-          .querySelector(".counter-value")
-          .getAttribute("data-key");
-        row.querySelector(".counter-value").textContent = guestCounts[key];
-      });
     }
 
     function updateDateSummary() {
@@ -599,21 +553,6 @@ export function createNavbar({
     checkInInput.addEventListener("change", updateDateSummary);
     checkOutInput.addEventListener("change", updateDateSummary);
 
-    guestRows.forEach((row) => {
-      row.querySelectorAll("button").forEach((button) => {
-        button.addEventListener("click", () => {
-          const key = button.getAttribute("data-key");
-          const action = button.getAttribute("data-action");
-          if (action === "increase") {
-            guestCounts[key] += 1;
-          } else if (guestCounts[key] > 0) {
-            guestCounts[key] -= 1;
-          }
-          syncGuestSummary();
-        });
-      });
-    });
-
     searchForm.addEventListener("submit", (event) => {
       event.preventDefault();
 
@@ -636,6 +575,7 @@ export function createNavbar({
       }
 
       const params = new URLSearchParams();
+
       const locationValueText = locationInput.value.trim();
       if (locationValueText) {
         params.set("location", locationValueText);

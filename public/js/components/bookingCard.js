@@ -1,6 +1,13 @@
 import { createElement } from "../reusable/functions.js";
+import { createGuestPicker } from "./guestPicker.js";
 
-export function createBookingCard(property) {
+export function createBookingCard(property, bookings, checkIn, checkOut, guestCounts) {
+
+    const disabledRanges = bookings.map(booking => ({
+        from: booking.start_date.split("T")[0],
+        to: booking.end_date.split("T")[0]
+    }))
+
     const card = createElement("div", {
         className: "booking-card"
     });
@@ -36,7 +43,9 @@ export function createBookingCard(property) {
 
     const checkInInput = createElement("input", {
         className: "booking-date-input",
-        type: "date"
+        type: "text",
+        placeholder: "Check in",
+        readOnly: true
     });
 
     checkInBox.append(
@@ -55,7 +64,41 @@ export function createBookingCard(property) {
 
     const checkOutInput = createElement("input", {
         className: "booking-date-input",
-        type: "date"
+        type: "text",
+        placeholder: "Check out",
+        readOnly: true
+    });
+
+    const checkOutCalendar = flatpickr(checkOutInput, {
+        minDate: "today",
+        disable: disabledRanges,
+        defaultDate: checkOut
+    });
+
+    const checkInCalendar = flatpickr(checkInInput, {
+        minDate: "today",
+        disable: disabledRanges,
+        defaultDate: checkIn,
+
+        onChange: function(selectedDates) {
+            const checkInDate = selectedDates[0];
+
+            if (!checkInDate) {
+                return;
+            }
+
+            checkOutCalendar.set("minDate", checkInDate);
+            
+            const nextBooking = bookings.map(booking => new Date(booking.start_date)).filter(startDate => startDate > checkInDate).sort((a,b) => a-b)[0];
+
+            if (nextBooking) {
+                checkOutCalendar.set("maxDate", nextBooking);
+            } else {
+                checkOutCalendar.set("maxDate", null);
+            }
+
+            checkOutCalendar.clear();
+        }
     });
 
     checkOutBox.append(
@@ -77,17 +120,20 @@ export function createBookingCard(property) {
         textContent: "GUESTS"
     });
 
-    const guestInput = createElement("input", {
-        className: "booking-guest-input",
-        type: "number",
-        min: "1",
-        max: property.max_guests,
-        value: "1"
+    const guestPicker = createGuestPicker(guestCounts);
+
+    const guestValue = createElement("div", {
+        className: "booking-guest-value",
+    });
+
+    guestValue.addEventListener("click", () => {
+        guestPicker.element.classList.toggle("open");
     });
 
     guestSection.append(
         guestLabel,
-        guestInput
+        guestValue,
+        guestPicker.element
     );
 
     const reserveButton = createElement("button", {
