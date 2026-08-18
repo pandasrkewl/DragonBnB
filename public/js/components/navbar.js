@@ -270,6 +270,12 @@ export function createNavbar({
       className: "search-bar",
     });
 
+    const searchInput = createElement("input", {
+            type: "text",
+            placeholder: "Search location",
+            id: "search-input",
+          })
+
     const locationSegment = createElement(
       "div",
       { className: "search-segment search-segment-input" },
@@ -281,15 +287,13 @@ export function createNavbar({
         }),
         createElement("div", { className: "segment-text" }, [
           createElement("span", { className: "label", textContent: "Where" }),
-          createElement("input", {
-            type: "text",
-            placeholder: "Search location",
-            className: "search-input",
-          }),
+          searchInput
         ]),
       ],
     );
 
+    locationSegment.addEventListener("click", () => {searchInput.focus();});
+    
     const dateSegment = createElement(
       "div",
       { className: "search-segment search-segment-picker" },

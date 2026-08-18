@@ -53,7 +53,6 @@ main h2{
 form{
     background:white;
     max-width:500px;
-    margin:30px auto;
     padding:30px;
     border-radius:8px;
     box-shadow:0 2px 8px rgba(0,0,0,.1);
@@ -97,7 +96,6 @@ button{
 
 form button{
     width:100%;
-    margin-top:20px;
 }
 
 
@@ -533,11 +531,12 @@ button.profile-menu:hover{
   border-radius: 50px;
   display: flex;
   align-items: center;
-  padding: 6px 6px 6px 24px;
+  padding: 0px 6px 0px 24px;
   color: #333;
-  height: 70px;
+  height: 60px;
   max-width: 680px;
-  width: 100%;
+  width: 680px;
+  min-width: 600px;
   box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
   border: 1px solid #e7e7e7;
 }
@@ -548,8 +547,8 @@ button.profile-menu:hover{
   gap: 12px;
   flex: 1;
   min-width: 0;
-  height: 70px;
-  padding: 10px 12px;
+  height: 60px;
+  padding: 0px 12px;
   border-radius: 999px;
   cursor: pointer;
   transition: background 0.2s ease;
@@ -578,13 +577,18 @@ button.profile-menu:hover{
   margin-bottom: 2px;
 }
 
-.search-input {
+#search-input {
   border: none;
   outline: none;
   font-size: 0.85rem;
   color: #666;
   background: transparent;
   width: 100%;
+  padding: 0;
+}
+
+#search-input::placeholder {
+  color: #666;
 }
 
 .search-value {
@@ -593,10 +597,6 @@ button.profile-menu:hover{
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.search-input::placeholder {
-  color: #666;
 }
 
 .divider {
@@ -620,7 +620,6 @@ button.profile-menu:hover{
   transition: background 0.2s ease;
   flex-shrink: 0;
   margin-left: 8px;
-  transform: translateY(-6px);
 }
 
 .search-btn:hover {
@@ -726,6 +725,11 @@ button.profile-menu:hover{
   cursor: pointer;
   font-size: 1.05rem;
   color: #333;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
 }
 
 .counter-value {
@@ -913,27 +917,27 @@ button.profile-menu:hover{
 
 @media (max-width: 1100px) {
   .main-header {
-    height: auto;
     min-height: 80px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 16px;
     padding: 16px 20px;
   }
 
   .search-bar {
-    order: 3;
-    flex: 1 1 100%;
-    max-width: none;
-    margin-top: 4px;
+    order: initial;
+
+    width: 680px;
+    max-width: 680px;
+    min-width: 400px;
+
+    flex: 0 1 680px;
+
+    margin-top: 0;
   }
 
   .nav-actions {
     margin-left: auto;
-  }
-
-  .host-nav-links {
-    flex: 1 1 100%;
-    order: 3;
+    flex-shrink: 0;
   }
 }
 
@@ -943,24 +947,36 @@ button.profile-menu:hover{
   }
 
   .search-bar {
-    border-radius: 28px;
-    padding: 12px;
-    flex-wrap: wrap;
-    gap: 10px;
+    border-radius: 50px;
+    padding: 6px 6px 6px 24px;
+
+    display: flex;
+    flex-wrap: nowrap;       /* IMPORTANT */
+    align-items: center;
+
+    width: 100%;
+    min-width: 0;
+    height: 70px;
+    gap: 0;
   }
 
-  .search-segment {
-    flex: 1 1 100%;
-    width: 100%;
+   .search-segment {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
+    height: 100%;
     padding: 10px 12px;
   }
 
   .divider {
-    display: none;
+    display: block;    
+    flex-shrink: 0;
   }
 
   .search-btn {
-    margin-left: auto;
+    flex-shrink: 0;
+    margin-left: 8px;
+    transform: none;
   }
 
   .search-dropdown,
@@ -968,11 +984,6 @@ button.profile-menu:hover{
     width: calc(100vw - 32px);
     left: 0;
     right: 0;
-  }
-
-  /* Avoid vertical nudge on small screens */
-  .search-btn {
-    transform: none;
   }
 
   .guest-dropdown {
@@ -1087,6 +1098,10 @@ button.profile-menu:hover{
   background: white;
   font-size: 22px;
   cursor: pointer;
+  color: black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .gallery-btn-left {
@@ -1164,6 +1179,8 @@ button.profile-menu:hover{
   font-weight: bold;
   text-decoration: underline;
   cursor: pointer;
+  color:#000000;
+  padding-left: 0px;
 }
 
 .modal-overlay {
@@ -1225,6 +1242,7 @@ button.profile-menu:hover{
   background: none;
   border: none;
   padding: 0;
+  color: black;
 
   font-size: 15px;
   font-weight: 600;
@@ -1291,6 +1309,7 @@ button.profile-menu:hover{
   font-weight: bold;
   text-decoration: underline;
   cursor: pointer;
+  color: black
 }
 
 .full-reviews {
