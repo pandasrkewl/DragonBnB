@@ -1,5 +1,6 @@
 const path = require("path");
 const express = require("express");
+const multer = require("multer");
 const {
   getProperties,
   getPropertyCities,
@@ -8,6 +9,10 @@ const {
   getPropertyAmenities,
   getPropertyReviews,
   getPropertyBookings,
+  createProperty,
+  getHostProperties,
+  addPropertyAmenities,
+  addPropertyImage,
   getUserConversations,
   getConversationById,
   getConversationMessages,
@@ -26,6 +31,20 @@ const {
   requireLogin,
   verifyUserInConversation,
 } = require("./middleware/authMiddleware");
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "public/assets/images/properties");
+  },
+
+  filename: function (req, file, cb) {
+    const uniqueName =
+      Date.now() + "-" + file.originalname.replace(/\s+/g, "-");
+    cb(null, uniqueName);
+  }
+});
+
+const upload = multer({ storage });
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -510,6 +529,347 @@ app.post(
       res.status(500).json({ error: "Failed to send message" });
     }
   },
+);
+
+app.post("/api/properties", requireLogin, async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+
+    const {
+      title,
+      description,
+      address_line_1,
+      address_line_2,
+      city,
+      state,
+      postal_code,
+      country,
+      max_guests,
+      bedrooms,
+      bathrooms,
+      beds,
+      price_per_night,
+      property_type,
+      pets_allowed,
+      check_in_time,
+      check_out_time
+    } = req.body;
+
+    if (
+      !title ||
+      !address_line_1 ||
+      !city ||
+      !state ||
+      !postal_code ||
+      !country ||
+      !max_guests ||
+      bedrooms === undefined ||
+      bathrooms === undefined ||
+      beds === undefined ||
+      !price_per_night ||
+      !property_type
+    ) {
+      return res.status(400).json({
+        error: "Missing required property information"
+      });
+    }
+
+    const property = await createProperty({
+      host_id: userId,
+      title,
+      description,
+      address_line_1,
+      address_line_2,
+      city,
+      state,
+      postal_code,
+      country,
+      max_guests,
+      bedrooms,
+      bathrooms,
+      beds,
+      price_per_night,
+      property_type,
+      pets_allowed,
+      check_in_time,
+      check_out_time
+    });
+
+    res.status(201).json(property);
+
+  } catch (error) {
+
+    console.error("Error creating property:", error);
+
+    res.status(500).json({
+      error: "Could not create property"
+    });
+
+  }
+});
+
+app.get("/api/host/properties", requireLogin, async (req, res) => {
+  try {
+      const user = req.session.user;
+
+      if (!user || !user.id) {
+          return res.status(401).json({
+              error: "Not authenticated"
+          });
+      }
+
+      if (!user.host) {
+          return res.status(403).json({
+              error: "Not a host"
+          });
+      }
+
+      const properties = await getHostProperties(user.id);
+
+      res.json(properties);
+
+  } catch (error) {
+      console.error("Error getting host properties:", error);
+
+      res.status(500).json({
+          error: "Could not get host properties"
+      });
+  }
+});
+
+app.post(
+  "/api/properties/:id/images",
+  requireLogin,
+  upload.array("images", 10),
+  async (req, res) => {
+    try {
+      const propertyId = Number(req.params.id);
+
+      if (!req.files || req.files.length === 0) {
+        return res.status(400).json({
+          error: "No images uploaded"
+        });
+      }
+
+      const savedImages = [];
+
+      for (let i = 0; i < req.files.length; i++) {
+        const file = req.files[i];
+
+        const imageUrl =
+          `/assets/images/properties/${file.filename}`;
+
+        const image = await addPropertyImage(
+          propertyId,
+          imageUrl,
+          i
+        );
+
+        savedImages.push(image);
+      }
+
+      res.status(201).json(savedImages);
+
+    } catch (error) {
+      console.error("Error uploading property images:", error);
+
+      res.status(500).json({
+        error: "Could not upload images"
+      });
+    }
+  }
+);
+
+app.post(
+  "/api/properties/:id/amenities",
+  requireLogin,
+  async (req, res) => {
+    try {
+      const propertyId = Number(req.params.id);
+      const { amenities } = req.body;
+
+      if (!Array.isArray(amenities)) {
+        return res.status(400).json({
+          error: "Amenities must be an array"
+        });
+      }
+
+      await addPropertyAmenities(
+        propertyId,
+        amenities
+      );
+
+      res.status(201).json({
+        success: true
+      });
+
+    } catch (error) {
+      console.error(
+        "Error saving property amenities:",
+        error
+      );
+
+      res.status(500).json({
+        error: "Could not save amenities"
+      });
+    }
+  }
+);
+
+app.put(
+  "/api/properties/:id",
+  requireLogin,
+  async (req, res) => {
+    try {
+      const propertyId = Number(req.params.id);
+      const userId = req.session.user.id;
+      if (!Number.isInteger(propertyId) || propertyId <= 0) {
+        return res.status(400).json({
+          error: "Invalid property id"
+        });
+      }
+      const {
+        property_type,
+        title,
+        description,
+        address_line_1,
+        address_line_2,
+        city,
+        state,
+        postal_code,
+        country,
+        max_guests,
+        bedrooms,
+        bathrooms,
+        beds,
+        pets_allowed,
+        check_in_time,
+        check_out_time,
+        price_per_night
+      } = req.body;
+
+      if (
+        !property_type ||
+        !title ||
+        !address_line_1 ||
+        !city ||
+        !state ||
+        !postal_code ||
+        !country ||
+        !max_guests ||
+        bedrooms === undefined ||
+        bathrooms === undefined ||
+        beds === undefined ||
+        !price_per_night
+      ) {
+        return res.status(400).json({
+          error: "Missing required property information"
+        });
+      }
+
+      const result = await pool.query(
+        `UPDATE properties
+         SET
+           property_type = $1,
+           title = $2,
+           description = $3,
+           address_line_1 = $4,
+           address_line_2 = $5,
+           city = $6,
+           state = $7,
+           postal_code = $8,
+           country = $9,
+           max_guests = $10,
+           bedrooms = $11,
+           bathrooms = $12,
+           beds = $13,
+           pets_allowed = $14,
+           check_in_time = $15,
+           check_out_time = $16,
+           price_per_night = $17
+         WHERE id = $18
+         AND host_id = $19
+         RETURNING *`,
+        [
+          property_type,
+          title,
+          description,
+          address_line_1,
+          address_line_2 || null,
+          city,
+          state,
+          postal_code,
+          country,
+          max_guests,
+          bedrooms,
+          bathrooms,
+          beds,
+          pets_allowed ?? false,
+          check_in_time || null,
+          check_out_time || null,
+          price_per_night,
+          propertyId,
+          userId
+        ]
+      );
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          error: "Property not found or you do not own this property"
+        });
+      }
+      res.json(result.rows[0]);
+    } catch (error) {
+      console.error("Error updating property:", error);
+      res.status(500).json({
+        error: "Could not update property"
+      });
+    }
+  }
+);
+
+app.delete(
+  "/api/properties/:id",
+  requireLogin,
+  async (req, res) => {
+    try {
+      const propertyId = Number(req.params.id);
+      const userId = req.session.user.id;
+
+      const result = await pool.query(
+        `DELETE FROM properties
+         WHERE id = $1
+         AND host_id = $2
+         RETURNING id`,
+        [
+          propertyId,
+          userId
+        ]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          error:
+            "Property not found or you do not own this property"
+        });
+
+      }
+      res.json({
+        success: true
+      });
+
+    } catch (error) {
+      console.error(
+        "Error deleting property:",
+        error
+      );
+
+      res.status(500).json({
+        error: "Could not delete property"
+      });
+
+    }
+
+  }
 );
 
 app.listen(PORT, () => {
