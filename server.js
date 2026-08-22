@@ -512,6 +512,28 @@ app.post(
   },
 );
 
+app.get("/listing/:propertyId/book", async(req, res) => {
+
+  try {
+    const propertyId = Number(req.params.propertyId);
+
+    if (!Number.isInteger(propertyId) || propertyId <= 0) {
+      return res.status(400).json({"error": "Invalid property id"});
+    }
+
+    const property = await getPropertyById(propertyId);
+
+    if (!property) {
+      return res.status(404).json({"error": "Property not found"})
+    }
+
+    res.sendFile(path.join(__dirname, "public", "book.html"));
+  } catch (error) {
+    console.error("Error loading booking page:", error);
+    res.status(500).send("Could not load booking page");  
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

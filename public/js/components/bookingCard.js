@@ -8,7 +8,7 @@ export function createBookingCard(property, bookings, checkIn, checkOut, guestCo
         to: booking.end_date.split("T")[0]
     }))
 
-    const card = createElement("div", {
+    const card = createElement("form", {
         className: "booking-card"
     });
 
@@ -35,6 +35,10 @@ export function createBookingCard(property, bookings, checkIn, checkOut, guestCo
     const checkInBox = createElement("div", {
         className: "booking-date-box"
     });
+
+    checkInBox.addEventListener("click", () => {
+        checkInInput.focus();
+    })
 
     const checkInLabel = createElement("label", {
         className: "booking-label",
@@ -68,6 +72,10 @@ export function createBookingCard(property, bookings, checkIn, checkOut, guestCo
         placeholder: "Check out",
         readOnly: true
     });
+
+    checkOutBox.addEventListener("click", () => {
+        checkOutInput.focus();
+    })
 
     const checkOutCalendar = flatpickr(checkOutInput, {
         minDate: "today",
@@ -138,7 +146,68 @@ export function createBookingCard(property, bookings, checkIn, checkOut, guestCo
 
     const reserveButton = createElement("button", {
         className: "reserve-btn",
-        textContent: "Reserve"
+        textContent: "Reserve",
+        type: "submit"
+    });
+
+    function setError(errorText) {
+        bookingError.textContent = errorText;
+    }
+
+    function isValidDateRange() {
+        const checkInDate = checkInCalendar.selectedDates[0];
+        const checkOutDate = checkOutCalendar.selectedDates[0];
+        
+        if (!checkInDate) {
+            setError("Please input the Check In date");
+            return false;
+        } else if (!checkOutDate) {
+            setError("Please input the Check Out date");
+            return false;
+        }
+        else if (checkInInput.value > checkOutInput.value) {
+            setError("Check-in must be on or before check-out.")
+            return false;
+        }
+        return true;
+    }
+
+    function isValidGuests() {
+        const allGuestCounts = guestPicker.guestCounts
+
+        const hasMinorsOrPets = allGuestCounts.children > 0 || allGuestCounts.infants > 0 || allGuestCounts.pets > 0;
+        if (allGuestCounts.adults === 0) {
+            if (hasMinorsOrPets) {
+                setError("At least one adult must accompany children, infants, or pets.");
+                return false;
+            } else {
+                setError("Choose at least one adult guest.");
+                return false;
+            }
+        } 
+        return true;
+    }
+
+    
+
+    card.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        setError("");
+
+        if (!isValidDateRange()) {
+            return;
+        }
+
+        if (!isValidGuests()) {
+            return;
+        }
+
+        window.location.href = `/listing/${property.id}/book`;
+    })
+
+    const bookingError = createElement("p", {
+        className: "booking-error",
+        textContent: ""
     });
 
     const chargeText = createElement("p", {
@@ -150,6 +219,7 @@ export function createBookingCard(property, bookings, checkIn, checkOut, guestCo
         priceSection,
         dateSection,
         guestSection,
+        bookingError,
         reserveButton,
         chargeText
     );
