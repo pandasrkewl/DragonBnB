@@ -41,7 +41,8 @@ const bookingDetails = {
     subtotal,
     taxes,
     taxRate,
-    total
+    total,
+    propertyId
 };
 
 const header = createBookingHeader();

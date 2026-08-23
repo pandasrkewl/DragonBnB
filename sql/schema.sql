@@ -540,3 +540,13 @@ SELECT setval(
     'users_id_seq',
     (SELECT MAX(id) FROM users)
 );
+
+SELECT setval(
+    'properties_id_seq',
+    (SELECT MAX(id) FROM properties)
+);
+
+SELECT setval(
+  'bookings_id_seq',
+  (SELECT MAX(id) FROM bookings)
+);

@@ -429,6 +429,83 @@ app.post("/api/messages", requireLogin, async (req, res) => {
   }
 });
 
+app.post("/api/bookings", requireLogin, async (req, res) => {
+  try {
+    const {
+      propertyId,
+      startDate,
+      endDate,
+      totalPrice,
+      message
+    } = req.body;
+
+    const guestId = req.session.user.id;
+
+    if (!propertyId || !startDate || !endDate || totalPrice == null) {
+      return res.status(400).json({
+        error: "Missing booking information"
+      });
+    }
+
+    const property = await getPropertyById(propertyId);
+
+    if (!property) {
+      return res.status(404).json({
+        error: "Property not found"
+      });
+    }
+
+    const bookingResult = await pool.query(
+      `INSERT INTO bookings (
+        property_id,
+        user_id,
+        start_date,
+        end_date,
+        total_price,
+        status
+      )
+      VALUES ($1, $2, $3, $4, $5, 'pending')
+      RETURNING id`,
+      [
+        propertyId,
+        guestId,
+        startDate,
+        endDate,
+        totalPrice
+      ]
+    );
+
+    const bookingId = bookingResult.rows[0].id;
+
+    const conversationId = await createOrGetConversation(
+      property.host_id,
+      guestId,
+      propertyId
+    );
+
+    if (message && message.trim()) {
+      await sendMessage(
+        conversationId,
+        guestId,
+        message.trim()
+      );
+    }
+
+    res.status(201).json({
+      success: true,
+      bookingId,
+      conversationId
+    });
+
+  } catch (error) {
+    console.error("Error creating booking:", error);
+
+    res.status(500).json({
+      error: "Could not create booking"
+    });
+  }
+});
+
 app.post("/api/conversations", requireLogin, async (req, res) => {
   try {
     const { hostId, guestId, propertyId } = req.body;

@@ -73,21 +73,22 @@ export function createConfirmationSection(bookingDetails) {
     });
 
     confirmationPayNextButton.addEventListener("click", async () => {
-    try {
-        const response = await fetch("/api/me");
+        try {
+            const response = await fetch("/api/me");
+            const user = await response.json();
 
-        if (!response.ok) {
-        document.body.appendChild(createLoginModal());
-        return;
+            if (!user) {
+                document.body.appendChild(createLoginModal());
+                return;
+            }
+
+            confirmationPayContainer.classList.add("completed");
+            cardForm.classList.remove("collapsed");
+            cardForm.classList.add("open");
+
+        } catch (error) {
+            console.error("Error checking login:", error);
         }
-
-        confirmationPayContainer.classList.add("completed");
-        cardForm.classList.remove("collapsed");
-        cardForm.classList.add("open");
-
-    } catch (error) {
-        console.error("Error checking login:", error);
-    }
     });
 
     const confirmationPayNextContainerText = createElement("p", {
@@ -359,10 +360,41 @@ export function createConfirmationSection(bookingDetails) {
         textContent: "Request to book"
     });
 
-    confirmBookingButton.addEventListener("click", () => {
-        console.log("Booking requested");
+    confirmBookingButton.addEventListener("click", async () => {
+        console.log({propertyId: bookingDetails.propertyId,
+                    startDate: bookingDetails.checkIn,
+                    endDate: bookingDetails.checkOut,
+                    totalPrice: bookingDetails.total,
+                    message: messageHostTextarea.value.trim()})
 
-        
+        try {
+            const response = await fetch("/api/bookings", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    propertyId: bookingDetails.propertyId,
+                    startDate: bookingDetails.checkIn,
+                    endDate: bookingDetails.checkOut,
+                    totalPrice: bookingDetails.total,
+                    message: messageHostTextarea.value.trim()
+                })
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                console.error(result.error);
+                return;
+            }
+
+            window.location.href =
+                `/messages?conversationId=${result.conversationId}`;
+
+        } catch (error) {
+            console.error("Error requesting booking:", error);
+        }
     });
 
     messageHostNextButton.addEventListener("click", () => {
