@@ -2012,11 +2012,6 @@ button.profile-menu:hover{
   color: #ffc600;
 }
 
-
-/* =========================================================
-   PROFILE MODALS
-   ========================================================= */
-
 .profile-modal {
   position: relative;
 
@@ -2324,19 +2319,6 @@ button.profile-menu:hover{
   font-size: 16px;
 }
 
-.confirmation-container {
-  width: 37vw;
-}
-
-.confirmation-container-title {
-  font-size: 30px;
-}
-
-
-.blank-container {
-  width: 15vw;
-}
-
 .property-change-button-text, .confirmation-pay-next-container-text {
   font-size: 12px;
 }
@@ -2349,4 +2331,157 @@ button.profile-menu:hover{
 
 .auth-switch-link:hover {
   color: #004999;
+}
+
+.collapsed {
+    display: none;
+}
+
+.open {
+    display: block;
+}
+
+.confirmation-pay-completed-content {
+    display: none;
+}
+
+.confirmation-pay-container.completed .confirmation-pay-option,
+.confirmation-pay-container.completed .confirmation-pay-next-container {
+    display: none;
+}
+
+.confirmation-pay-container.completed .confirmation-pay-completed-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.payment-method-completed-content {
+    display: none;
+}
+
+.confirmation-step-container.completed .card-form {
+    display: none;
+}
+
+.confirmation-step-container.completed .payment-method-completed-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-form.open {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 22px;
+}
+
+.card-input {
+    width: 100%;
+    height: 52px;
+    box-sizing: border-box;
+    padding: 0 16px;
+
+    border: 1px solid #c7c7c7;
+    border-radius: 8px;
+
+    font-size: 16px;
+    font-family: inherit;
+
+    background: white;
+}
+
+.card-input:focus {
+    outline: none;
+    border: 2px solid #0b355f;
+}
+
+.card-details-row {
+    display: flex;
+    gap: 12px;
+}
+
+.card-details-row .card-input {
+    flex: 1;
+    min-width: 0;
+}
+
+.message-host-description {
+    margin: 0;
+    color: #666;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.message-host-content.open {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin-top: 20px;
+}
+
+.message-host-textarea {
+    width: 100%;
+    min-height: 120px;
+    box-sizing: border-box;
+    padding: 16px;
+    border: 1px solid #999;
+    border-radius: 10px;
+    font: inherit;
+    resize: vertical;
+}
+
+.message-host-completed-content {
+    display: none;
+}
+
+.confirmation-step-container.completed .message-host-completed-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.confirmation-step-container.completed .message-host-content {
+    display: none;
+}
+
+.message-host-summary {
+    margin: 0;
+    color: #555;
+}
+
+.review-reservation-content.open {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    margin-top: 24px;
+}
+
+.review-reservation-description {
+    margin: 0;
+    color: #666;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.request-booking-button {
+    width: 100%;
+    padding: 16px;
+
+    border: none;
+    border-radius: 8px;
+
+    background: #0b355f;
+    color: white;
+
+    font-size: 18px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+.request-booking-button:hover {
+    background: #082a4c;
 }
