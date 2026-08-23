@@ -2075,6 +2075,42 @@ button.profile-menu:hover{
   font-size: 14px;
 }
 
-#calendar-header{
-  text-align:left;
+#calendar-settings {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  margin: 24px 32px;
 }
+
+#calendar-settings select {
+  height: 42px;
+  padding: 0 36px 0 14px;
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+  background-color: white;
+  color: #222;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 20px;
+  cursor: pointer;
+  outline: none;
+}
+
+#calendar-settings select:hover {
+  border-color: #999;
+}
+
+#calendar-settings select:focus {
+  border-color: #07294d;
+  box-shadow: 0 0 0 2px rgba(7, 41, 77, 0.1);
+}
+
+#month-year-dropdown {
+  min-width: 12 0px;
+  border-radius: 5px;
+}
+
+#calendar-filter {
+  min-width: 100px;
+}
+
