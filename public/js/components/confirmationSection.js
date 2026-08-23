@@ -361,6 +361,8 @@ export function createConfirmationSection(bookingDetails) {
 
     confirmBookingButton.addEventListener("click", () => {
         console.log("Booking requested");
+
+        
     });
 
     messageHostNextButton.addEventListener("click", () => {
