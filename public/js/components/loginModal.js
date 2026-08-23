@@ -61,9 +61,54 @@ export function createLoginModal() {
 
   const modal = createModal("Log in", form);
 
-  signupLink.addEventListener("click", () => {
+  signupLink.addEventListener("click", (event) => {
+    event.preventDefault();
+
     modal.remove();
     document.body.appendChild(createSignupModal());
+  });
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    errorMessage.textContent = "";
+    errorMessage.classList.remove("visible");
+
+    submitButton.disabled = true;
+    submitButton.textContent = "Logging in...";
+
+    const formData = new FormData(form);
+
+    const data = {
+      email: formData.get("email"),
+      password: formData.get("password")
+    };
+
+    try {
+      const response = await fetch("/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Unable to log in.");
+      }
+
+      modal.remove();
+      window.location.reload();
+
+    } catch (error) {
+      errorMessage.textContent = error.message;
+      errorMessage.classList.add("visible");
+
+      submitButton.disabled = false;
+      submitButton.textContent = "Log in";
+    }
   });
 
   return modal;
