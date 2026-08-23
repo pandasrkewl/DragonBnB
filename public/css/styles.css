@@ -2136,6 +2136,7 @@ button.profile-menu:hover{
 .property-container {
   width: 32vw;
   padding-left: 55px;
+  margin-top: 55px;
 }
 
 .blank-container {
@@ -2331,9 +2332,6 @@ button.profile-menu:hover{
   font-size: 30px;
 }
 
-.property-container {
-  width: 32vw;
-}
 
 .blank-container {
   width: 15vw;
@@ -2341,4 +2339,14 @@ button.profile-menu:hover{
 
 .property-change-button-text, .confirmation-pay-next-container-text {
   font-size: 12px;
+}
+
+.auth-switch-link {
+  color: #0066cc;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.auth-switch-link:hover {
+  color: #004999;
 }

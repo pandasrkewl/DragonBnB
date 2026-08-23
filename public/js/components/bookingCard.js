@@ -95,8 +95,10 @@ export function createBookingCard(property, bookings, checkIn, checkOut, guestCo
                 return;
             }
 
-            checkOutCalendar.set("minDate", checkInDate);
-            
+            const minimumCheckOut = new Date(checkInDate);
+            minimumCheckOut.setDate(minimumCheckOut.getDate() + 1);
+            checkOutCalendar.set("minDate", minimumCheckOut);   
+
             const nextBooking = bookings.map(booking => new Date(booking.start_date)).filter(startDate => startDate > checkInDate).sort((a,b) => a-b)[0];
 
             if (nextBooking) {
@@ -108,6 +110,17 @@ export function createBookingCard(property, bookings, checkIn, checkOut, guestCo
             checkOutCalendar.clear();
         }
     });
+
+    if (checkInCalendar.selectedDates[0]) {
+        const initialCheckInDate = checkInCalendar.selectedDates[0];
+        const minimumCheckOut = new Date(initialCheckInDate);
+        minimumCheckOut.setDate(minimumCheckOut.getDate() + 1);
+        checkOutCalendar.set("minDate", minimumCheckOut);
+
+        if (checkOutCalendar.selectedDates[0] && checkOutCalendar.selectedDates[0] < minimumCheckOut) {
+            checkOutCalendar.clear();
+        }
+    }
 
     checkOutBox.append(
         checkOutLabel,
@@ -164,9 +177,8 @@ export function createBookingCard(property, bookings, checkIn, checkOut, guestCo
         } else if (!checkOutDate) {
             setError("Please input the Check Out date");
             return false;
-        }
-        else if (checkInInput.value > checkOutInput.value) {
-            setError("Check-in must be on or before check-out.")
+        } else if (checkInInput.value >= checkOutInput.value) {
+            setError("Check-out must be after check-in.");
             return false;
         }
         return true;
@@ -188,7 +200,6 @@ export function createBookingCard(property, bookings, checkIn, checkOut, guestCo
         return true;
     }
 
-    
 
     card.addEventListener("submit", async (event) => {
         event.preventDefault();
@@ -202,7 +213,21 @@ export function createBookingCard(property, bookings, checkIn, checkOut, guestCo
             return;
         }
 
-        window.location.href = `/listing/${property.id}/book`;
+    const checkInDate = checkInCalendar.selectedDates[0];
+
+    const checkOutDate = checkOutCalendar.selectedDates[0];
+
+    const guests = guestPicker.guestCounts;
+
+    const params = new URLSearchParams({
+        checkIn: checkInDate.toISOString().split("T")[0],
+        checkOut: checkOutDate.toISOString().split("T")[0],
+        adults: guests.adults,
+        children: guests.children,
+        infants: guests.infants,
+        pets: guests.pets
+    });
+        window.location.href = `/listing/${property.id}/book?${params.toString()}`;
     })
 
     const bookingError = createElement("p", {
