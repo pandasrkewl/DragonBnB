@@ -115,7 +115,7 @@ app.post("/login", async (req, res) => {
 
     const normalizedEmail = email.trim().toLowerCase();
     const result = await pool.query(
-      `SELECT id, first_name, last_name, email, password_hash, host
+      `SELECT id, first_name, last_name, email, password_hash, host, image_url
        FROM users
        WHERE email = $1`,
       [normalizedEmail]
@@ -142,7 +142,8 @@ app.post("/login", async (req, res) => {
       first_name: user.first_name,
       last_name: user.last_name,
       email: user.email,
-      host: user.host
+      host: user.host,
+      image_url: user.image_url
     };
     
     req.session.save((err) => {

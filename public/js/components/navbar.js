@@ -217,6 +217,9 @@ function createLoginModal() {
   return modal;
 }
 
+const response = await fetch("/api/me");
+const user = await response.json();
+
 export function createNavbar({
   userMode = "guest",
   isRegisteredHost = false,
@@ -654,6 +657,12 @@ export function createNavbar({
     className: "link-property",
     textContent: toggleModeText,
   });
+
+  if(user) {
+    profilePic = user.image_url;
+    console.log(user);
+    console.log(`User Image Url: ${profilePic}`)
+  }
 
   const profileButton = createElement(
     "button",
