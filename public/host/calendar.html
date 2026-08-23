@@ -15,8 +15,41 @@
     </header>
 
     <main>
-        <select id="month-year-dropdown">
-        </select>
+        <section class="host-calendar" aria-labelledby="calendar-title">
+            <div class="calendar-intro">
+                <div>
+                    <p class="eyebrow">Hosting calendar</p>
+                    <h1 id="calendar-title">Availability</h1>
+                    <p class="page-description">Keep your stays, prices, and open nights in view.</p>
+                </div>
+                <div class="calendar-controls" aria-label="Calendar controls">
+                    <div class="calendar-view-toggle" role="group" aria-label="Choose calendar picker">
+                        <button class="calendar-view-button is-active" type="button" data-view="month" aria-pressed="true">Month</button>
+                        <button class="calendar-view-button" type="button" data-view="year" aria-pressed="false">Year</button>
+                    </div>
+                    <label class="calendar-picker-label" for="month-year-dropdown">Show</label>
+                    <select id="month-year-dropdown" aria-label="Choose calendar month or year"></select>
+                </div>
+            </div>
+
+            <div class="calendar-summary">
+                <div>
+                    <p class="calendar-kicker">Your calendar</p>
+                    <h2 id="calendar-header"></h2>
+                </div>
+                <div class="calendar-legend" aria-label="Calendar legend">
+                    <span><i class="legend-dot legend-dot-open"></i>Available</span>
+                    <span><i class="legend-dot legend-dot-booked"></i>Booked</span>
+                </div>
+            </div>
+
+            <div class="calendar-table-wrap">
+                <div class="calendar-weekdays" aria-hidden="true">
+                    <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+                </div>
+                <div id="calendar-grid" class="calendar-grid" role="grid" aria-label="Availability calendar"></div>
+            </div>
+        </section>
 
     </main>
 
