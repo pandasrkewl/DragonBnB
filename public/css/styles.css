@@ -2074,3 +2074,7 @@ button.profile-menu:hover{
 
   font-size: 14px;
 }
+
+#calendar-header{
+  text-align:left;
+}

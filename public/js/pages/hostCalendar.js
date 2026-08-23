@@ -1,5 +1,6 @@
 import { createNavbar } from "../components/navbar.js";
 import { 
+  format,
   getMonth,
   getYear,
   startOfToday 
@@ -19,6 +20,13 @@ navBarContainer.appendChild(navElement);
 let date = startOfToday();
 let month = getMonth(date);
 let year = getYear(date);
-console.log(date);
-console.log(month);
-console.log(year);
+
+let calendarHeader = document.getElementById("calendar-header");
+calendarHeader.textContent = format(date, "MMMM");
+
+const monthDropdown = document.getElementById("month-dropdown");
+
+monthDropdown.addEventListener("change", (event) => {
+    const month = Number(event.target.value);
+    console.log(month);
+});
