@@ -28,12 +28,8 @@
                 </div>
 
                 <div id="calendar-settings">
-                    <select id="month-year-dropdown"></select>
-
-                    <select id="calendar-filter">
-                        <option value="month">Month</option>
-                        <option value="year">Year</option>
-                    </select>
+                    <select id="month-dropdown" aria-label="Select month"></select>
+                    <select id="year-dropdown" aria-label="Select year"></select>
                 </div>
 
                 <div id="calendar">
@@ -68,6 +64,7 @@
                 </div>
 
                 <div id="availability-toggle" class="availability-toggle-container"></div>
+                <button id="availability-save-button" class="availability-save-button" type="button" disabled>Save availability</button>
             </div>
 
         </div>

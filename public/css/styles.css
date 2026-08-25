@@ -2164,12 +2164,12 @@ button.profile-menu:hover{
   box-shadow: 0 0 0 2px rgba(7, 41, 77, 0.1);
 }
 
-#month-year-dropdown {
+#month-dropdown {
   min-width: 120px;
   border-radius: 5px;
 }
 
-#calendar-filter {
+#year-dropdown {
   min-width: 100px;
 }
 
@@ -2341,6 +2341,21 @@ button.profile-menu:hover{
 }
 
 .availability-confirm:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.availability-save-button {
+  margin-top: 10px;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: #07294d;
+  color: white;
+  cursor: pointer;
+}
+
+.availability-save-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }

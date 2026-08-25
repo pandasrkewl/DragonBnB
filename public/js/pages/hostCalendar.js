@@ -75,7 +75,6 @@ const monthIndexToName = {
 
 // Variables
 
-let monthOrYearFilter = "month";
 let timePeriodsSelected = false;
 let selectedDayAvailability = [];
 let selectedDayKeys = [];
@@ -86,10 +85,11 @@ let pendingAvailabilityAction = null;
 
 // Selecting a month (if filter is "month") or a year (if filter is "year") to show
 
-const monthYearDropdown = document.getElementById("month-year-dropdown");
+const monthDropdown = document.getElementById("month-dropdown");
+const yearDropdown = document.getElementById("year-dropdown");
 
 function setMonthDropdown() {
-  monthYearDropdown.innerHTML = "";
+  monthDropdown.innerHTML = "";
 
   for (const [index, name] of Object.entries(monthIndexToName)) {
     const option = document.createElement("option");
@@ -97,53 +97,36 @@ function setMonthDropdown() {
     option.value = index;
     option.textContent = name;
 
-    monthYearDropdown.appendChild(option);
+    monthDropdown.appendChild(option);
   }
 
-  monthYearDropdown.value = month;
+  monthDropdown.value = month;
 }
 function setYearDropdown() {
-  monthYearDropdown.innerHTML = "";
+  yearDropdown.innerHTML = "";
 
-  for (const yearOption of [year-1, year, year+1]) {
+  for (const yearOption of [year - 1, year, year + 1]) {
     const option = document.createElement("option");
 
     option.value = yearOption;
     option.textContent = yearOption;
 
-    monthYearDropdown.appendChild(option);
+    yearDropdown.appendChild(option);
   }
 
-  monthYearDropdown.value = year;
+  yearDropdown.value = year;
 }
 
-// Choosing to display a month at a tim or the year at a time
+setMonthDropdown();
+setYearDropdown();
 
-const chooseMonthOrYear = document.getElementById("calendar-filter");
-
-chooseMonthOrYear.addEventListener("change", (event) => {
-  monthOrYearFilter = event.target.value;
-
-
-  if (monthOrYearFilter === "month") {
-    setMonthDropdown();
-  } else if (monthOrYearFilter === "year") {
-    setYearDropdown();
-  }
+monthDropdown.addEventListener("change", (event) => {
+  updateCalendarByMonth(Number(event.target.value));
 });
 
-setMonthDropdown();
-chooseMonthOrYear.value = "month";
-
-monthYearDropdown.addEventListener("change", (event) => {
-  const selection = Number(event.target.value);
-
-  if (monthOrYearFilter === "month") {
-    updateCalendarByMonth(selection);
-  } else {
-    year = selection;
-    updateCalendarByMonth(month);
-  }
+yearDropdown.addEventListener("change", (event) => {
+  year = Number(event.target.value);
+  updateCalendarByMonth(month);
 });
 
 // Pricing Settings
@@ -217,6 +200,7 @@ async function getPropertyImages() {
 
 let properties = await getPropertyImages();
 let bookingsByProperty = new Map();
+let blockingsByProperty = new Map();
 
 async function setPropertySelector(propertyIndex) {
   if (propertySelector.children.length !== 0) {
@@ -237,8 +221,26 @@ async function setPropertySelector(propertyIndex) {
     selectedDayKeys = [];
     selectedDayAvailability = [];
     pendingAvailabilityAction = null;
-    await loadPropertyBookings(property.property_id);
+    await Promise.all([
+      loadPropertyBookings(property.property_id),
+      loadPropertyBlockings(property.property_id),
+    ]);
     updateCalendarByMonth(month);
+  }
+}
+
+async function loadPropertyBlockings(propertyId) {
+  try {
+    const response = await fetch(`/api/properties/${propertyId}/blockings`);
+    if (!response.ok) {
+      throw new Error(`Could not load blockings: ${response.status}`);
+    }
+
+    const blockings = await response.json();
+    blockingsByProperty.set(propertyId, Array.isArray(blockings) ? blockings : []);
+  } catch (error) {
+    console.error("Error loading property blockings:", error);
+    blockingsByProperty.set(propertyId, []);
   }
 }
 
@@ -291,11 +293,17 @@ pricePerNight.addEventListener("input", () => {
 
 const availabilitySettings = document.getElementById("availability-settings");
 const availabilityToggle = document.getElementById("availability-toggle");
+const availabilitySaveButton = document.getElementById("availability-save-button");
+
+function setAvailabilitySaveState(enabled) {
+  availabilitySaveButton.disabled = !enabled;
+}
 
 function updateAvailabilitySettings() {
   availabilityToggle.replaceChildren();
 
   timePeriodsSelected = selectedDayAvailability.length > 0;
+  setAvailabilitySaveState(timePeriodsSelected);
   if (!timePeriodsSelected) {
     return;
   }
@@ -387,6 +395,39 @@ function updateAvailabilitySettings() {
 
 updateAvailabilitySettings();
 
+availabilitySaveButton.addEventListener("click", async () => {
+  const propertyId = properties[selectedPropertyIndex]?.property_id;
+  const dates = selectedDayKeys.map((dayKey) => ({
+    date: dayKey.slice(String(propertyId).length + 1),
+    available: availabilityByDate.get(dayKey) !== false,
+  }));
+
+  if (!propertyId || dates.length === 0) {
+    return;
+  }
+
+  setAvailabilitySaveState(false);
+  try {
+    const response = await fetch(`/api/host/properties/${propertyId}/blockings`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ dates }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.error || "Could not save availability");
+    }
+
+    await loadPropertyBlockings(propertyId);
+    updateCalendarDayStyles();
+  } catch (error) {
+    console.error("Error saving property availability:", error);
+    setAvailabilitySaveState(true);
+    alert(error.message);
+  }
+});
+
 // Calendar
 
 function updateCalendarByMonth(monthIndex) {
@@ -400,6 +441,7 @@ function updateCalendarByMonth(monthIndex) {
   selectedDayKeys = [];
   selectedDayAvailability = [];
   pendingAvailabilityAction = null;
+  setAvailabilitySaveState(false);
   updateAvailabilitySettings();
   tbody.replaceChildren();
 
@@ -426,8 +468,12 @@ function updateCalendarByMonth(monthIndex) {
     const calendarDate = new Date(year, month, day);
     const isPastDate = calendarDate < startOfToday();
     const isBookedDate = isDateBooked(day);
+    const isBlockedDate = isDateBlocked(day);
 
     dayCell.dataset.dateKey = dayKey;
+    if (isBlockedDate && !availabilityByDate.has(dayKey)) {
+      availabilityByDate.set(dayKey, false);
+    }
     dayCell.classList.add(availabilityByDate.get(dayKey) === false ? "blocked" : "available");
 
     if (isBookedDate) {
@@ -465,9 +511,21 @@ function isDateBooked(day) {
   const dateKey = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
   const bookings = bookingsByProperty.get(propertyId) || [];
 
-  return bookings.some((booking) => {
-    const startDate = String(booking.start_date).slice(0, 10);
-    const endDate = String(booking.end_date).slice(0, 10);
+  return bookings.some((period) => {
+    const startDate = String(period.start_date).slice(0, 10);
+    const endDate = String(period.end_date).slice(0, 10);
+    return dateKey >= startDate && dateKey < endDate;
+  });
+}
+
+function isDateBlocked(day) {
+  const propertyId = properties[selectedPropertyIndex]?.property_id;
+  const dateKey = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+  const blockings = blockingsByProperty.get(propertyId) || [];
+
+  return blockings.some((blocking) => {
+    const startDate = String(blocking.start_date).slice(0, 10);
+    const endDate = String(blocking.end_date).slice(0, 10);
     return dateKey >= startDate && dateKey < endDate;
   });
 }

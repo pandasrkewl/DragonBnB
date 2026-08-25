@@ -9,6 +9,8 @@ const {
   getPropertyAmenities,
   getPropertyReviews,
   getPropertyBookings,
+  getPropertyBlockings,
+  replacePropertyBlockings,
   getUserConversations,
   getConversationById,
   getConversationMessages,
@@ -323,6 +325,54 @@ app.get("/api/properties/:id/bookings", async(req, res) => {
     res.status(500).json({
       error: "Could not get bookings"
     });
+  }
+});
+
+app.get("/api/properties/:id/blockings", async (req, res) => {
+  try {
+    const listingId = Number(req.params.id);
+
+    if (!Number.isInteger(listingId) || listingId <= 0) {
+      return res.status(400).json({ error: "Invalid property id" });
+    }
+
+    const blockings = await getPropertyBlockings(listingId);
+    res.json(blockings);
+  } catch (error) {
+    console.log("Error: getting blockings", error);
+    res.status(500).json({ error: "Could not get blockings" });
+  }
+});
+
+app.put("/api/host/properties/:propertyId/blockings", requireLogin, async (req, res) => {
+  try {
+    const propertyId = Number(req.params.propertyId);
+    const { dates } = req.body;
+
+    if (!Number.isInteger(propertyId) || propertyId <= 0 || !Array.isArray(dates) || dates.length === 0) {
+      return res.status(400).json({ error: "A property id and selected dates are required" });
+    }
+
+    const validDates = dates.every((entry) =>
+      entry && /^\d{4}-\d{2}-\d{2}$/.test(entry.date) && typeof entry.available === "boolean",
+    );
+    if (!validDates) {
+      return res.status(400).json({ error: "Invalid availability dates" });
+    }
+
+    const saved = await replacePropertyBlockings(
+      propertyId,
+      req.session.user.id,
+      dates,
+    );
+    if (!saved) {
+      return res.status(404).json({ error: "Property not found" });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error updating property blockings:", error);
+    res.status(500).json({ error: "Could not update property availability" });
   }
 });
 

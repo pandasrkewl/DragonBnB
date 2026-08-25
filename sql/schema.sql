@@ -485,7 +485,7 @@ INSERT INTO "blockings" ("property_id", "start_date", "end_date", "reason")
 VALUES
     (1, '2026-04-20', '2026-04-23', 'Personal use'),
     (1, '2026-07-01', '2026-07-05', 'Maintenance'),
-    (1, '2026-09-15', '2026-09-19', 'Personal use');
+    (4, '2026-09-15', '2026-09-19', 'Personal use');
 
 INSERT INTO "reviews" ("id", "rating", "comment", "created_at", "user_id", "property_id", "booking_id")
 VALUES
