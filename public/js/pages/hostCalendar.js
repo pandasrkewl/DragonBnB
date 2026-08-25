@@ -51,12 +51,12 @@ console.log(user);
 
 // Constants
 
-let date = startOfToday();
-let month = getMonth(date);
-let year = getYear(date);
-let weekday = getDay(date);
-let startDay = getDate(startOfMonth(date));
-let endDay = getDate(endOfMonth(date));
+let today = startOfToday();
+let month = getMonth(today);
+let year = getYear(today);
+let weekday = getDay(today);
+let startDay = getDate(startOfMonth(today));
+let endDay = getDate(endOfMonth(today));
 
 const monthIndexToName = {
   0: "January",
@@ -77,6 +77,8 @@ const monthIndexToName = {
 
 let monthOrYearFilter = "month";
 let timePeriodsSelected = false;
+let selectedDayAvailability = [];
+let pendingAvailabilityAction = null;
 
 // Components
 
@@ -259,16 +261,111 @@ pricePerNight.addEventListener("input", () => {
 // New booking price
 
 const availabilitySettings = document.getElementById("availability-settings");
+const availabilityToggle = document.getElementById("availability-toggle");
 
 function updateAvailabilitySettings() {
-  availabilitySettings.innerHTML = "";
+  availabilityToggle.replaceChildren();
 
-  if(timePeriodsSelected) {
-    return;
-  } else {
+  timePeriodsSelected = selectedDayAvailability.length > 0;
+  if (!timePeriodsSelected) {
     return;
   }
+
+  const availableDays = selectedDayAvailability.filter(Boolean).length;
+  const blockedDays = selectedDayAvailability.length - availableDays;
+
+  if (blockedDays === 0 || availableDays === 0) {
+    const isAvailable = availableDays > 0;
+    const toggleLabel = createElement("label", {
+      className: "availability-toggle-label",
+    });
+    const toggle = createElement("input", {
+      className: "availability-toggle-input",
+      type: "checkbox",
+    });
+    const toggleTrack = createElement("span", {
+      className: "availability-toggle-track",
+    });
+    const status = createElement("span", {
+      className: "availability-status",
+      textContent: isAvailable ? "Available" : "Unavailable",
+    });
+
+    toggle.checked = isAvailable;
+    toggle.addEventListener("change", () => {
+      selectedDayAvailability = selectedDayAvailability.map(() => toggle.checked);
+      updateAvailabilitySettings();
+    });
+
+    toggleLabel.append(toggle, toggleTrack, status);
+    availabilityToggle.appendChild(toggleLabel);
+    return;
+  }
+
+  const mixedSummary = createElement("p", {
+    className: "availability-mixed-summary",
+    textContent: `${availableDays} available, ${blockedDays} blocked`,
+  });
+  const actionContainer = createElement("div", {
+    className: "availability-actions",
+  });
+
+  [
+    ["block", "Block all days"],
+    ["open", "Open all days"],
+  ].forEach(([action, text]) => {
+    const actionButton = createElement("button", {
+      className: pendingAvailabilityAction === action
+        ? "availability-action selected"
+        : "availability-action",
+      textContent: text,
+      type: "button",
+    });
+    actionButton.addEventListener("click", () => {
+      pendingAvailabilityAction = action;
+      updateAvailabilitySettings();
+    });
+    actionContainer.appendChild(actionButton);
+  });
+
+  const confirmButton = createElement("button", {
+    className: "availability-confirm",
+    textContent: "Confirm",
+    type: "button",
+  });
+  confirmButton.disabled = pendingAvailabilityAction === null;
+  confirmButton.addEventListener("click", () => {
+    if (!pendingAvailabilityAction) {
+      return;
+    }
+
+    const makeAvailable = pendingAvailabilityAction === "open";
+    selectedDayAvailability = selectedDayAvailability.map(() => makeAvailable);
+    pendingAvailabilityAction = null;
+    updateAvailabilitySettings();
+  });
+
+  availabilityToggle.append(mixedSummary, actionContainer, confirmButton);
 }
 
+updateAvailabilitySettings();
+
 // Calendar
+
+let tbody = document.getElementById("calendar-rows");
+
+function updateCalendarByMonth(monthIndex) {
+  date = new Date(year, monthIndex, 1);
+  month = getMonth(date);
+  year = getYear(date);
+  weekday = getDay(date);
+  startDay = getDate(startOfMonth(date));
+  endDay = getDate(endOfMonth(date));
+
+  tbody.innerHTML = "";
+
+  for(let i = 0; i < weekday; i++) {
+    
+  }
+}
 
