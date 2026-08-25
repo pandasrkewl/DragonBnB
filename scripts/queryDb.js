@@ -544,6 +544,136 @@ async function deleteConversation(conversationId) {
   return result.rows.length > 0;
 }
 
+async function createProperty(property) {
+  const result = await pool.query(
+    `INSERT INTO properties (
+      host_id,
+      title,
+      description,
+      address_line_1,
+      address_line_2,
+      city,
+      state,
+      postal_code,
+      country,
+      max_guests,
+      bedrooms,
+      bathrooms,
+      beds,
+      price_per_night,
+      property_type,
+      pets_allowed,
+      check_in_time,
+      check_out_time
+    )
+    VALUES (
+      $1, $2, $3, $4, $5,
+      $6, $7, $8, $9, $10,
+      $11, $12, $13, $14, $15,
+      $16, $17, $18
+    )
+    RETURNING *`,
+    [
+      property.host_id,
+      property.title,
+      property.description,
+      property.address_line_1,
+      property.address_line_2 || null,
+      property.city,
+      property.state,
+      property.postal_code,
+      property.country,
+      property.max_guests,
+      property.bedrooms,
+      property.bathrooms,
+      property.beds,
+      property.price_per_night,
+      property.property_type,
+      property.pets_allowed ?? false,
+      property.check_in_time || null,
+      property.check_out_time || null
+    ]
+  );
+  return result.rows[0];
+}
+
+async function addPropertyAmenities(propertyId, amenityNames) {
+  for (const name of amenityNames) {
+    const amenityResult = await pool.query(
+      `SELECT id
+       FROM amenities
+       WHERE name = $1`,
+      [name]
+    );
+
+    if (amenityResult.rows.length === 0) {
+      continue;
+    }
+
+    const amenityId = amenityResult.rows[0].id;
+
+    await pool.query(
+      `INSERT INTO property_amenities (
+        property_id,
+        amenity_id
+      )
+      VALUES ($1, $2)
+      ON CONFLICT DO NOTHING`,
+      [
+        propertyId,
+        amenityId
+      ]
+    );
+  }
+}
+
+async function getHostProperties(hostId) {
+  const result = await pool.query(
+    `SELECT
+        p.id,
+        p.title,
+        p.city,
+        p.state,
+        p.price_per_night,
+        p.property_type,
+        COALESCE(
+          (
+            SELECT pi.image_url
+            FROM property_images pi
+            WHERE pi.property_id = p.id
+            ORDER BY pi.display_order ASC
+            LIMIT 1
+          ),
+          '/assets/placeholders/default_home.jpg'
+        ) AS image_url
+     FROM properties p
+     WHERE p.host_id = $1
+     ORDER BY p.created_at DESC`,
+    [hostId]
+  );
+
+  return result.rows;
+}
+
+async function addPropertyImage(propertyId, imageUrl, displayOrder) {
+  const result = await pool.query(
+    `INSERT INTO property_images (
+      property_id,
+      image_url,
+      display_order
+    )
+    VALUES ($1, $2, $3)
+    RETURNING *`,
+    [
+      propertyId,
+      imageUrl,
+      displayOrder
+    ]
+  );
+
+  return result.rows[0];
+}
+
 module.exports = {
   getUser,
   getProperties,
@@ -553,6 +683,10 @@ module.exports = {
   getPropertyAmenities,
   getPropertyReviews,
   getPropertyBookings,
+  createProperty,
+  getHostProperties,
+  addPropertyAmenities,
+  addPropertyImage,
   getBookingsForToday,
   getBookingsUpcoming,
   getUserConversations,
