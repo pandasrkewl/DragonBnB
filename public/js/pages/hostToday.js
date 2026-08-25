@@ -189,6 +189,7 @@ async function renderBookings(view) {
 
     const cardImg = createElement("img", {
       src: imgUrl,
+      className: "big-avatar"
     });
 
     const content = createElement("div", {

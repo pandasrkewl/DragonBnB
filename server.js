@@ -1,6 +1,8 @@
 const path = require("path");
 const express = require("express");
 const multer = require("multer");
+const http = require("http");
+const { Server } = require("socket.io");
 const {
   getProperties,
   getPropertyCities,
@@ -22,7 +24,7 @@ const {
   getUnreadMessageCount,
   getUnreadCountForConversation,
   getBookingsForToday,
-  getBookingsUpcoming
+  getBookingsUpcoming,
 } = require("./scripts/queryDb");
 const session = require("express-session");
 const bcrypt = require("bcrypt");
@@ -48,6 +50,26 @@ const upload = multer({ storage });
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+const server = http.createServer(app);
+const io = new Server(server);
+
+io.on("connection", (socket) => {
+  console.log("A user connected:", socket.id);
+
+  socket.on("joinRoom", (conversationId) => {
+    socket.join(conversationId);
+    console.log(`Socket ${socket.id} joined conversation ${conversationId}`);
+  });
+
+  socket.on("sendMessage", (messageData) => {
+    socket.to(messageData.conversation_id).emit("receiveMessage", messageData);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("A user disconnected:", socket.id);
+  });
+});
 
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
@@ -76,9 +98,9 @@ app.use(
       maxAge: 1000 * 60 * 60 * 24,
       httpOnly: true,
       secure: false,
-      sameSite: "lax"
-    }
-  })
+      sameSite: "lax",
+    },
+  }),
 );
 
 app.post("/signup", async (req, res) => {
@@ -92,7 +114,7 @@ app.post("/signup", async (req, res) => {
 
     if (existingUser.rows.length > 0) {
       return res.status(400).json({
-        error: "Email already exists."
+        error: "Email already exists.",
       });
     }
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -113,12 +135,12 @@ app.post("/signup", async (req, res) => {
     req.session.user = result.rows[0];
     res.json({
       success: true,
-      user: result.rows[0]
+      user: result.rows[0],
     });
   } catch (err) {
     console.error(err);
     res.status(500).json({
-      error: "Internal server error."
+      error: "Internal server error.",
     });
   }
 });
@@ -128,32 +150,29 @@ app.post("/login", async (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) {
       return res.status(400).json({
-        error: "Email and password are required."
+        error: "Email and password are required.",
       });
     }
 
     const normalizedEmail = email.trim().toLowerCase();
     const result = await pool.query(
-      `SELECT id, first_name, last_name, email, password_hash, host
+      `SELECT id, first_name, last_name, email, password_hash, host, image_url
        FROM users
        WHERE email = $1`,
-      [normalizedEmail]
+      [normalizedEmail],
     );
 
     if (result.rows.length === 0) {
       return res.status(401).json({
-        error: "Invalid email or password."
+        error: "Invalid email or password.",
       });
     }
 
     const user = result.rows[0];
-    const passwordMatches = await bcrypt.compare(
-      password,
-      user.password_hash
-    );
+    const passwordMatches = await bcrypt.compare(password, user.password_hash);
     if (!passwordMatches) {
       return res.status(401).json({
-        error: "Invalid email or password."
+        error: "Invalid email or password.",
       });
     }
     req.session.user = {
@@ -161,26 +180,27 @@ app.post("/login", async (req, res) => {
       first_name: user.first_name,
       last_name: user.last_name,
       email: user.email,
-      host: user.host
+      host: user.host,
+      image_url: user.image_url
     };
-    
+
     req.session.save((err) => {
       if (err) {
         console.error("Session save error:", err);
         return res.status(500).json({
-          error: "Could not save session."
+          error: "Could not save session.",
         });
       }
-    
+
       res.json({
         success: true,
-        user: req.session.user
+        user: req.session.user,
       });
     });
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).json({
-      error: "Internal server error."
+      error: "Internal server error.",
     });
   }
 });
@@ -302,13 +322,13 @@ app.get("/api/properties/:id/reviews", async (req, res) => {
   }
 });
 
-app.get("/api/properties/:id/bookings", async(req, res) => {
+app.get("/api/properties/:id/bookings", async (req, res) => {
   try {
     const listingId = Number(req.params.id);
 
     if (!Number.isInteger(listingId) || listingId <= 0) {
       return res.status(400).json({
-        error: "Invalid property id"
+        error: "Invalid property id",
       });
     }
 
@@ -318,7 +338,7 @@ app.get("/api/properties/:id/bookings", async(req, res) => {
   } catch (error) {
     console.log("Error: getting bookings", error);
     res.status(500).json({
-      error: "Could not get bookings"
+      error: "Could not get bookings",
     });
   }
 });
@@ -872,8 +892,8 @@ app.delete(
   }
 );
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+server.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT} with Socket.io`);
 });
 
 app.get("/api/me", (req, res) => {
@@ -931,14 +951,14 @@ app.get("/logout", (req, res) => {
     if (err) {
       console.error("Logout error:", err);
       return res.status(500).json({
-        error: "Could not log out."
+        error: "Could not log out.",
       });
     }
 
     res.clearCookie("connect.sid", {
       httpOnly: true,
       sameSite: "lax",
-      secure: false
+      secure: false,
     });
 
     res.redirect("/");
