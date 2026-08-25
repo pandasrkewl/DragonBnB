@@ -59,25 +59,58 @@ export function createActiveThread(
     [chatColumn],
   );
 
-  if (currentUser.host) {
-    const reservationPanel = createReservationPanel(conversation, (status) => {
-      const checkInStrMsg = conversation.check_in_date
-        ? new Date(conversation.check_in_date).toLocaleDateString()
-        : "N/A";
-      const checkOutStrMsg = conversation.check_out_date
-        ? new Date(conversation.check_out_date).toLocaleDateString()
-        : "N/A";
+  if (currentUser.host && conversation.booking_status === "pending") {
+    const reservationPanel = createReservationPanel(
+      conversation,
+      async (status) => {
+        try {
+          const backendStatus =
+            status === "accepted"
+              ? "confirmed"
+              : "rejected";
 
-      const autoMessage = JSON.stringify({
-        type: "reservation_action",
-        status: status,
-        property: conversation.property_title,
-        dates: `${checkInStrMsg} - ${checkOutStrMsg} • ${conversation.guests || 1} guests`,
-        image: conversation.property_image,
-      });
-      onSubmitMessage(autoMessage, messagesArea);
-    });
+          const response = await fetch(
+            `/api/bookings/${conversation.booking_id}/status`,
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                status: backendStatus
+              })
+            }
+          );
 
+          const result = await response.json();
+
+          if (!response.ok) {
+            console.error(result.error);
+            return;
+          }
+
+          reservationPanel.classList.add("hidden");
+
+          if (result.message) {
+            messagesArea.appendChild(
+              createMessageBubble(
+                result.message,
+                currentUser.id
+              )
+            );
+
+            messagesArea.scrollTop =
+              messagesArea.scrollHeight;
+          }
+
+        } catch (error) {
+          console.error(
+            "Error updating reservation:",
+            error
+          );
+        }
+      }
+    );
     reservationPanel.classList.add("hidden");
     threadBody.appendChild(reservationPanel);
   }
@@ -110,7 +143,7 @@ function createReservationPanel(conversation, onAction) {
     createElement("p", { textContent: `Check-in: ${checkInStr}` }),
     createElement("p", { textContent: `Checkout: ${checkOutStr}` }),
     createElement("p", {
-      textContent: `Total: $${conversation.cost || "0.00"}`,
+textContent: `Total: $${Number(conversation.total_price || 0).toFixed(2)}`,
     }),
   ]);
 

@@ -95,7 +95,7 @@ export function createThreadHeader(
 
   const headerChildren = [headerInfo];
 
-  if (isHost) {
+  if (isHost && conversation.booking_status === "pending") {
     const rightBtn = createElement("button", {
       className: "show-reservation-btn",
       textContent: "Show reservation",

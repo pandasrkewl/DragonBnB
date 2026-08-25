@@ -2545,3 +2545,8 @@ button.profile-menu:hover{
   background: #222;
   color: white;
 }
+
+.reservation-status-rejected {
+  color: #d93025;
+  font-weight: 700;
+}
