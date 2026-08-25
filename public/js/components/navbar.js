@@ -217,16 +217,19 @@ function createLoginModal() {
   return modal;
 }
 
+const response = await fetch("/api/me");
+const user = await response.json();
+
 export function createNavbar({
   userMode = "guest",
   isRegisteredHost = false,
   activeHostTab = null,
-  profilePic = "../../../assets/placeholders/default_user.jpg",
+  profilePic = "/assets/placeholders/default_user.jpg",
 }) {
   const header = createElement("header", { className: "main-header" });
 
   const logoImg = createElement("img", {
-    src: "../../../assets/icons/logo.svg",
+    src: "/assets/icons/logo.svg",
     alt: "DrexelBNB Logo",
     className: "logo-icon",
   });
@@ -281,7 +284,7 @@ export function createNavbar({
       { className: "search-segment search-segment-input" },
       [
         createElement("img", {
-          src: "../../../assets/icons/location.svg",
+          src: "/assets/icons/location.svg",
           alt: "Location",
           className: "segment-icon",
         }),
@@ -299,7 +302,7 @@ export function createNavbar({
       { className: "search-segment search-segment-picker" },
       [
         createElement("img", {
-          src: "../../../assets/icons/calendar.svg",
+          src: "/assets/icons/calendar.svg",
           alt: "Calendar",
           className: "segment-icon",
         }),
@@ -318,7 +321,7 @@ export function createNavbar({
       { className: "search-segment search-segment-picker" },
       [
         createElement("img", {
-          src: "../../../assets/icons/person.svg",
+          src: "/assets/icons/person.svg",
           alt: "Guests",
           className: "segment-icon",
         }),
@@ -337,7 +340,7 @@ export function createNavbar({
       { className: "search-btn", type: "submit" },
       [
         createElement("img", {
-          src: "../../../assets/icons/search.svg",
+          src: "/assets/icons/search.svg",
           alt: "Search",
         }),
       ],
@@ -655,6 +658,12 @@ export function createNavbar({
     textContent: toggleModeText,
   });
 
+  if(user) {
+    profilePic = user.image_url;
+    console.log(user);
+    console.log(`User Image Url: ${profilePic}`)
+  }
+
   const profileButton = createElement(
     "button",
     {
@@ -663,7 +672,7 @@ export function createNavbar({
     },
     [
       createElement("img", {
-        src: "../../../assets/icons/menu.svg",
+        src: "/assets/icons/menu.svg",
         alt: "Menu",
         className: "hamburger",
       }),
@@ -740,7 +749,7 @@ export function createNavbar({
       { href: "/favorites", className: "favorites-link" },
       [
         createElement("img", {
-          src: "../../../assets/icons/heart.svg",
+          src: "/assets/icons/heart.svg",
           alt: "Favorites",
         }),
         document.createTextNode(" Favorites"),
