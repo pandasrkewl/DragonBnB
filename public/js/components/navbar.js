@@ -248,7 +248,7 @@ export function createNavbar({
     const hostTabs = [
       { text: "Today", href: "/host/today.html" },
       { text: "Calendar", href: "/host/calendar.html" },
-      { text: "Listings", href: "/host/listings.html" },
+      { text: "Listings", href: "/host/create-listing.html" },
       { text: "Messages", href: "/host/messages.html" },
     ];
 

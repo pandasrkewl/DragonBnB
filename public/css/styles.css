@@ -2077,3 +2077,201 @@ button.profile-menu:hover{
 
   font-size: 14px;
 }
+
+/* =========================
+   CREATE LISTING MODAL
+   ========================= */
+
+   .create-listing-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Labels */
+.create-listing-form > label {
+    font-weight: 600;
+    margin-top: 8px;
+    color: #222;
+}
+
+/* Text inputs, number inputs, time inputs, selects */
+.create-listing-form input[type="text"],
+.create-listing-form input[type="number"],
+.create-listing-form input[type="time"],
+.create-listing-form select,
+.create-listing-form textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 14px;
+
+    border: 1px solid #cccccc;
+    border-radius: 8px;
+
+    font-family: inherit;
+    font-size: 15px;
+
+    background-color: white;
+    color: #222;
+}
+
+/* Fix select dropdowns */
+.create-listing-form select {
+    height: 46px;
+    cursor: pointer;
+    appearance: auto;
+}
+
+/* Description */
+.create-listing-form textarea {
+    min-height: 110px;
+    resize: vertical;
+}
+
+/* Focus */
+.create-listing-form input:focus,
+.create-listing-form select:focus,
+.create-listing-form textarea:focus {
+    outline: none;
+    border-color: #07294d;
+    box-shadow: 0 0 0 2px rgba(7, 41, 77, 0.12);
+}
+
+
+/* =========================
+   AMENITIES
+   ========================= */
+
+.create-listing-form h3 {
+    margin: 18px 0 4px;
+}
+
+.checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.checkbox-grid label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 10px 12px;
+
+    border: 1px solid #ddd;
+    border-radius: 8px;
+
+    font-weight: 400;
+    cursor: pointer;
+}
+
+.checkbox-grid label:hover {
+    border-color: #07294d;
+}
+
+.checkbox-grid input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    cursor: pointer;
+}
+
+
+/* =========================
+   PETS CHECKBOX
+   ========================= */
+
+.create-listing-form > label:has(input[type="checkbox"]) {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    font-weight: 400;
+
+    padding: 10px 12px;
+
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.create-listing-form > label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+}
+
+
+/* =========================
+   FILE UPLOAD
+   ========================= */
+
+.create-listing-form input[type="file"] {
+    width: 100%;
+    box-sizing: border-box;
+
+    padding: 10px;
+
+    border: 1px dashed #aaa;
+    border-radius: 8px;
+
+    background-color: #fafafa;
+    cursor: pointer;
+}
+
+
+/* =========================
+   CREATE BUTTON
+   ========================= */
+
+.create-listing-form .primary-btn {
+    width: 100%;
+    margin-top: 14px;
+    padding: 13px;
+
+    border: none;
+    border-radius: 8px;
+
+    font-size: 16px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+
+/* =========================
+   ERROR MESSAGE
+   ========================= */
+
+.create-listing-error {
+    margin: 0;
+    color: #b00020;
+    font-size: 14px;
+}
+
+
+/* =========================
+   MODAL SIZE / SCROLLING
+   ========================= */
+
+.modal {
+    max-height: 85vh;
+    overflow-y: auto;
+}
+
+.modal .create-listing-form {
+    padding: 5px 2px 15px;
+}
+
+
+/* Smaller screens */
+@media (max-width: 600px) {
+
+    .checkbox-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
