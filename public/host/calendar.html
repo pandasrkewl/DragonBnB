@@ -15,17 +15,59 @@
     </header>
 
     <main>
-        <div id="calendar-settings">
-            <select id="month-year-dropdown">
-            </select>
+        <div id="availability-container">
 
-            <select id="calendar-filter">
-                <option value="month">Month</option>
-                <option value="year">Year</option>
-            </select>
+            <!-- Property selector -->
+            <div id="property-selector">
+
+            </div>
+
+            <div id="calendar-section">
+                <div id="calendar-header">
+                    <h1>Availability</h1>
+                </div>
+
+                <div id="calendar-settings">
+                    <select id="month-year-dropdown"></select>
+
+                    <select id="calendar-filter">
+                        <option value="month">Month</option>
+                        <option value="year">Year</option>
+                    </select>
+                </div>
+
+                <div id="calendar">
+                    <table id="calendar-table">
+                        <thead>
+                            <tr>
+                                <th>Sunday</th>
+                                <th>Monday</th>
+                                <th>Tuesday</th>
+                                <th>Wednesday</th>
+                                <th>Thursday</th>
+                                <th>Friday</th>
+                                <th>Saturday</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="calendar-rows"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="availability-settings">
+                <div class="pricing-input">
+                    <span class="pricing-label">Pricing</span>
+
+                    <div class="price-editor">
+                        <span class="currency">$</span>
+                        <input id="price-per-night" type="number" value="150" min="0">
+                        <span class="per-night">/ night</span>
+                    </div>
+                </div>
+            </div>
+
         </div>
-        
-
     </main>
 
     <footer>

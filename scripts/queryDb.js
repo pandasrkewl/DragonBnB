@@ -213,6 +213,23 @@ async function getPropertyImages(listingId) {
   return result.rows;
 }
 
+async function getPropertyImagesByUser(userId) {
+  const result = await pool.query(
+    `SELECT
+        image_url,
+        property_id
+      FROM property_images
+      JOIN properties
+        ON properties.id = property_images.property_id
+      WHERE properties.host_id = $1
+        AND property_images.display_order = 1
+        ORDER BY property_images.property_id ASC`,
+      [userId]
+  );
+
+  return result.rows;
+}
+
 async function getPropertyAmenities(listingId) {
   const result = await pool.query(
     `SELECT 
@@ -523,6 +540,7 @@ module.exports = {
   getPropertyCities,
   getPropertyById,
   getPropertyImages,
+  getPropertyImagesByUser,
   getPropertyAmenities,
   getPropertyReviews,
   getPropertyBookings,

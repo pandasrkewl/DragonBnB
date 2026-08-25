@@ -5,6 +5,7 @@ const {
   getPropertyCities,
   getPropertyById,
   getPropertyImages,
+  getPropertyImagesByUser,
   getPropertyAmenities,
   getPropertyReviews,
   getPropertyBookings,
@@ -240,6 +241,27 @@ app.get("/api/properties/:id/images", async (req, res) => {
     });
   }
 });
+
+app.get("/api/property_images/:userId", async (req, res) => {
+  try {
+    const userId = Number(req.params.userId);
+
+    if (!Number.isInteger(userId) || userId <= 0) {
+      return res.status(400).json({
+        error: "Invalid user id"
+      });
+    }
+
+    const images = await getPropertyImagesByUser(userId);
+
+    res.json(images);
+  } catch (error) {
+    console.log("Error: gtting images", error);
+    res.status(500).json({
+      error: "Could not get property images by user id"
+    });
+  }
+})
 
 app.get("/api/properties/:id/amenities", async (req, res) => {
   try {

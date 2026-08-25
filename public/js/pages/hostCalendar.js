@@ -1,6 +1,8 @@
 import { createNavbar } from "../components/navbar.js";
+import { createElement } from "../reusable/functions.js";
 import { 
   format,
+  getDay,
   getMonth,
   getYear,
   startOfToday 
@@ -15,11 +17,41 @@ const navElement = createNavbar({
 });
 navBarContainer.appendChild(navElement);
 
+//Get User Info
+
+let user = null;
+
+async function validateAccount() {
+  try {
+    const response = await fetch("/api/me");
+
+    if (!response.ok) {
+      window.location.replace("/");
+      return;
+    }
+
+    user = await response.json();
+
+    if (!user) {
+      window.location.replace("/");
+      return;
+    }
+  } catch (err) {
+    console.error("Failed to validate account:", err);
+    window.location.replace("/");
+  }
+}
+
+await validateAccount();
+console.log(user);
+
 // Current Date
 
+// Constants
 let date = startOfToday();
 let month = getMonth(date);
 let year = getYear(date);
+let weekday = getDay(date);
 
 const monthIndexToName = {
   0: "January",
@@ -36,8 +68,16 @@ const monthIndexToName = {
   11: "December"
 }
 
+// Variables
+
+let monthOrYearFilter = "month";
+let timePeriodsSelected = false;
+
+// Components
+
+// Selecting a month (if filter is "month") or a year (if filter is "year") to show
+
 const monthYearDropdown = document.getElementById("month-year-dropdown");
-const chooseMonthOrYear = document.getElementById("calendar-filter");
 
 function setMonthDropdown() {
   monthYearDropdown.innerHTML = "";
@@ -68,12 +108,17 @@ function setYearDropdown() {
   monthYearDropdown.value = year;
 }
 
-chooseMonthOrYear.addEventListener("change", (event) => {
-  const selection = event.target.value;
+// Choosing to display a month at a tim or the year at a time
 
-  if (selection === "month") {
+const chooseMonthOrYear = document.getElementById("calendar-filter");
+
+chooseMonthOrYear.addEventListener("change", (event) => {
+  monthOrYearFilter = event.target.value;
+
+
+  if (monthOrYearFilter === "month") {
     setMonthDropdown();
-  } else if (selection === "year") {
+  } else if (monthOrYearFilter === "year") {
     setYearDropdown();
   }
 });
@@ -84,3 +129,80 @@ chooseMonthOrYear.value = "month";
 monthYearDropdown.addEventListener("change", (event) => {
   const selection = Number(event.target.value);
 });
+
+// Property Selector
+
+const propertySelector = document.getElementById("property-selector");
+let selectedPropertyIndex = 0;
+
+async function getPropertyImages() {
+  try {
+    const res = await fetch(`/api/property_images/${user.id}`);
+
+    if (!res.ok) {
+      console.warn(`Could not fetch property images:`, res.status);
+      return [];
+    }
+
+    const data = await res.json();
+    return Array.isArray(data) ? data : [];
+  } catch (err) {
+    console.error(`Error fetching property images:`, err);
+    return [];
+  }
+}
+
+let properties = await getPropertyImages();
+
+function setPropertySelector(propertyIndex) {
+  if (propertySelector.children.length !== 0) {
+    for (let i = 0; i < propertySelector.children.length; i++) {
+      const node = propertySelector.children[i];
+      if (i === propertyIndex) {
+        node.className = "property-option active";
+      } else {
+        node.className = "property-option";
+      }
+    }
+  }
+}
+
+properties.forEach((property, index) => {
+  let propertyButton = createElement("button", {
+    className: index === 0
+        ? "property-option active"
+        : "property-option"
+  });
+
+  propertyButton.dataset.propertyId = property.property_id;
+
+  let propertyImage = createElement("img", {
+    src: property.image_url,
+    alt: "Property"
+  });
+
+  propertyButton.appendChild(propertyImage);
+  propertyButton.addEventListener("click", () => {
+    setPropertySelector(index);
+  });
+  propertySelector.appendChild(propertyButton);
+});
+
+setPropertySelector(0);
+
+// Availability settings
+// Available or not
+// New booking price
+
+const availabilitySettings = document.getElementById("availability-settings");
+const pricePerNight = document.getElementById("price-per-night");
+
+function updateAvailabilitySettings() {
+  availabilitySettings.innerHTML = "";
+
+  if(timePeriodsSelected) {
+    return;
+  } else {
+    return;
+  }
+}

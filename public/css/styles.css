@@ -2074,6 +2074,65 @@ button.profile-menu:hover{
 
   font-size: 14px;
 }
+#availability-container {
+  display: flex;
+  width: 100%;
+  min-height: calc(100vh - 80px);
+}
+
+/* Property selector */
+#property-selector {
+  width: 70px;
+  flex-shrink: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;  
+  gap: 12px;
+
+  padding: 20px 0;
+
+  border-right: 1px solid #ddd;
+}
+
+/* Property square */
+.property-option {
+  width: 48px;
+  height: 48px;
+
+  padding: 0;
+
+  border: 2px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  appearance: none;
+
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.property-option img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Selected property */
+.property-option.active {
+  border-color: #07294d;
+}
+
+/* Existing calendar */
+#calendar-section {
+  width: 80%;
+}
+
+/* Existing settings */
+#availability-settings {
+  width: 20%;
+}
 
 #calendar-settings {
   display: flex;
@@ -2106,7 +2165,7 @@ button.profile-menu:hover{
 }
 
 #month-year-dropdown {
-  min-width: 12 0px;
+  min-width: 120px;
   border-radius: 5px;
 }
 
@@ -2114,3 +2173,62 @@ button.profile-menu:hover{
   min-width: 100px;
 }
 
+#calendar-table {
+  width: 90%;
+  margin: 0 auto;
+}
+
+.pricing-input {
+    display: inline-flex;
+    align-items: center;
+    height: 44px;
+    border: 1px solid #d0d0d0;
+    border-radius: 10px;
+    overflow: hidden;
+    background: white;
+}
+
+.pricing-label {
+    padding: 0 14px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #555;
+    border-right: 1px solid #e0e0e0;
+}
+
+.price-editor {
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    gap: 3px;
+}
+
+.currency {
+    font-size: 16px;
+    color: #333;
+}
+
+.price-editor input {
+    width: 60px;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    font-weight: 600;
+    background: transparent;
+    padding: 0;
+}
+
+.price-editor input::-webkit-inner-spin-button,
+.price-editor input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.price-editor input[type="number"] {
+    appearance: textfield;
+}
+
+.per-night {
+    color: #666;
+    font-size: 14px;
+}
