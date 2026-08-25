@@ -25,18 +25,13 @@ async function init() {
     if (!response.ok) throw new Error("Unauthorized");
     currentUser = await response.json();
 
-    if (!currentUser || !currentUser.host) {
-      window.location.href = "/";
-      return;
-    }
-
     const navElement = createNavbar({
-      userMode: "host",
+      userMode: "tenant",
       isRegisteredHost: currentUser.host,
-      activeHostTab: 3,
     });
     navBarContainer.appendChild(navElement);
   } catch (err) {
+    console.error(err);
     window.location.href = "/";
     return;
   }
@@ -71,7 +66,7 @@ async function loadSidebar() {
   ]);
 
   backButton.addEventListener("click", () => {
-    window.location.href = "/host/today.html";
+    window.location.href = "/";
   });
 
   const header = createElement("div", { className: "sidebar-header" }, [

@@ -277,7 +277,7 @@ async function getUserConversations(userId) {
             c.guest_id,
             c.property_id,
             c.created_at,
-            c.last_message_at,
+            c.last_message_at AS last_updated,
             p.title AS property_title,
             CASE 
                 WHEN c.host_id = $1 THEN u_guest.id
@@ -295,16 +295,17 @@ async function getUserConversations(userId) {
                 WHEN c.host_id = $1 THEN 'host'
                 ELSE 'guest'
             END AS user_role,
-            m.message AS last_message,
-            m.sender_id AS last_message_sender_id,
-            COUNT(CASE WHEN m.read = FALSE AND m.sender_id != $1 THEN 1 END) AS unread_count
+            
+            (SELECT message FROM messages WHERE conversation_id = c.id ORDER BY created_at DESC LIMIT 1) AS last_message_text,
+            (SELECT sender_id FROM messages WHERE conversation_id = c.id ORDER BY created_at DESC LIMIT 1) AS last_message_sender_id,
+            
+            (SELECT COUNT(*) FROM messages WHERE conversation_id = c.id AND read = FALSE AND sender_id != $1) AS unread_count
+            
         FROM conversations c
         JOIN users u_host ON c.host_id = u_host.id
         JOIN users u_guest ON c.guest_id = u_guest.id
         JOIN properties p ON c.property_id = p.id
-        LEFT JOIN messages m ON c.id = m.conversation_id
         WHERE c.host_id = $1 OR c.guest_id = $1
-        GROUP BY c.id, u_guest.id, u_host.id, p.id, m.message, m.sender_id
         ORDER BY c.last_message_at DESC`,
     [userId],
   );
@@ -323,12 +324,25 @@ async function getConversationById(conversationId) {
             c.last_message_at,
             p.title AS property_title,
             p.address_line_1 AS property_address,
+            COALESCE(
+                (
+                    SELECT pi.image_url
+                    FROM property_images pi
+                    WHERE pi.property_id = p.id
+                    ORDER BY pi.display_order ASC
+                    LIMIT 1
+                ),
+                '/assets/placeholders/default_home.jpg'
+            ) AS property_image,
             u_host.id AS host_id,
             u_host.first_name || ' ' || u_host.last_name AS host_name,
             u_host.image_url AS host_image,
             u_guest.id AS guest_id,
             u_guest.first_name || ' ' || u_guest.last_name AS guest_name,
-            u_guest.image_url AS guest_image
+            u_guest.image_url AS guest_image,
+            (SELECT start_date FROM bookings WHERE property_id = c.property_id AND user_id = c.guest_id ORDER BY start_date DESC LIMIT 1) AS check_in_date,
+            (SELECT end_date FROM bookings WHERE property_id = c.property_id AND user_id = c.guest_id ORDER BY start_date DESC LIMIT 1) AS check_out_date,
+            (SELECT end_date - start_date FROM bookings WHERE property_id = c.property_id AND user_id = c.guest_id ORDER BY start_date DESC LIMIT 1) AS nights
         FROM conversations c
         JOIN users u_host ON c.host_id = u_host.id
         JOIN users u_guest ON c.guest_id = u_guest.id
@@ -401,8 +415,8 @@ async function sendMessage(conversationId, senderId, content) {
 }
 
 async function getPropertyBookings(listingId) {
-    const result = await pool.query(
-        `SELECT
+  const result = await pool.query(
+    `SELECT
             b.user_id,
             b.start_date,
             b.end_date,
@@ -417,10 +431,10 @@ async function getPropertyBookings(listingId) {
             AND status = 'confirmed'
 
         ORDER BY b.start_date ASC`,
-        [listingId]
-    );
+    [listingId],
+  );
 
-    return result.rows;
+  return result.rows;
 }
 
 async function markMessagesAsRead(conversationId, userId) {
@@ -451,10 +465,10 @@ async function getBookingsForToday(hostId) {
       ON users.id = bookings.user_id
     WHERE properties.host_id = $1
       AND CURRENT_DATE BETWEEN bookings.start_date AND bookings.end_date;`,
-    [hostId]
+    [hostId],
   );
 
-    return result.rows;
+  return result.rows;
 }
 
 async function getBookingsUpcoming(hostId) {
@@ -473,10 +487,10 @@ async function getBookingsUpcoming(hostId) {
       ON users.id = bookings.user_id
     WHERE properties.host_id = $1
       AND CURRENT_DATE < bookings.start_date;`,
-    [hostId]
+    [hostId],
   );
 
-    return result.rows;
+  return result.rows;
 }
 
 async function getUnreadMessageCount(userId) {
