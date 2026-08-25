@@ -29,6 +29,7 @@ export function createNavbar({
   isRegisteredHost = false,
   activeHostTab = null,
   profilePic = "/assets/placeholders/default_user.jpg",
+  user=null
 }) {
   const header = createElement("header", { className: "main-header" });
 
