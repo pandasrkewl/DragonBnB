@@ -80,6 +80,7 @@ let selectedDayAvailability = [];
 let selectedDayKeys = [];
 let availabilityByDate = new Map();
 let pendingAvailabilityAction = null;
+let availabilityChanged = false;
 
 // Components
 
@@ -221,6 +222,8 @@ async function setPropertySelector(propertyIndex) {
     selectedDayKeys = [];
     selectedDayAvailability = [];
     pendingAvailabilityAction = null;
+      availabilityChanged = false;
+      blockingReason.value = "";
     await Promise.all([
       loadPropertyBookings(property.property_id),
       loadPropertyBlockings(property.property_id),
@@ -294,6 +297,7 @@ pricePerNight.addEventListener("input", () => {
 const availabilitySettings = document.getElementById("availability-settings");
 const availabilityToggle = document.getElementById("availability-toggle");
 const availabilitySaveButton = document.getElementById("availability-save-button");
+const blockingReason = document.getElementById("blocking-reason");
 
 function setAvailabilitySaveState(enabled) {
   availabilitySaveButton.disabled = !enabled;
@@ -303,7 +307,7 @@ function updateAvailabilitySettings() {
   availabilityToggle.replaceChildren();
 
   timePeriodsSelected = selectedDayAvailability.length > 0;
-  setAvailabilitySaveState(timePeriodsSelected);
+  setAvailabilitySaveState(timePeriodsSelected && availabilityChanged);
   if (!timePeriodsSelected) {
     return;
   }
@@ -334,6 +338,7 @@ function updateAvailabilitySettings() {
         availabilityByDate.set(dayKey, toggle.checked);
       });
       selectedDayAvailability = selectedDayKeys.map((dayKey) => availabilityByDate.get(dayKey));
+      availabilityChanged = true;
       updateCalendarDayStyles();
       updateAvailabilitySettings();
     });
@@ -386,6 +391,7 @@ function updateAvailabilitySettings() {
     });
     selectedDayAvailability = selectedDayKeys.map((dayKey) => availabilityByDate.get(dayKey));
     pendingAvailabilityAction = null;
+    availabilityChanged = true;
     updateCalendarDayStyles();
     updateAvailabilitySettings();
   });
@@ -401,6 +407,7 @@ availabilitySaveButton.addEventListener("click", async () => {
     date: dayKey.slice(String(propertyId).length + 1),
     available: availabilityByDate.get(dayKey) !== false,
   }));
+  const reason = blockingReason.value.trim();
 
   if (!propertyId || dates.length === 0) {
     return;
@@ -411,7 +418,7 @@ availabilitySaveButton.addEventListener("click", async () => {
     const response = await fetch(`/api/host/properties/${propertyId}/blockings`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ dates }),
+      body: JSON.stringify({ dates, reason }),
     });
 
     if (!response.ok) {
@@ -420,11 +427,19 @@ availabilitySaveButton.addEventListener("click", async () => {
     }
 
     await loadPropertyBlockings(propertyId);
+    availabilityChanged = false;
     updateCalendarDayStyles();
   } catch (error) {
     console.error("Error saving property availability:", error);
     setAvailabilitySaveState(true);
     alert(error.message);
+  }
+});
+
+blockingReason.addEventListener("input", () => {
+  if (selectedDayKeys.length > 0) {
+    availabilityChanged = true;
+    setAvailabilitySaveState(true);
   }
 });
 
@@ -484,7 +499,7 @@ function updateCalendarByMonth(monthIndex) {
       dayCell.classList.add("past");
       dayCell.setAttribute("aria-disabled", "true");
     } else {
-      dayCell.addEventListener("click", () => selectCalendarDay(dayKey, dayCell));
+        dayCell.addEventListener("click", () => selectCalendarDay(dayKey, dayCell, day));
     }
   }
 
@@ -519,23 +534,32 @@ function isDateBooked(day) {
 }
 
 function isDateBlocked(day) {
+  return Boolean(getBlockingForDate(day));
+}
+
+function getBlockingForDate(day) {
   const propertyId = properties[selectedPropertyIndex]?.property_id;
   const dateKey = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
   const blockings = blockingsByProperty.get(propertyId) || [];
 
-  return blockings.some((blocking) => {
+  return blockings.find((blocking) => {
     const startDate = String(blocking.start_date).slice(0, 10);
     const endDate = String(blocking.end_date).slice(0, 10);
     return dateKey >= startDate && dateKey < endDate;
   });
 }
 
-function selectCalendarDay(dayKey, dayCell) {
+function selectCalendarDay(dayKey, dayCell, day) {
   const selectedIndex = selectedDayKeys.indexOf(dayKey);
 
   if (selectedIndex === -1) {
     selectedDayKeys.push(dayKey);
-    availabilityByDate.set(dayKey, availabilityByDate.get(dayKey) !== false);
+    const blocking = getBlockingForDate(day);
+    const isAvailable = availabilityByDate.has(dayKey)
+      ? availabilityByDate.get(dayKey)
+      : !blocking;
+    availabilityByDate.set(dayKey, isAvailable);
+    blockingReason.value = blocking?.reason || "";
     dayCell.classList.add("selected");
   } else {
     selectedDayKeys.splice(selectedIndex, 1);

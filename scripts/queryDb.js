@@ -453,7 +453,7 @@ async function getPropertyBlockings(listingId) {
   return result.rows;
 }
 
-async function replacePropertyBlockings(propertyId, hostId, dates) {
+async function replacePropertyBlockings(propertyId, hostId, dates, reason) {
   const client = await pool.connect();
 
   try {
@@ -491,7 +491,7 @@ async function replacePropertyBlockings(propertyId, hostId, dates) {
       await client.query(
         `INSERT INTO blockings (property_id, start_date, end_date, reason)
          VALUES ($1, $2, $3, $4)`,
-        [propertyId, startDate, endDate, "Host calendar"],
+        [propertyId, startDate, endDate, reason],
       );
     };
 

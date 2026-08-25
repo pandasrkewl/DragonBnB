@@ -347,7 +347,7 @@ app.get("/api/properties/:id/blockings", async (req, res) => {
 app.put("/api/host/properties/:propertyId/blockings", requireLogin, async (req, res) => {
   try {
     const propertyId = Number(req.params.propertyId);
-    const { dates } = req.body;
+    const { dates, reason = "Host calendar" } = req.body;
 
     if (!Number.isInteger(propertyId) || propertyId <= 0 || !Array.isArray(dates) || dates.length === 0) {
       return res.status(400).json({ error: "A property id and selected dates are required" });
@@ -360,10 +360,15 @@ app.put("/api/host/properties/:propertyId/blockings", requireLogin, async (req, 
       return res.status(400).json({ error: "Invalid availability dates" });
     }
 
+    if (typeof reason !== "string" || reason.length > 255) {
+      return res.status(400).json({ error: "Reason must be 255 characters or fewer" });
+    }
+
     const saved = await replacePropertyBlockings(
       propertyId,
       req.session.user.id,
       dates,
+      reason.trim() || "Host calendar",
     );
     if (!saved) {
       return res.status(404).json({ error: "Property not found" });
