@@ -106,7 +106,7 @@ app.post("/signup", async (req, res) => {
         last_name,
         normalizedEmail,
         hashedPassword,
-        host ? true : false,
+        true
       ],
     );
 
