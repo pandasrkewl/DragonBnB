@@ -217,7 +217,8 @@ async function getPropertyImagesByUser(userId) {
   const result = await pool.query(
     `SELECT
         image_url,
-        property_id
+        property_id,
+        price_per_night
       FROM property_images
       JOIN properties
         ON properties.id = property_images.property_id

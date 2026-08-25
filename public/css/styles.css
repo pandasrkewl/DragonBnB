@@ -2232,3 +2232,18 @@ button.profile-menu:hover{
     color: #666;
     font-size: 14px;
 }
+
+.price-save-button {
+  margin-left: 8px;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: #07294d;
+  color: white;
+  cursor: pointer;
+}
+
+.price-save-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

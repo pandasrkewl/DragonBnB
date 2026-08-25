@@ -588,6 +588,41 @@ app.get("/api/host/bookings/upcoming", requireLogin, async (req, res) => {
   }
 });
 
+app.put("/api/host/properties/:propertyId/price", requireLogin, async (req, res) => {
+  try {
+    const propertyId = Number(req.params.propertyId);
+    const rawPrice = req.body.price_per_night;
+    const pricePerNight = Number(rawPrice);
+    const hostId = req.session.user.id;
+
+    if (!Number.isInteger(propertyId) || propertyId <= 0) {
+      return res.status(400).json({ error: "Invalid property id" });
+    }
+
+    if (rawPrice === "" || rawPrice === null || rawPrice === undefined ||
+      !Number.isFinite(pricePerNight) || pricePerNight < 0 || pricePerNight > 99999999.99) {
+      return res.status(400).json({ error: "Price must be between 0 and 99,999,999.99" });
+    }
+
+    const result = await pool.query(
+      `UPDATE properties
+       SET price_per_night = $1
+       WHERE id = $2 AND host_id = $3
+       RETURNING id, price_per_night`,
+      [pricePerNight.toFixed(2), propertyId, hostId],
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Property not found" });
+    }
+
+    res.json({ success: true, property: result.rows[0] });
+  } catch (error) {
+    console.error("Error updating property price:", error);
+    res.status(500).json({ error: "Could not update property price" });
+  }
+});
+
 app.get("/logout", (req, res) => {
   req.session.destroy((err) => {
     if (err) {

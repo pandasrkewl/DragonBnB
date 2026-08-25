@@ -1,8 +1,10 @@
 import { createNavbar } from "../components/navbar.js";
 import { createElement } from "../reusable/functions.js";
 import { 
-  format,
   getDay,
+  getDate,
+  startOfMonth,
+  endOfMonth,
   getMonth,
   getYear,
   startOfToday 
@@ -48,10 +50,13 @@ console.log(user);
 // Current Date
 
 // Constants
+
 let date = startOfToday();
 let month = getMonth(date);
 let year = getYear(date);
 let weekday = getDay(date);
+let startDay = getDate(startOfMonth(date));
+let endDay = getDate(endOfMonth(date));
 
 const monthIndexToName = {
   0: "January",
@@ -130,6 +135,52 @@ monthYearDropdown.addEventListener("change", (event) => {
   const selection = Number(event.target.value);
 });
 
+// Pricing Settings
+
+const pricePerNight = document.getElementById("price-per-night");
+const priceSaveButton = document.getElementById("price-save-button");
+let pendingPropertyId = null;
+
+function updatePricePerNight(propertyId) {
+  pendingPropertyId = propertyId;
+  priceSaveButton.disabled = false;
+}
+
+priceSaveButton.addEventListener("click", async () => {
+    const rawPrice = pricePerNight.value.trim();
+    const price = Number(rawPrice);
+
+    if (!rawPrice || !Number.isFinite(price) || price < 0) {
+      pricePerNight.setCustomValidity("Enter a valid price of 0 or more.");
+      pricePerNight.reportValidity();
+      return;
+    }
+
+    pricePerNight.setCustomValidity("");
+    priceSaveButton.disabled = true;
+
+    try {
+      const response = await fetch(`/api/host/properties/${pendingPropertyId}/price`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ price_per_night: price }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.error || "Could not save price");
+      }
+
+      const data = await response.json();
+      pricePerNight.value = Number(data.property.price_per_night).toFixed(2);
+      properties[selectedPropertyIndex].price_per_night = data.property.price_per_night;
+    } catch (error) {
+      console.error("Error saving property price:", error);
+      priceSaveButton.disabled = false;
+      alert(error.message);
+    }
+  });
+
 // Property Selector
 
 const propertySelector = document.getElementById("property-selector");
@@ -160,10 +211,16 @@ function setPropertySelector(propertyIndex) {
       const node = propertySelector.children[i];
       if (i === propertyIndex) {
         node.className = "property-option active";
+        selectedPropertyIndex = propertyIndex;
       } else {
         node.className = "property-option";
       }
     }
+
+    const property = properties[propertyIndex];
+    pricePerNight.value = property.price_per_night;
+    pendingPropertyId = null;
+    priceSaveButton.disabled = true;
   }
 }
 
@@ -190,12 +247,18 @@ properties.forEach((property, index) => {
 
 setPropertySelector(0);
 
+pricePerNight.addEventListener("input", () => {
+  const property = properties[selectedPropertyIndex];
+  if (property) {
+    updatePricePerNight(property.property_id);
+  }
+});
+
 // Availability settings
 // Available or not
 // New booking price
 
 const availabilitySettings = document.getElementById("availability-settings");
-const pricePerNight = document.getElementById("price-per-night");
 
 function updateAvailabilitySettings() {
   availabilitySettings.innerHTML = "";
@@ -206,3 +269,6 @@ function updateAvailabilitySettings() {
     return;
   }
 }
+
+// Calendar
+
