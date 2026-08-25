@@ -78,6 +78,8 @@ const monthIndexToName = {
 let monthOrYearFilter = "month";
 let timePeriodsSelected = false;
 let selectedDayAvailability = [];
+let selectedDayKeys = [];
+let availabilityByDate = new Map();
 let pendingAvailabilityAction = null;
 
 // Components
@@ -193,6 +195,7 @@ priceSaveButton.addEventListener("click", async () => {
 // Property Selector
 
 const propertySelector = document.getElementById("property-selector");
+const tbody = document.getElementById("calendar-rows");
 let selectedPropertyIndex = 0;
 
 async function getPropertyImages() {
@@ -230,6 +233,10 @@ function setPropertySelector(propertyIndex) {
     pricePerNight.value = property.price_per_night;
     pendingPropertyId = null;
     priceSaveButton.disabled = true;
+    selectedDayKeys = [];
+    selectedDayAvailability = [];
+    pendingAvailabilityAction = null;
+    updateCalendarByMonth(month);
   }
 }
 
@@ -253,8 +260,6 @@ properties.forEach((property, index) => {
   });
   propertySelector.appendChild(propertyButton);
 });
-
-setPropertySelector(0);
 
 pricePerNight.addEventListener("input", () => {
   const property = properties[selectedPropertyIndex];
@@ -300,7 +305,11 @@ function updateAvailabilitySettings() {
 
     toggle.checked = isAvailable;
     toggle.addEventListener("change", () => {
-      selectedDayAvailability = selectedDayAvailability.map(() => toggle.checked);
+      selectedDayKeys.forEach((dayKey) => {
+        availabilityByDate.set(dayKey, toggle.checked);
+      });
+      selectedDayAvailability = selectedDayKeys.map((dayKey) => availabilityByDate.get(dayKey));
+      updateCalendarDayStyles();
       updateAvailabilitySettings();
     });
 
@@ -347,8 +356,12 @@ function updateAvailabilitySettings() {
     }
 
     const makeAvailable = pendingAvailabilityAction === "open";
-    selectedDayAvailability = selectedDayAvailability.map(() => makeAvailable);
+    selectedDayKeys.forEach((dayKey) => {
+      availabilityByDate.set(dayKey, makeAvailable);
+    });
+    selectedDayAvailability = selectedDayKeys.map((dayKey) => availabilityByDate.get(dayKey));
     pendingAvailabilityAction = null;
+    updateCalendarDayStyles();
     updateAvailabilitySettings();
   });
 
@@ -359,8 +372,6 @@ updateAvailabilitySettings();
 
 // Calendar
 
-let tbody = document.getElementById("calendar-rows");
-
 function updateCalendarByMonth(monthIndex) {
   let date = new Date(year, monthIndex, 1);
   month = getMonth(date);
@@ -369,6 +380,10 @@ function updateCalendarByMonth(monthIndex) {
   startDay = getDate(startOfMonth(date));
   endDay = getDate(endOfMonth(date));
 
+  selectedDayKeys = [];
+  selectedDayAvailability = [];
+  pendingAvailabilityAction = null;
+  updateAvailabilitySettings();
   tbody.replaceChildren();
 
   let row = createElement("tr");
@@ -389,6 +404,20 @@ function updateCalendarByMonth(monthIndex) {
       className: "calendar-day",
       textContent: day,
     }));
+    const dayCell = row.lastElementChild;
+    const dayKey = getCalendarDayKey(day);
+    const calendarDate = new Date(year, month, day);
+    const isPastDate = calendarDate < startOfToday();
+
+    dayCell.dataset.dateKey = dayKey;
+    dayCell.classList.add(availabilityByDate.get(dayKey) === false ? "blocked" : "available");
+
+    if (isPastDate) {
+      dayCell.classList.add("past");
+      dayCell.setAttribute("aria-disabled", "true");
+    } else {
+      dayCell.addEventListener("click", () => selectCalendarDay(dayKey, dayCell));
+    }
   }
 
   while (row.children.length > 0 && row.children.length < 7) {
@@ -402,5 +431,39 @@ function updateCalendarByMonth(monthIndex) {
   }
 }
 
-updateCalendarByMonth(month);
+function getCalendarDayKey(day) {
+  const propertyId = properties[selectedPropertyIndex]?.property_id || "property";
+  const monthNumber = String(month + 1).padStart(2, "0");
+  const dayNumber = String(day).padStart(2, "0");
+  return `${propertyId}-${year}-${monthNumber}-${dayNumber}`;
+}
+
+function selectCalendarDay(dayKey, dayCell) {
+  const selectedIndex = selectedDayKeys.indexOf(dayKey);
+
+  if (selectedIndex === -1) {
+    selectedDayKeys.push(dayKey);
+    availabilityByDate.set(dayKey, availabilityByDate.get(dayKey) !== false);
+    dayCell.classList.add("selected");
+  } else {
+    selectedDayKeys.splice(selectedIndex, 1);
+    dayCell.classList.remove("selected");
+  }
+
+  selectedDayAvailability = selectedDayKeys.map((selectedKey) => availabilityByDate.get(selectedKey));
+  pendingAvailabilityAction = null;
+  updateAvailabilitySettings();
+}
+
+function updateCalendarDayStyles() {
+  tbody.querySelectorAll(".calendar-day").forEach((dayCell) => {
+    const dayKey = dayCell.dataset.dateKey;
+    dayCell.classList.toggle("selected", selectedDayKeys.includes(dayKey));
+    dayCell.classList.toggle("blocked", availabilityByDate.get(dayKey) === false);
+    dayCell.classList.toggle("available", availabilityByDate.get(dayKey) !== false);
+  });
+}
+
+setPropertySelector(0);
+
 
