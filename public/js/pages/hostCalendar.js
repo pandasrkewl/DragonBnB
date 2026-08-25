@@ -216,8 +216,9 @@ async function getPropertyImages() {
 }
 
 let properties = await getPropertyImages();
+let bookingsByProperty = new Map();
 
-function setPropertySelector(propertyIndex) {
+async function setPropertySelector(propertyIndex) {
   if (propertySelector.children.length !== 0) {
     for (let i = 0; i < propertySelector.children.length; i++) {
       const node = propertySelector.children[i];
@@ -236,7 +237,23 @@ function setPropertySelector(propertyIndex) {
     selectedDayKeys = [];
     selectedDayAvailability = [];
     pendingAvailabilityAction = null;
+    await loadPropertyBookings(property.property_id);
     updateCalendarByMonth(month);
+  }
+}
+
+async function loadPropertyBookings(propertyId) {
+  try {
+    const response = await fetch(`/api/properties/${propertyId}/bookings`);
+    if (!response.ok) {
+      throw new Error(`Could not load bookings: ${response.status}`);
+    }
+
+    const bookings = await response.json();
+    bookingsByProperty.set(propertyId, Array.isArray(bookings) ? bookings : []);
+  } catch (error) {
+    console.error("Error loading property bookings:", error);
+    bookingsByProperty.set(propertyId, []);
   }
 }
 
@@ -255,8 +272,8 @@ properties.forEach((property, index) => {
   });
 
   propertyButton.appendChild(propertyImage);
-  propertyButton.addEventListener("click", () => {
-    setPropertySelector(index);
+  propertyButton.addEventListener("click", async () => {
+    await setPropertySelector(index);
   });
   propertySelector.appendChild(propertyButton);
 });
@@ -408,11 +425,16 @@ function updateCalendarByMonth(monthIndex) {
     const dayKey = getCalendarDayKey(day);
     const calendarDate = new Date(year, month, day);
     const isPastDate = calendarDate < startOfToday();
+    const isBookedDate = isDateBooked(day);
 
     dayCell.dataset.dateKey = dayKey;
     dayCell.classList.add(availabilityByDate.get(dayKey) === false ? "blocked" : "available");
 
-    if (isPastDate) {
+    if (isBookedDate) {
+      dayCell.classList.add("booked");
+      dayCell.setAttribute("aria-disabled", "true");
+      dayCell.title = "Booked";
+    } else if (isPastDate) {
       dayCell.classList.add("past");
       dayCell.setAttribute("aria-disabled", "true");
     } else {
@@ -436,6 +458,18 @@ function getCalendarDayKey(day) {
   const monthNumber = String(month + 1).padStart(2, "0");
   const dayNumber = String(day).padStart(2, "0");
   return `${propertyId}-${year}-${monthNumber}-${dayNumber}`;
+}
+
+function isDateBooked(day) {
+  const propertyId = properties[selectedPropertyIndex]?.property_id;
+  const dateKey = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+  const bookings = bookingsByProperty.get(propertyId) || [];
+
+  return bookings.some((booking) => {
+    const startDate = String(booking.start_date).slice(0, 10);
+    const endDate = String(booking.end_date).slice(0, 10);
+    return dateKey >= startDate && dateKey < endDate;
+  });
 }
 
 function selectCalendarDay(dayKey, dayCell) {
@@ -464,6 +498,6 @@ function updateCalendarDayStyles() {
   });
 }
 
-setPropertySelector(0);
+await setPropertySelector(0);
 
 
