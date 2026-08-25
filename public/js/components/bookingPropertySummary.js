@@ -192,8 +192,14 @@ export function createBookingPropertySummary(property, bookingDetails) {
             className: "guest-save-button"
         });
 
+        const guestsError = createElement("p", {
+            className: "booking-error",
+            textContent: ""
+        });
+
         const content = createElement("div", {}, [
             guestPicker.element,
+            guestsError,
             saveButton
         ]);
 
@@ -203,6 +209,26 @@ export function createBookingPropertySummary(property, bookingDetails) {
         );
 
         saveButton.addEventListener("click", () => {
+
+            const guests = guestPicker.guestCounts;
+
+            const hasMinorsOrPets =
+                guests.children > 0 ||
+                guests.infants > 0 ||
+                guests.pets > 0;
+
+            if (guests.adults === 0) {
+                if (hasMinorsOrPets) {
+                    guestsError.textContent =
+                        "At least one adult must accompany children, infants, or pets.";
+                } else {
+                    guestsError.textContent =
+                        "Choose at least one adult guest.";
+                }
+                return;
+            }
+
+            guestsError.textContent = "";
             const params = new URLSearchParams(window.location.search);
 
             params.set("adults", guestPicker.guestCounts.adults);

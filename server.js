@@ -447,6 +447,29 @@ app.post("/api/bookings", requireLogin, async (req, res) => {
       });
     }
 
+    const existingBooking = await pool.query(
+      `SELECT id
+       FROM bookings
+       WHERE property_id = $1
+         AND user_id = $2
+         AND start_date = $3
+         AND end_date = $4
+         AND status = 'pending'
+       LIMIT 1`,
+      [
+        propertyId,
+        guestId,
+        startDate,
+        endDate
+      ]
+    );
+
+    if (existingBooking.rows.length > 0) {
+      return res.status(409).json({
+        error: "You already requested this booking."
+      });
+    }
+    
     const property = await getPropertyById(propertyId);
 
     if (!property) {
@@ -481,6 +504,23 @@ app.post("/api/bookings", requireLogin, async (req, res) => {
       property.host_id,
       guestId,
       propertyId
+    );
+
+    const reservationRequest = JSON.stringify({
+      type: "reservation_request",
+      bookingId: bookingId,
+      property: property.title,
+      startDate: startDate,
+      endDate: endDate,
+      total: totalPrice,
+      status: "pending",
+      image: property.image_url
+    });
+
+    await sendMessage(
+      conversationId,
+      guestId,
+      reservationRequest
     );
 
     if (message && message.trim()) {

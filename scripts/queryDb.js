@@ -164,6 +164,16 @@ async function getPropertyById(listingId) {
             p.price_per_night,
             COALESCE(
                 (
+                    SELECT pi.image_url
+                    FROM property_images pi
+                    WHERE pi.property_id = p.id
+                    ORDER BY pi.display_order ASC
+                    LIMIT 1
+                ),
+                '/assets/placeholders/default_home.jpg'
+            ) AS image_url,
+            COALESCE(
+                (
                     SELECT ROUND(AVG(r.rating), 2)
                     FROM reviews r
                     WHERE r.property_id = p.id

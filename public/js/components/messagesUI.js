@@ -124,7 +124,51 @@ export function createMessageBubble(message, currentUserId) {
 
   try {
     const parsed = JSON.parse(rawText);
-    if (parsed.type === "reservation_action") {
+
+    if (parsed.type === "reservation_request") {
+      const statusTitle = createElement("h4", {
+        textContent: "Reservation REQUESTED",
+        className: "reservation-status-pending",
+      });
+
+      const propertyText = createElement("p", {
+        textContent: parsed.property,
+      });
+
+      const datesText = createElement("p", {
+        textContent: `${parsed.startDate} - ${parsed.endDate}`,
+      });
+
+      const priceText = createElement("p", {
+        textContent: `Total: $${Number(parsed.total).toFixed(2)}`,
+      });
+
+      const children = [
+        statusTitle,
+        propertyText,
+        datesText,
+        priceText      
+      ];
+
+      if (parsed.image) {
+        const imageElement = createElement("img", {
+          src: parsed.image,
+          className: "reservation-card-image",
+        });
+        children.push(imageElement);
+      }
+
+      bubbleContent = createElement(
+        "div",
+        {
+          className: `message-bubble reservation-card ${
+            isMine ? "mine" : "theirs"
+          }`,
+        },
+        children,
+      );
+    }
+    else if (parsed.type === "reservation_action") {
       const statusTitle = createElement("h4", {
         textContent: `Reservation ${parsed.status.toUpperCase()}`,
         className: `reservation-status-${parsed.status}`,

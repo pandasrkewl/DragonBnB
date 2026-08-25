@@ -258,17 +258,56 @@ export function createConfirmationSection(bookingDetails) {
         className: "message-host-content collapsed"
     });
 
+    function isValidExpiration(expiration) {
+        const [month, year] = expiration.split("/");
+
+        if (!month || !year) {
+            return false;
+        }
+
+        const monthNumber = Number(month);
+        const yearNumber = Number(`20${year}`);
+
+        if (monthNumber < 1 || monthNumber > 12) {
+            return false;
+        }
+
+        const now = new Date();
+
+        const currentMonth = now.getMonth() + 1;
+        const currentYear = now.getFullYear();
+
+        if (yearNumber < currentYear) {
+            return false;
+        }
+
+        if (
+            yearNumber === currentYear &&
+            monthNumber < currentMonth
+        ) {
+            return false;
+        }
+
+        return true;
+    }
+
     paymentMethodNextButton.addEventListener("click", () => {
         const cardNumber = cardNumberInput.value.replace(/\s/g, "");
         const expiration = expirationInput.value.trim();
         const cvv = cvvInput.value.trim();
 
-        if (
-            cardNumber.length !== 16 ||
-            expiration.length !== 5 ||
-            cvv.length < 3
-        ) {
-            paymentError.textContent = "Enter valid card details.";
+        if (cardNumber.length !== 16) {
+            paymentError.textContent = "Please enter a valid card number.";
+            return;
+        }
+
+        if (!isValidExpiration(expiration)) {
+            paymentError.textContent = "Please enter a valid expiration date.";
+            return;
+        }
+
+        if (cvv.length < 3) {
+            paymentError.textContent = "Please enter a valid CVV.";
             return;
         }
 
@@ -361,6 +400,13 @@ export function createConfirmationSection(bookingDetails) {
     });
 
     confirmBookingButton.addEventListener("click", async () => {
+        if (confirmBookingButton.disabled) {
+            return;
+        }
+
+        confirmBookingButton.disabled = true;
+        confirmBookingButton.textContent = "Requesting...";
+
         console.log({propertyId: bookingDetails.propertyId,
                     startDate: bookingDetails.checkIn,
                     endDate: bookingDetails.checkOut,
@@ -390,7 +436,7 @@ export function createConfirmationSection(bookingDetails) {
             }
 
             window.location.href =
-                `/messages?conversationId=${result.conversationId}`;
+                `/messages?convoId=${result.conversationId}`;
 
         } catch (error) {
             console.error("Error requesting booking:", error);

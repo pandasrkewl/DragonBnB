@@ -52,7 +52,7 @@ export function createHostSection(property) {
         responseData?.conversationId || responseData?.conversation?.id;
 
       if (responseData?.success && targetConvoId) {
-        window.location.href = `/messages.html?convoId=${targetConvoId}`;
+        window.location.href = `/messages?convoId=${targetConvoId}`;
       } else {
         console.error("Could not load conversation.");
       }
