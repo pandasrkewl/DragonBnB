@@ -135,6 +135,13 @@ chooseMonthOrYear.value = "month";
 
 monthYearDropdown.addEventListener("change", (event) => {
   const selection = Number(event.target.value);
+
+  if (monthOrYearFilter === "month") {
+    updateCalendarByMonth(selection);
+  } else {
+    year = selection;
+    updateCalendarByMonth(month);
+  }
 });
 
 // Pricing Settings
@@ -355,17 +362,45 @@ updateAvailabilitySettings();
 let tbody = document.getElementById("calendar-rows");
 
 function updateCalendarByMonth(monthIndex) {
-  date = new Date(year, monthIndex, 1);
+  let date = new Date(year, monthIndex, 1);
   month = getMonth(date);
   year = getYear(date);
   weekday = getDay(date);
   startDay = getDate(startOfMonth(date));
   endDay = getDate(endOfMonth(date));
 
-  tbody.innerHTML = "";
+  tbody.replaceChildren();
 
-  for(let i = 0; i < weekday; i++) {
-    
+  let row = createElement("tr");
+
+  for (let blankDay = 0; blankDay < weekday; blankDay++) {
+    row.appendChild(createElement("td", {
+      className: "calendar-empty",
+    }));
+  }
+
+  for (let day = 1; day <= endDay; day++) {
+    if (row.children.length === 7) {
+      tbody.appendChild(row);
+      row = createElement("tr");
+    }
+
+    row.appendChild(createElement("td", {
+      className: "calendar-day",
+      textContent: day,
+    }));
+  }
+
+  while (row.children.length > 0 && row.children.length < 7) {
+    row.appendChild(createElement("td", {
+      className: "calendar-empty",
+    }));
+  }
+
+  if (row.children.length > 0) {
+    tbody.appendChild(row);
   }
 }
+
+updateCalendarByMonth(month);
 
