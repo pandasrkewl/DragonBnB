@@ -164,6 +164,16 @@ async function getPropertyById(listingId) {
             p.price_per_night,
             COALESCE(
                 (
+                    SELECT pi.image_url
+                    FROM property_images pi
+                    WHERE pi.property_id = p.id
+                    ORDER BY pi.display_order ASC
+                    LIMIT 1
+                ),
+                '/assets/placeholders/default_home.jpg'
+            ) AS image_url,
+            COALESCE(
+                (
                     SELECT ROUND(AVG(r.rating), 2)
                     FROM reviews r
                     WHERE r.property_id = p.id
@@ -342,7 +352,10 @@ async function getConversationById(conversationId) {
             u_guest.image_url AS guest_image,
             (SELECT start_date FROM bookings WHERE property_id = c.property_id AND user_id = c.guest_id ORDER BY start_date DESC LIMIT 1) AS check_in_date,
             (SELECT end_date FROM bookings WHERE property_id = c.property_id AND user_id = c.guest_id ORDER BY start_date DESC LIMIT 1) AS check_out_date,
-            (SELECT end_date - start_date FROM bookings WHERE property_id = c.property_id AND user_id = c.guest_id ORDER BY start_date DESC LIMIT 1) AS nights
+            (SELECT end_date - start_date FROM bookings WHERE property_id = c.property_id AND user_id = c.guest_id ORDER BY start_date DESC LIMIT 1) AS nights,
+            (SELECT id FROM bookings WHERE property_id = c.property_id AND user_id = c.guest_id ORDER BY start_date DESC LIMIT 1) AS booking_id,
+            (SELECT status FROM bookings WHERE property_id = c.property_id AND user_id = c.guest_id ORDER BY start_date DESC LIMIT 1) AS booking_status,
+            (SELECT total_price FROM bookings WHERE property_id = c.property_id AND user_id = c.guest_id ORDER BY start_date DESC LIMIT 1) AS total_price
         FROM conversations c
         JOIN users u_host ON c.host_id = u_host.id
         JOIN users u_guest ON c.guest_id = u_guest.id
