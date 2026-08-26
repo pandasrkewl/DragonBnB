@@ -29,9 +29,14 @@
     "express": "^5.2.1",
     "express-session": "^1.19.0",
     "flatpickr": "^4.6.13",
-    "pg": "^8.22.0"
+    "multer": "^2.2.0",
+    "pg": "^8.22.0",
+    "socket.io": "^4.8.3"
   },
   "devDependencies": {
     "jest": "^29.7.0"
+  },
+  "allowScripts": {
+    "bcrypt@6.0.0": true
   }
 }

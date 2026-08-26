@@ -164,6 +164,16 @@ async function getPropertyById(listingId) {
             p.price_per_night,
             COALESCE(
                 (
+                    SELECT pi.image_url
+                    FROM property_images pi
+                    WHERE pi.property_id = p.id
+                    ORDER BY pi.display_order ASC
+                    LIMIT 1
+                ),
+                '/assets/placeholders/default_home.jpg'
+            ) AS image_url,
+            COALESCE(
+                (
                     SELECT ROUND(AVG(r.rating), 2)
                     FROM reviews r
                     WHERE r.property_id = p.id
@@ -295,7 +305,7 @@ async function getUserConversations(userId) {
             c.guest_id,
             c.property_id,
             c.created_at,
-            c.last_message_at,
+            c.last_message_at AS last_updated,
             p.title AS property_title,
             CASE 
                 WHEN c.host_id = $1 THEN u_guest.id
@@ -313,16 +323,17 @@ async function getUserConversations(userId) {
                 WHEN c.host_id = $1 THEN 'host'
                 ELSE 'guest'
             END AS user_role,
-            m.message AS last_message,
-            m.sender_id AS last_message_sender_id,
-            COUNT(CASE WHEN m.read = FALSE AND m.sender_id != $1 THEN 1 END) AS unread_count
+            
+            (SELECT message FROM messages WHERE conversation_id = c.id ORDER BY created_at DESC LIMIT 1) AS last_message_text,
+            (SELECT sender_id FROM messages WHERE conversation_id = c.id ORDER BY created_at DESC LIMIT 1) AS last_message_sender_id,
+            
+            (SELECT COUNT(*) FROM messages WHERE conversation_id = c.id AND read = FALSE AND sender_id != $1) AS unread_count
+            
         FROM conversations c
         JOIN users u_host ON c.host_id = u_host.id
         JOIN users u_guest ON c.guest_id = u_guest.id
         JOIN properties p ON c.property_id = p.id
-        LEFT JOIN messages m ON c.id = m.conversation_id
         WHERE c.host_id = $1 OR c.guest_id = $1
-        GROUP BY c.id, u_guest.id, u_host.id, p.id, m.message, m.sender_id
         ORDER BY c.last_message_at DESC`,
     [userId],
   );
@@ -341,12 +352,28 @@ async function getConversationById(conversationId) {
             c.last_message_at,
             p.title AS property_title,
             p.address_line_1 AS property_address,
+            COALESCE(
+                (
+                    SELECT pi.image_url
+                    FROM property_images pi
+                    WHERE pi.property_id = p.id
+                    ORDER BY pi.display_order ASC
+                    LIMIT 1
+                ),
+                '/assets/placeholders/default_home.jpg'
+            ) AS property_image,
             u_host.id AS host_id,
             u_host.first_name || ' ' || u_host.last_name AS host_name,
             u_host.image_url AS host_image,
             u_guest.id AS guest_id,
             u_guest.first_name || ' ' || u_guest.last_name AS guest_name,
-            u_guest.image_url AS guest_image
+            u_guest.image_url AS guest_image,
+            (SELECT start_date FROM bookings WHERE property_id = c.property_id AND user_id = c.guest_id ORDER BY start_date DESC LIMIT 1) AS check_in_date,
+            (SELECT end_date FROM bookings WHERE property_id = c.property_id AND user_id = c.guest_id ORDER BY start_date DESC LIMIT 1) AS check_out_date,
+            (SELECT end_date - start_date FROM bookings WHERE property_id = c.property_id AND user_id = c.guest_id ORDER BY start_date DESC LIMIT 1) AS nights,
+            (SELECT id FROM bookings WHERE property_id = c.property_id AND user_id = c.guest_id ORDER BY start_date DESC LIMIT 1) AS booking_id,
+            (SELECT status FROM bookings WHERE property_id = c.property_id AND user_id = c.guest_id ORDER BY start_date DESC LIMIT 1) AS booking_status,
+            (SELECT total_price FROM bookings WHERE property_id = c.property_id AND user_id = c.guest_id ORDER BY start_date DESC LIMIT 1) AS total_price
         FROM conversations c
         JOIN users u_host ON c.host_id = u_host.id
         JOIN users u_guest ON c.guest_id = u_guest.id
@@ -419,8 +446,8 @@ async function sendMessage(conversationId, senderId, content) {
 }
 
 async function getPropertyBookings(listingId) {
-    const result = await pool.query(
-        `SELECT
+  const result = await pool.query(
+    `SELECT
             b.user_id,
             b.start_date,
             b.end_date,
@@ -435,10 +462,10 @@ async function getPropertyBookings(listingId) {
             AND status = 'confirmed'
 
         ORDER BY b.start_date ASC`,
-        [listingId]
-    );
+    [listingId],
+  );
 
-    return result.rows;
+  return result.rows;
 }
 
 async function getPropertyBlockings(listingId) {
@@ -558,10 +585,10 @@ async function getBookingsForToday(hostId) {
       ON users.id = bookings.user_id
     WHERE properties.host_id = $1
       AND CURRENT_DATE BETWEEN bookings.start_date AND bookings.end_date;`,
-    [hostId]
+    [hostId],
   );
 
-    return result.rows;
+  return result.rows;
 }
 
 async function getBookingsUpcoming(hostId) {
@@ -580,10 +607,10 @@ async function getBookingsUpcoming(hostId) {
       ON users.id = bookings.user_id
     WHERE properties.host_id = $1
       AND CURRENT_DATE < bookings.start_date;`,
-    [hostId]
+    [hostId],
   );
 
-    return result.rows;
+  return result.rows;
 }
 
 async function getUnreadMessageCount(userId) {
@@ -624,6 +651,136 @@ async function deleteConversation(conversationId) {
   return result.rows.length > 0;
 }
 
+async function createProperty(property) {
+  const result = await pool.query(
+    `INSERT INTO properties (
+      host_id,
+      title,
+      description,
+      address_line_1,
+      address_line_2,
+      city,
+      state,
+      postal_code,
+      country,
+      max_guests,
+      bedrooms,
+      bathrooms,
+      beds,
+      price_per_night,
+      property_type,
+      pets_allowed,
+      check_in_time,
+      check_out_time
+    )
+    VALUES (
+      $1, $2, $3, $4, $5,
+      $6, $7, $8, $9, $10,
+      $11, $12, $13, $14, $15,
+      $16, $17, $18
+    )
+    RETURNING *`,
+    [
+      property.host_id,
+      property.title,
+      property.description,
+      property.address_line_1,
+      property.address_line_2 || null,
+      property.city,
+      property.state,
+      property.postal_code,
+      property.country,
+      property.max_guests,
+      property.bedrooms,
+      property.bathrooms,
+      property.beds,
+      property.price_per_night,
+      property.property_type,
+      property.pets_allowed ?? false,
+      property.check_in_time || null,
+      property.check_out_time || null
+    ]
+  );
+  return result.rows[0];
+}
+
+async function addPropertyAmenities(propertyId, amenityNames) {
+  for (const name of amenityNames) {
+    const amenityResult = await pool.query(
+      `SELECT id
+       FROM amenities
+       WHERE name = $1`,
+      [name]
+    );
+
+    if (amenityResult.rows.length === 0) {
+      continue;
+    }
+
+    const amenityId = amenityResult.rows[0].id;
+
+    await pool.query(
+      `INSERT INTO property_amenities (
+        property_id,
+        amenity_id
+      )
+      VALUES ($1, $2)
+      ON CONFLICT DO NOTHING`,
+      [
+        propertyId,
+        amenityId
+      ]
+    );
+  }
+}
+
+async function getHostProperties(hostId) {
+  const result = await pool.query(
+    `SELECT
+        p.id,
+        p.title,
+        p.city,
+        p.state,
+        p.price_per_night,
+        p.property_type,
+        COALESCE(
+          (
+            SELECT pi.image_url
+            FROM property_images pi
+            WHERE pi.property_id = p.id
+            ORDER BY pi.display_order ASC
+            LIMIT 1
+          ),
+          '/assets/placeholders/default_home.jpg'
+        ) AS image_url
+     FROM properties p
+     WHERE p.host_id = $1
+     ORDER BY p.created_at DESC`,
+    [hostId]
+  );
+
+  return result.rows;
+}
+
+async function addPropertyImage(propertyId, imageUrl, displayOrder) {
+  const result = await pool.query(
+    `INSERT INTO property_images (
+      property_id,
+      image_url,
+      display_order
+    )
+    VALUES ($1, $2, $3)
+    RETURNING *`,
+    [
+      propertyId,
+      imageUrl,
+      displayOrder
+    ]
+  );
+
+  return result.rows[0];
+}
+
 module.exports = {
   getUser,
   getProperties,
@@ -636,6 +793,10 @@ module.exports = {
   getPropertyBookings,
   getPropertyBlockings,
   replacePropertyBlockings,
+  createProperty,
+  getHostProperties,
+  addPropertyAmenities,
+  addPropertyImage,
   getBookingsForToday,
   getBookingsUpcoming,
   getUserConversations,

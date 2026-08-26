@@ -168,35 +168,30 @@ INSERT INTO users (
     image_url
 )
 VALUES
-    (1, 'Max', 'Chiu', 'maxkchiu@gmail.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, 'assets/images/users/1.jpg'),
-    (2, 'Larry', 'Wu', 'larrywu@test.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', FALSE, NULL),
-    (3, 'Peter', 'Parker', 'notspiderman@marvel.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', FALSE, NULL),
-    (4, 'Tony', 'Stark', 'iamironman@dead.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, NULL),
-    (5, 'Emma', 'Johnson', 'emma.johnson@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', FALSE, NULL),
-    (6, 'Noah', 'Williams', 'noah.williams@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, NULL),
-    (7, 'Olivia', 'Brown', 'olivia.brown@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', FALSE, NULL),
-    (8, 'Liam', 'Davis', 'liam.davis@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, NULL),
-    (9, 'Ava', 'Martinez', 'ava.martinez@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', FALSE, NULL),
-    (10, 'Ethan', 'Wilson', 'ethan.wilson@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, NULL),
-    (11, 'Sophia', 'Anderson', 'sophia.anderson@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', FALSE, NULL),
-    (12, 'James', 'Thomas', 'james.thomas@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, NULL),
-    (13, 'Mia', 'Taylor', 'mia.taylor@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', FALSE, NULL),
-    (14, 'Benjamin', 'Moore', 'benjamin.moore@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, NULL),
-    (15, 'Charlotte', 'Jackson', 'charlotte.jackson@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', FALSE, NULL),
-    (16, 'Lucas', 'Martin', 'lucas.martin@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, NULL),
-    (17, 'Amelia', 'Lee', 'amelia.lee@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', FALSE, NULL),
-    (18, 'Henry', 'Walker', 'henry.walker@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, NULL),
-    (19, 'Evelyn', 'Hall', 'evelyn.hall@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', FALSE, NULL),
-    (20, 'Daniel', 'Allen', 'daniel.allen@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, NULL),
-    (21, 'Harper', 'Young', 'harper.young@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', FALSE, NULL),
-    (22, 'Michael', 'King', 'michael.king@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, NULL),
-    (23, 'Ella', 'Wright', 'e.wwright@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', FALSE, NULL),
-    (24, 'Jack', 'Scott', 'jack.scott@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, NULL);
-
-SELECT setval(
-    'users_id_seq',
-    (SELECT MAX(id) FROM users)
-);
+    (1, 'Max', 'Chiu', 'maxkchiu@gmail.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, '/assets/images/users/1.jpg'),
+    (2, 'Larry', 'Wu', 'larrywu@test.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, '/assets/placeholders/default_user.jpg'),
+    (3, 'Peter', 'Parker', 'notspiderman@marvel.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, '/assets/images/users/3.png'),
+    (4, 'Tony', 'Stark', 'iamironman@dead.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, '/assets/placeholders/default_user.jpg'),
+    (5, 'Emma', 'Johnson', 'emma.johnson@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, '/assets/placeholders/default_user.jpg'),
+    (6, 'Noah', 'Williams', 'noah.williams@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, '/assets/placeholders/default_user.jpg'),
+    (7, 'Olivia', 'Brown', 'olivia.brown@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, '/assets/placeholders/default_user.jpg'),
+    (8, 'Liam', 'Davis', 'liam.davis@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, '/assets/placeholders/default_user.jpg'),
+    (9, 'Ava', 'Martinez', 'ava.martinez@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, '/assets/placeholders/default_user.jpg'),
+    (10, 'Ethan', 'Wilson', 'ethan.wilson@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, '/assets/placeholders/default_user.jpg'),
+    (11, 'Sophia', 'Anderson', 'sophia.anderson@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, '/assets/placeholders/default_user.jpg'),
+    (12, 'James', 'Thomas', 'james.thomas@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, '/assets/placeholders/default_user.jpg'),
+    (13, 'Mia', 'Taylor', 'mia.taylor@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, '/assets/placeholders/default_user.jpg'),
+    (14, 'Benjamin', 'Moore', 'benjamin.moore@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, '/assets/placeholders/default_user.jpg'),
+    (15, 'Charlotte', 'Jackson', 'charlotte.jackson@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, '/assets/placeholders/default_user.jpg'),
+    (16, 'Lucas', 'Martin', 'lucas.martin@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, '/assets/placeholders/default_user.jpg'),
+    (17, 'Amelia', 'Lee', 'amelia.lee@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, '/assets/placeholders/default_user.jpg'),
+    (18, 'Henry', 'Walker', 'henry.walker@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, '/assets/placeholders/default_user.jpg'),
+    (19, 'Evelyn', 'Hall', 'evelyn.hall@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, '/assets/placeholders/default_user.jpg'),
+    (20, 'Daniel', 'Allen', 'daniel.allen@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, '/assets/placeholders/default_user.jpg'),
+    (21, 'Harper', 'Young', 'harper.young@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, '/assets/placeholders/default_user.jpg'),
+    (22, 'Michael', 'King', 'michael.king@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, '/assets/placeholders/default_user.jpg'),
+    (23, 'Ella', 'Wright', 'e.wwright@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, '/assets/placeholders/default_user.jpg'),
+    (24, 'Jack', 'Scott', 'jack.scott@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, '/assets/placeholders/default_user.jpg');
 
 INSERT INTO properties (
     id,
@@ -472,14 +467,14 @@ VALUES
     (2, 1, 2, '2026-05-10', '2026-05-13', 525.00, 'completed'),
     (3, 2, 3, '2026-06-01', '2026-06-03', 280.00, 'completed'),
     (4, 3, 5, '2026-07-15', '2026-07-18', 750.00, 'completed'),
-    (5, 1, 3, '2026-01-10', '2026-01-12', 350.00, 'completed'),
+    (5, 1, 2, '2026-01-10', '2026-01-12', 350.00, 'completed'),
     (6, 1, 5, '2026-02-14', '2026-02-16', 350.00, 'completed'),
     (7, 1, 7, '2026-04-05', '2026-04-08', 525.00, 'completed'),
     (8, 1, 9, '2026-06-12', '2026-06-15', 525.00, 'completed'),
-    (9, 1, 2, '2026-08-20', '2026-08-23', 525.00, 'confirmed'),
-    (10, 1, 3, '2026-08-28', '2026-08-31', 525.00, 'confirmed'),
+    (9, 1, 3, '2026-08-20', '2026-08-23', 525.00, 'confirmed'),
+    (10, 1, 4, '2026-08-28', '2026-08-31', 525.00, 'confirmed'),
     (11, 16, 3, '2026-08-20', '2026-08-21', 525.00, 'confirmed'),
-    (12, 1, 2, '2027-03-01', '2027-03-09', 1000.00, 'confirmed');
+    (12, 1, 5, '2027-03-01', '2027-03-09', 1000.00, 'confirmed');
 
 INSERT INTO "blockings" ("property_id", "start_date", "end_date", "reason")
 VALUES
@@ -560,4 +555,14 @@ VALUES
 SELECT setval(
     'users_id_seq',
     (SELECT MAX(id) FROM users)
+);
+
+SELECT setval(
+    'properties_id_seq',
+    (SELECT MAX(id) FROM properties)
+);
+
+SELECT setval(
+  'bookings_id_seq',
+  (SELECT MAX(id) FROM bookings)
 );

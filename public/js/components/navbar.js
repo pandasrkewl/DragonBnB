@@ -1,8 +1,8 @@
-import {
-  createElement,
-  createModal
-} from "../reusable/functions.js";
+import { createElement } from "../reusable/functions.js";
 import {createGuestPicker} from "./guestPicker.js";
+import { createDatePicker } from "./datePicker.js";
+import { createLoginModal } from "./loginModal.js";
+import { createSignupModal } from "./signupModal.js";
 
 function formatDateLabel(value) {
   if (!value) return "Add dates";
@@ -24,209 +24,17 @@ function formatDateRange(checkIn, checkOut) {
     : `Add date – ${formatDateLabel(checkOut)}`;
 }
 
-function createSignupModal() {
-  const form = createElement("form", {
-    className: "signup-form"
-  });
-
-  const errorMessage = createElement("p", {
-    className: "signup-error",
-    textContent: ""
-  });
-
-  const firstNameInput = createElement("input", {
-    type: "text",
-    name: "first_name",
-    placeholder: "First name",
-    required: "required"
-  });
-
-  const lastNameInput = createElement("input", {
-    type: "text",
-    name: "last_name",
-    placeholder: "Last name",
-    required: "required"
-  });
-
-  const emailInput = createElement("input", {
-    type: "email",
-    name: "email",
-    placeholder: "Email",
-    required: "required"
-  });
-
-  const passwordInput = createElement("input", {
-    type: "password",
-    name: "password",
-    placeholder: "Password",
-    required: "required"
-  });
-
-  const submitButton = createElement("button", {
-    type: "submit",
-    className: "signup-submit",
-    textContent: "Create account"
-  });
-
-  form.append(
-    firstNameInput,
-    lastNameInput,
-    emailInput,
-    passwordInput,
-    errorMessage,
-    submitButton
-  );
-
-  const modal = createModal("Create an account", form);
-
-  form.addEventListener("submit", async (event) => {
-    event.preventDefault();
-
-    errorMessage.textContent = "";
-    errorMessage.classList.remove("visible");
-
-    submitButton.disabled = true;
-    submitButton.textContent = "Creating account...";
-
-    const formData = new FormData(form);
-
-    const data = {
-      first_name: formData.get("first_name"),
-      last_name: formData.get("last_name"),
-      email: formData.get("email"),
-      password: formData.get("password"),
-      host: false
-    };
-
-    try {
-      const response = await fetch("/signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data)
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || "Unable to create account.");
-      }
-
-      // Account was successfully created
-      modal.remove();
-
-      // Refresh the page so the navbar shows the logged-in user
-      window.location.reload();
-
-    } catch (error) {
-      errorMessage.textContent = error.message;
-      errorMessage.classList.add("visible");
-
-      submitButton.disabled = false;
-      submitButton.textContent = "Create account";
-    }
-  });
-
-  return modal;
-}
-
-function createLoginModal() {
-  const form = createElement("form", {
-    className: "login-form"
-  });
-
-  const errorMessage = createElement("p", {
-    className: "login-error",
-    textContent: ""
-  });
-
-  const emailInput = createElement("input", {
-    type: "email",
-    name: "email",
-    placeholder: "Email",
-    required: "required"
-  });
-
-  const passwordInput = createElement("input", {
-    type: "password",
-    name: "password",
-    placeholder: "Password",
-    required: "required"
-  });
-
-  const submitButton = createElement("button", {
-    type: "submit",
-    className: "login-submit",
-    textContent: "Log in"
-  });
-
-  form.append(
-    emailInput,
-    passwordInput,
-    errorMessage,
-    submitButton
-  );
-
-  const modal = createModal("Log in", form);
-
-  form.addEventListener("submit", async (event) => {
-    event.preventDefault();
-
-    errorMessage.textContent = "";
-    errorMessage.classList.remove("visible");
-
-    submitButton.disabled = true;
-    submitButton.textContent = "Logging in...";
-
-    const formData = new FormData(form);
-
-    const data = {
-      email: formData.get("email"),
-      password: formData.get("password")
-    };
-
-    try {
-      const response = await fetch("/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data)
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || "Unable to log in.");
-      }
-
-      modal.remove();
-
-      window.location.reload();
-
-    } catch (error) {
-      errorMessage.textContent = error.message;
-      errorMessage.classList.add("visible");
-
-      submitButton.disabled = false;
-      submitButton.textContent = "Log in";
-    }
-  });
-
-  return modal;
-}
-
 export function createNavbar({
   userMode = "guest",
   isRegisteredHost = false,
   activeHostTab = null,
-  profilePic = "../../../assets/placeholders/default_user.jpg",
+  profilePic = "/assets/placeholders/default_user.jpg",
+  user=null
 }) {
   const header = createElement("header", { className: "main-header" });
 
   const logoImg = createElement("img", {
-    src: "../../../assets/icons/logo.svg",
+    src: "/assets/icons/logo.svg",
     alt: "DrexelBNB Logo",
     className: "logo-icon",
   });
@@ -245,7 +53,7 @@ export function createNavbar({
     const hostTabs = [
       { text: "Today", href: "/host/today.html" },
       { text: "Calendar", href: "/host/calendar.html" },
-      { text: "Listings", href: "/host/listings.html" },
+      { text: "Listings", href: "/host/create-listing.html" },
       { text: "Messages", href: "/host/messages.html" },
     ];
 
@@ -281,7 +89,7 @@ export function createNavbar({
       { className: "search-segment search-segment-input" },
       [
         createElement("img", {
-          src: "../../../assets/icons/location.svg",
+          src: "/assets/icons/location.svg",
           alt: "Location",
           className: "segment-icon",
         }),
@@ -299,7 +107,7 @@ export function createNavbar({
       { className: "search-segment search-segment-picker" },
       [
         createElement("img", {
-          src: "../../../assets/icons/calendar.svg",
+          src: "/assets/icons/calendar.svg",
           alt: "Calendar",
           className: "segment-icon",
         }),
@@ -318,7 +126,7 @@ export function createNavbar({
       { className: "search-segment search-segment-picker" },
       [
         createElement("img", {
-          src: "../../../assets/icons/person.svg",
+          src: "/assets/icons/person.svg",
           alt: "Guests",
           className: "segment-icon",
         }),
@@ -337,7 +145,7 @@ export function createNavbar({
       { className: "search-btn", type: "submit" },
       [
         createElement("img", {
-          src: "../../../assets/icons/search.svg",
+          src: "/assets/icons/search.svg",
           alt: "Search",
         }),
       ],
@@ -351,36 +159,22 @@ export function createNavbar({
       className: "suggestion-list",
     });
 
-    const checkIn = createElement("input", {type: "text", className: "date-input", placeholder: "Check in"})
-    const checkOut = createElement("input", {type: "text", className: "date-input", placeholder: "Check out"})
+    const datePicker = createDatePicker(null, null, () => {updateDateSummary();});
+    const checkInInput = datePicker.checkIn;
+    const checkOutInput = datePicker.checkOut;
 
     const datePanel = createElement(
       "div",
       { className: "search-dropdown date-dropdown" },
       [
         createElement("div", { className: "dropdown-header" }, [
-          createElement("strong", { textContent: "Select dates" }),
+          createElement("strong", {
+            textContent: "Select dates"
+          }),
         ]),
-        createElement("div", { className: "date-picker-grid" }, [
-          createElement("label", { className: "date-field" }, [
-            createElement("span", { textContent: "Check in" }),
-            checkIn
-          ]),
-          createElement("label", { className: "date-field" }, [
-            createElement("span", { textContent: "Check out" }),
-            checkOut
-          ]),
-        ]),
-      ],
+        datePicker.element
+      ]
     );
-
-    const checkInCalendar = flatpickr(checkIn, {
-      minDate: "today"
-    });
-
-    const checkOutCalendar = flatpickr(checkOut, {
-      minDate: "today"
-    });
 
     const guestsPanel = createElement(
       "div",
@@ -396,8 +190,7 @@ export function createNavbar({
   const guestCounts = guestPicker.guestCounts;
   guestsPanel.appendChild(guestPicker.element);
 
-    const checkInInput = datePanel.querySelectorAll("input")[0];
-    const checkOutInput = datePanel.querySelectorAll("input")[1];
+
     const dateError = createElement("p", {
       className: "search-error",
       textContent: "",
@@ -655,6 +448,12 @@ export function createNavbar({
     textContent: toggleModeText,
   });
 
+  if(user) {
+    profilePic = user.image_url;
+    console.log(user);
+    console.log(`User Image Url: ${profilePic}`)
+  }
+
   const profileButton = createElement(
     "button",
     {
@@ -663,7 +462,7 @@ export function createNavbar({
     },
     [
       createElement("img", {
-        src: "../../../assets/icons/menu.svg",
+        src: "/assets/icons/menu.svg",
         alt: "Menu",
         className: "hamburger",
       }),
@@ -677,18 +476,18 @@ export function createNavbar({
 
   const dropdownMenu = createElement("div", { className: "profile-dropdown" }, [
     createElement("a", {
-      href: "/messages",
+      href: "/api/messages",
       className: "dropdown-item",
       textContent: "Messages",
     }),
     createElement("a", {
-      href: "/profile",
+      href: "/api/profile",
       className: "dropdown-item",
       textContent: "Profile",
     }),
   
     createElement("a", {
-      href: "/logout",
+      href: "/api/logout",
       className: "dropdown-item",
       textContent: "Logout",
     }),
@@ -740,7 +539,7 @@ export function createNavbar({
       { href: "/favorites", className: "favorites-link" },
       [
         createElement("img", {
-          src: "../../../assets/icons/heart.svg",
+          src: "/assets/icons/heart.svg",
           alt: "Favorites",
         }),
         document.createTextNode(" Favorites"),
