@@ -105,7 +105,7 @@ app.use(
   }),
 );
 
-app.post("/signup", async (req, res) => {
+app.post("/api/signup", async (req, res) => {
   try {
     const { first_name, last_name, email, password, host } = req.body;
     const normalizedEmail = email.trim().toLowerCase();
@@ -147,7 +147,7 @@ app.post("/signup", async (req, res) => {
   }
 });
 
-app.post("/login", async (req, res) => {
+app.post("/api/login", async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
@@ -345,11 +345,11 @@ app.get("/api/properties/:id/bookings", async (req, res) => {
   }
 });
 
-app.get("/listing", (req, res) => {
+app.get("/api/listing", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "listing.html"));
 });
 
-app.get("/messages", (req, res) => {
+app.get("/api/messages", (req, res) => {
   if (!req.session.user) {
     return res.redirect("/login.html");
   }
@@ -670,7 +670,7 @@ app.post(
   },
 );
 
-app.get("/listing/:propertyId/book", async(req, res) => {
+app.get("/api/listing/:propertyId/book", async(req, res) => {
 
   try {
     const propertyId = Number(req.params.propertyId);
@@ -1280,7 +1280,7 @@ app.get("/api/host/bookings/upcoming", requireLogin, async (req, res) => {
   }
 });
 
-app.get("/logout", (req, res) => {
+app.get("/api/logout", (req, res) => {
   req.session.destroy((err) => {
     if (err) {
       console.error("Logout error:", err);
@@ -1299,7 +1299,7 @@ app.get("/logout", (req, res) => {
   });
 });
 
-app.get("/profile", (req, res) => {
+app.get("/api/profile", (req, res) => {
   if (!req.session.user) {
     return res.redirect("/");
   }

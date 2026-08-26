@@ -9,22 +9,6 @@
     {
       "source": "/api/:path*",
       "destination": "/api/index.js"
-    },
-    {
-      "source": "/listing",
-      "destination": "/api/index.js"
-    },
-    {
-      "source": "/listing/:propertyId/book",
-      "destination": "/api/index.js"
-    },
-    {
-      "source": "/messages",
-      "destination": "/api/index.js"
-    },
-    {
-      "source": "/profile",
-      "destination": "/api/index.js"
     }
   ]
 }
