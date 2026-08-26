@@ -104,7 +104,7 @@ loginPrompt.append(loginText, loginLink);
     };
 
     try {
-      const response = await fetch("/signup", {
+      const response = await fetch("/api/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

@@ -436,7 +436,7 @@ export function createConfirmationSection(bookingDetails) {
             }
 
             window.location.href =
-                `/messages?convoId=${result.conversationId}`;
+                `/api/messages?convoId=${result.conversationId}`;
 
         } catch (error) {
             console.error("Error requesting booking:", error);

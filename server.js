@@ -51,6 +51,8 @@ const upload = multer({ storage });
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.set("trust proxy", 1);
+
 const server = http.createServer(app);
 const io = new Server(server);
 
@@ -71,7 +73,7 @@ io.on("connection", (socket) => {
   });
 });
 
-app.use(express.static("public"));
+app.use(express.static(path.join(__dirname, "public")));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
@@ -97,13 +99,13 @@ app.use(
     cookie: {
       maxAge: 1000 * 60 * 60 * 24,
       httpOnly: true,
-      secure: false,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
     },
   }),
 );
 
-app.post("/signup", async (req, res) => {
+app.post("/api/signup", async (req, res) => {
   try {
     const { first_name, last_name, email, password, host } = req.body;
     const normalizedEmail = email.trim().toLowerCase();
@@ -145,7 +147,7 @@ app.post("/signup", async (req, res) => {
   }
 });
 
-app.post("/login", async (req, res) => {
+app.post("/api/login", async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
@@ -343,11 +345,11 @@ app.get("/api/properties/:id/bookings", async (req, res) => {
   }
 });
 
-app.get("/listing", (req, res) => {
+app.get("/api/listing", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "listing.html"));
 });
 
-app.get("/messages", (req, res) => {
+app.get("/api/messages", (req, res) => {
   if (!req.session.user) {
     return res.redirect("/login.html");
   }
@@ -668,7 +670,7 @@ app.post(
   },
 );
 
-app.get("/listing/:propertyId/book", async(req, res) => {
+app.get("/api/listing/:propertyId/book", async(req, res) => {
 
   try {
     const propertyId = Number(req.params.propertyId);
@@ -1031,10 +1033,6 @@ app.delete(
   }
 );
 
-server.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT} with Socket.io`);
-});
-
 app.get("/api/me", (req, res) => {
   if (!req.session.user) {
     return res.json(null);
@@ -1282,7 +1280,7 @@ app.get("/api/host/bookings/upcoming", requireLogin, async (req, res) => {
   }
 });
 
-app.get("/logout", (req, res) => {
+app.get("/api/logout", (req, res) => {
   req.session.destroy((err) => {
     if (err) {
       console.error("Logout error:", err);
@@ -1301,10 +1299,18 @@ app.get("/logout", (req, res) => {
   });
 });
 
-app.get("/profile", (req, res) => {
+app.get("/api/profile", (req, res) => {
   if (!req.session.user) {
     return res.redirect("/");
   }
 
   res.sendFile(path.join(__dirname, "public", "profile.html"));
 });
+
+if (require.main === module) {
+  server.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT} with Socket.io`);
+  });
+}
+
+module.exports = app;

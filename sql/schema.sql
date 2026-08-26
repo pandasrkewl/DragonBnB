@@ -178,11 +178,6 @@ VALUES
     (23, 'Ella', 'Wright', 'e.wwright@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, '/assets/placeholders/default_user.jpg'),
     (24, 'Jack', 'Scott', 'jack.scott@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, '/assets/placeholders/default_user.jpg');
 
-SELECT setval(
-    'users_id_seq',
-    (SELECT MAX(id) FROM users)
-);
-
 INSERT INTO properties (
     id,
     host_id,
