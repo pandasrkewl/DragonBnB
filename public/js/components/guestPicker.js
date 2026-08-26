@@ -11,6 +11,7 @@ export function createGuestPicker(initialGuests = {}, onChange=null) {
     const panel = createElement("div", {
         className: "guest-dropdown"
     });
+    const valueComponents = [];
 
     const counters = [
         { key: "adults", label: "Adults", detail: "Ages 13+" },
@@ -83,14 +84,22 @@ export function createGuestPicker(initialGuests = {}, onChange=null) {
         ]);
 
         row.append(textBlock, counter);
+        valueComponents.push({key, value})
 
         return row;
     });
+
+    function updateValues() {
+        valueComponents.forEach(({key, value}) => {
+            value.textContent = guestCounts[key];
+        })
+    }
 
     rows.forEach(row => panel.appendChild(row));
 
     return {
         element: panel,
-        guestCounts
+        guestCounts,
+        updateValues
     };
 }

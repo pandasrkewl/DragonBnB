@@ -451,6 +451,123 @@ app.post("/api/messages", requireLogin, async (req, res) => {
   }
 });
 
+app.post("/api/bookings", requireLogin, async (req, res) => {
+  try {
+    const {
+      propertyId,
+      startDate,
+      endDate,
+      totalPrice,
+      message
+    } = req.body;
+
+    const guestId = req.session.user.id;
+
+    if (!propertyId || !startDate || !endDate || totalPrice == null) {
+      return res.status(400).json({
+        error: "Missing booking information"
+      });
+    }
+
+    const existingBooking = await pool.query(
+      `SELECT id
+       FROM bookings
+       WHERE property_id = $1
+         AND user_id = $2
+         AND start_date = $3
+         AND end_date = $4
+         AND status = 'pending'
+       LIMIT 1`,
+      [
+        propertyId,
+        guestId,
+        startDate,
+        endDate
+      ]
+    );
+
+    if (existingBooking.rows.length > 0) {
+      return res.status(409).json({
+        error: "You already requested this booking."
+      });
+    }
+    
+    const property = await getPropertyById(propertyId);
+
+    if (!property) {
+      return res.status(404).json({
+        error: "Property not found"
+      });
+    }
+
+    const bookingResult = await pool.query(
+      `INSERT INTO bookings (
+        property_id,
+        user_id,
+        start_date,
+        end_date,
+        total_price,
+        status
+      )
+      VALUES ($1, $2, $3, $4, $5, 'pending')
+      RETURNING id`,
+      [
+        propertyId,
+        guestId,
+        startDate,
+        endDate,
+        totalPrice
+      ]
+    );
+
+    const bookingId = bookingResult.rows[0].id;
+
+    const conversationId = await createOrGetConversation(
+      property.host_id,
+      guestId,
+      propertyId
+    );
+
+    const reservationRequest = JSON.stringify({
+      type: "reservation_request",
+      bookingId: bookingId,
+      property: property.title,
+      startDate: startDate,
+      endDate: endDate,
+      total: totalPrice,
+      status: "pending",
+      image: property.image_url
+    });
+
+    await sendMessage(
+      conversationId,
+      guestId,
+      reservationRequest
+    );
+
+    if (message && message.trim()) {
+      await sendMessage(
+        conversationId,
+        guestId,
+        message.trim()
+      );
+    }
+
+    res.status(201).json({
+      success: true,
+      bookingId,
+      conversationId
+    });
+
+  } catch (error) {
+    console.error("Error creating booking:", error);
+
+    res.status(500).json({
+      error: "Could not create booking"
+    });
+  }
+});
+
 app.post("/api/conversations", requireLogin, async (req, res) => {
   try {
     const { hostId, guestId, propertyId } = req.body;
@@ -552,6 +669,28 @@ app.post(
     }
   },
 );
+
+app.get("/listing/:propertyId/book", async(req, res) => {
+
+  try {
+    const propertyId = Number(req.params.propertyId);
+
+    if (!Number.isInteger(propertyId) || propertyId <= 0) {
+      return res.status(400).json({"error": "Invalid property id"});
+    }
+
+    const property = await getPropertyById(propertyId);
+
+    if (!property) {
+      return res.status(404).json({"error": "Property not found"})
+    }
+
+    res.sendFile(path.join(__dirname, "public", "book.html"));
+  } catch (error) {
+    console.error("Error loading booking page:", error);
+    res.status(500).send("Could not load booking page");  
+  }
+});
 
 app.post("/api/properties", requireLogin, async (req, res) => {
   try {
@@ -921,6 +1060,203 @@ app.get("/api/host/bookings/today", requireLogin, async (req, res) => {
   } catch (error) {
     console.error("Error fetching host bookings for today:", error);
     res.status(500).json({ error: "Could not fetch bookings" });
+  }
+});
+
+app.put("/api/bookings/:bookingId/status", requireLogin, async (req, res) => {
+  const client = await pool.connect();
+
+  try {
+    const bookingId = Number(req.params.bookingId);
+    const { status } = req.body;
+    const hostId = req.session.user.id;
+
+    if (!Number.isInteger(bookingId) || bookingId <= 0) {
+      return res.status(400).json({
+        error: "Invalid booking id"
+      });
+    }
+
+    if (!["confirmed", "rejected"].includes(status)) {
+      return res.status(400).json({
+        error: "Invalid booking status"
+      });
+    }
+
+    await client.query("BEGIN");
+
+    // Find the booking and verify this user owns the property
+    const bookingResult = await client.query(
+      `SELECT
+          b.id,
+          b.property_id,
+          b.user_id,
+          b.start_date,
+          b.end_date,
+          b.total_price,
+          b.status,
+          p.title,
+          p.host_id,
+          COALESCE(
+            (
+              SELECT pi.image_url
+              FROM property_images pi
+              WHERE pi.property_id = p.id
+              ORDER BY pi.display_order ASC
+              LIMIT 1
+            ),
+            '/assets/placeholders/default_home.jpg'
+          ) AS property_image
+       FROM bookings b
+       JOIN properties p
+         ON p.id = b.property_id
+       WHERE b.id = $1
+       FOR UPDATE`,
+      [bookingId]
+    );
+
+    if (bookingResult.rows.length === 0) {
+      await client.query("ROLLBACK");
+
+      return res.status(404).json({
+        error: "Booking not found"
+      });
+    }
+
+    const booking = bookingResult.rows[0];
+
+    if (booking.host_id !== hostId) {
+      await client.query("ROLLBACK");
+
+      return res.status(403).json({
+        error: "You are not the host for this property"
+      });
+    }
+
+    if (booking.status !== "pending") {
+      await client.query("ROLLBACK");
+
+      return res.status(409).json({
+        error: "This booking has already been handled"
+      });
+    }
+
+    // Update the booking the host clicked
+    await client.query(
+      `UPDATE bookings
+       SET status = $1
+       WHERE id = $2`,
+      [status, bookingId]
+    );
+
+    let conflictingBookings = [];
+
+    // If accepted, reject all OTHER overlapping pending requests
+    if (status === "confirmed") {
+      const conflictResult = await client.query(
+        `UPDATE bookings
+         SET status = 'rejected'
+         WHERE property_id = $1
+           AND id != $2
+           AND status = 'pending'
+
+           -- Date ranges overlap
+           AND start_date < $3
+           AND end_date > $4
+
+         RETURNING
+           id,
+           user_id,
+           start_date,
+           end_date,
+           total_price`,
+        [
+          booking.property_id,
+          bookingId,
+          booking.end_date,
+          booking.start_date
+        ]
+      );
+
+      conflictingBookings = conflictResult.rows;
+    }
+
+    await client.query("COMMIT");
+
+    const conversationId = await createOrGetConversation(
+      hostId,
+      booking.user_id,
+      booking.property_id
+    );
+
+    const actionMessage = JSON.stringify({
+      type: "reservation_action",
+      status: status === "confirmed" ? "accepted" : "rejected",
+      property: booking.title,
+      dates: `${booking.start_date.toLocaleDateString()} - ${booking.end_date.toLocaleDateString()}`,
+      image: booking.property_image
+    });
+
+    const savedMessage = await sendMessage(
+      conversationId,
+      hostId,
+      actionMessage
+    );
+
+    io.to(String(conversationId)).emit(
+      "receiveMessage",
+      savedMessage
+    );
+    if (status === "confirmed") {
+      for (const conflict of conflictingBookings) {
+        const conflictConversationId =
+          await createOrGetConversation(
+            hostId,
+            conflict.user_id,
+            booking.property_id
+          );
+
+        const rejectedMessage = JSON.stringify({
+          type: "reservation_action",
+          status: "rejected",
+          property: booking.title,
+          dates:
+            `${new Date(conflict.start_date).toLocaleDateString()} - ` +
+            `${new Date(conflict.end_date).toLocaleDateString()}`,
+          image: booking.property_image
+        });
+
+        const savedRejectedMessage = await sendMessage(
+          conflictConversationId,
+          hostId,
+          rejectedMessage
+        );
+
+        io.to(String(conflictConversationId)).emit(
+          "receiveMessage",
+          savedRejectedMessage
+        );
+      }
+    }
+
+    res.json({
+      success: true,
+      status,
+      message: savedMessage,
+      rejectedConflicts: conflictingBookings.length
+    });
+
+  } catch (error) {
+    await client.query("ROLLBACK");
+
+    console.error("Error updating booking:", error);
+
+    res.status(500).json({
+      error: "Could not update booking"
+    });
+
+  } finally {
+    client.release();
   }
 });
 

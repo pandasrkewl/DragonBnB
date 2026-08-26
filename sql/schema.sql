@@ -178,11 +178,6 @@ VALUES
     (23, 'Ella', 'Wright', 'e.wwright@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, '/assets/placeholders/default_user.jpg'),
     (24, 'Jack', 'Scott', 'jack.scott@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, '/assets/placeholders/default_user.jpg');
 
-SELECT setval(
-    'users_id_seq',
-    (SELECT MAX(id) FROM users)
-);
-
 INSERT INTO properties (
     id,
     host_id,
@@ -535,3 +530,18 @@ VALUES
     (4, 16, 'Great! When would you like to stay?', '2026-08-01 10:30:00', FALSE, NULL),
     (5, 9, 'Can I bring a dog?', '2026-07-15 15:30:00', TRUE, '2026-07-15 15:35:00'),
     (5, 4, 'Of course! Dogs are welcome here.', '2026-07-15 15:45:00', FALSE, NULL);
+
+SELECT setval(
+    'users_id_seq',
+    (SELECT MAX(id) FROM users)
+);
+
+SELECT setval(
+    'properties_id_seq',
+    (SELECT MAX(id) FROM properties)
+);
+
+SELECT setval(
+  'bookings_id_seq',
+  (SELECT MAX(id) FROM bookings)
+);
