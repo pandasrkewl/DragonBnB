@@ -5,26 +5,26 @@
       "includeFiles": "public/**"
     }
   },
-  "routes": [
+  "rewrites": [
     {
-      "src": "/",
-      "dest": "/public/index.html"
+      "source": "/api/:path*",
+      "destination": "/api/index.js"
     },
     {
-      "src": "/js/(.*)",
-      "dest": "/public/js/$1"
+      "source": "/listing",
+      "destination": "/api/index.js"
     },
     {
-      "src": "/css/(.*)",
-      "dest": "/public/css/$1"
+      "source": "/listing/:propertyId/book",
+      "destination": "/api/index.js"
     },
     {
-      "src": "/assets/(.*)",
-      "dest": "/public/assets/$1"
+      "source": "/messages",
+      "destination": "/api/index.js"
     },
     {
-      "src": "/(.*)",
-      "dest": "/api/index.js"
+      "source": "/profile",
+      "destination": "/api/index.js"
     }
   ]
 }
