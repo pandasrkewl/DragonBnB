@@ -242,7 +242,7 @@ export function createBookingCard(
         infants: guests.infants,
         pets: guests.pets
     });
-        window.location.href = `/api/listing/${property.id}/book?${params.toString()}`;
+        window.location.href = `/listing/${property.id}/book?${params.toString()}`;
     })
 
     const bookingError = createElement("p", {

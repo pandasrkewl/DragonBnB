@@ -80,8 +80,11 @@ async function getProperties({
   const queryText = `SELECT
         p.id,
         p.title,
+        p.address_line_1,
         p.city,
         p.state,
+        p.latitude,
+        p.longitude,
         p.price_per_night,
 
         COALESCE(
@@ -663,6 +666,8 @@ async function createProperty(property) {
       state,
       postal_code,
       country,
+      latitude,
+      longitude,
       max_guests,
       bedrooms,
       bathrooms,
@@ -677,7 +682,7 @@ async function createProperty(property) {
       $1, $2, $3, $4, $5,
       $6, $7, $8, $9, $10,
       $11, $12, $13, $14, $15,
-      $16, $17, $18
+      $16, $17, $18, $19, $20
     )
     RETURNING *`,
     [
@@ -690,6 +695,8 @@ async function createProperty(property) {
       property.state,
       property.postal_code,
       property.country,
+      property.latitude,
+      property.longitude,
       property.max_guests,
       property.bedrooms,
       property.bathrooms,
