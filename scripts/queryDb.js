@@ -506,6 +506,35 @@ async function getBookingsUpcoming(hostId) {
   return result.rows;
 }
 
+async function getBookingsPast(hostId) {
+  const result = await pool.query(
+    `SELECT
+      bookings.start_date,
+      bookings.end_date,
+      bookings.user_id AS tenant_id,
+      bookings.status,
+      users.image_url,
+      users.first_name,
+      users.last_name
+    FROM bookings
+
+    JOIN properties
+      ON properties.id = bookings.property_id
+
+    JOIN users
+      ON users.id = bookings.user_id
+
+    WHERE properties.host_id = $1
+      AND bookings.end_date < CURRENT_DATE
+      AND bookings.status = 'confirmed'
+
+    ORDER BY bookings.end_date DESC`,
+    [hostId]
+  );
+
+  return result.rows;
+}
+
 async function getUnreadMessageCount(userId) {
   const result = await pool.query(
     `SELECT COUNT(*) as unread_count
@@ -689,6 +718,7 @@ module.exports = {
   addPropertyImage,
   getBookingsForToday,
   getBookingsUpcoming,
+  getBookingsPast,
   getUserConversations,
   getConversationById,
   getConversationMessages,

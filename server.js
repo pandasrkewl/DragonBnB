@@ -25,6 +25,7 @@ const {
   getUnreadCountForConversation,
   getBookingsForToday,
   getBookingsUpcoming,
+  getBookingsPast,
 } = require("./scripts/queryDb");
 const session = require("express-session");
 const bcrypt = require("bcrypt");
@@ -1277,6 +1278,35 @@ app.get("/api/host/bookings/upcoming", requireLogin, async (req, res) => {
   } catch (error) {
     console.error("Error fetching upcoming host bookings:", error);
     res.status(500).json({ error: "Could not fetch upcoming bookings" });
+  }
+});
+
+app.get("/api/host/bookings/past", requireLogin, async (req, res) => {
+  try {
+    const user = req.session.user;
+
+    if (!user || !user.id) {
+      return res.status(401).json({
+        error: "Not authenticated"
+      });
+    }
+
+    if (!user.host) {
+      return res.status(403).json({
+        error: "Not a host"
+      });
+    }
+
+    const bookings = await getBookingsPast(user.id);
+
+    res.json(bookings);
+
+  } catch (error) {
+    console.error("Error fetching past host bookings:", error);
+
+    res.status(500).json({
+      error: "Could not fetch past bookings"
+    });
   }
 });
 
