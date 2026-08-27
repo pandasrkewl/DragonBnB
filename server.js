@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const path = require("path");
 const express = require("express");
 const multer = require("multer");
@@ -77,6 +79,12 @@ io.on("connection", (socket) => {
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+app.get("/api/config", (req, res) => {
+  res.json({
+    mapApiKey: process.env.MAP_API_KEY || "",
+  });
+});
 
 function isInvalidDateRange(checkIn, checkOut) {
   if (!checkIn || !checkOut) {

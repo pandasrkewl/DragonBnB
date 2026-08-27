@@ -45,7 +45,7 @@ function openPropertyModal(property) {
   document.body.append(modal);
 }
 
-export function createResultsMap(properties) {
+export function createResultsMap(properties, mapApiKey = "") {
   const mapEl = document.getElementById("results-map");
 
   if (!mapEl || typeof L === "undefined") {
@@ -59,10 +59,23 @@ export function createResultsMap(properties) {
     DEFAULT_ZOOM,
   );
 
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution: "&copy; OpenStreetMap contributors",
-    maxZoom: 19,
-  }).addTo(map);
+  const tileUrl = mapApiKey
+    ? `https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=${mapApiKey}`
+    : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+
+  const tileOptions = mapApiKey
+    ? {
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        subdomains: "abcd",
+        maxZoom: 20,
+      }
+    : {
+        attribution: "&copy; OpenStreetMap contributors",
+        maxZoom: 19,
+      };
+
+  L.tileLayer(tileUrl, tileOptions).addTo(map);
 
   const geocoded = properties.filter(
     (property) => property.latitude != null && property.longitude != null,

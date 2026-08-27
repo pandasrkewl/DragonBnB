@@ -10,6 +10,8 @@ const resultsMap = document.getElementById("results-map");
 
 const response = await fetch("/api/me");
 const user = await response.json();
+const configResponse = await fetch("/api/config");
+const config = await configResponse.json();
 
 let userMode = user? "tenant" : "guest";
 
@@ -99,7 +101,7 @@ fetch(`/api/properties?${query.toString()}`)
       resultsGrid.appendChild(card);
     });
 
-    createResultsMap(properties);
+    createResultsMap(properties, config.mapApiKey);
   })
   .catch((error) => {
     console.error(error);
