@@ -1,10 +1,12 @@
 import { createNavbar } from "../components/navbar.js";
 import { createPropertyCard } from "../components/propertyCard.js";
+import { createResultsMap } from "../components/resultsMap.js";
 import { createElement } from "../reusable/functions.js";
 
 const navBarContainer = document.getElementById("navbar-container");
 const resultsHeader = document.getElementById("results-header");
 const resultsGrid = document.getElementById("results-grid");
+const resultsMap = document.getElementById("results-map");
 
 const response = await fetch("/api/me");
 const user = await response.json();
@@ -81,6 +83,12 @@ fetch(`/api/properties?${query.toString()}`)
           "No listings matched your search yet. Try broadening your criteria.",
       });
       resultsGrid.replaceChildren(emptyState);
+      resultsMap.replaceChildren(
+        createElement("div", {
+          className: "empty-state",
+          textContent: "No listings to show on the map.",
+        }),
+      );
       return;
     }
 
@@ -90,6 +98,8 @@ fetch(`/api/properties?${query.toString()}`)
       const card = createPropertyCard(property);
       resultsGrid.appendChild(card);
     });
+
+    createResultsMap(properties);
   })
   .catch((error) => {
     console.error(error);
@@ -98,4 +108,5 @@ fetch(`/api/properties?${query.toString()}`)
       textContent: "We could not load the results right now.",
     });
     resultsGrid.replaceChildren(errorState);
+    resultsMap.replaceChildren(errorState.cloneNode(true));
   });
