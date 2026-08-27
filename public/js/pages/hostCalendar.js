@@ -309,11 +309,35 @@ function updateAvailabilitySettings() {
   timePeriodsSelected = selectedDayAvailability.length > 0;
   setAvailabilitySaveState(timePeriodsSelected && availabilityChanged);
   if (!timePeriodsSelected) {
+    blockingReason.disabled = true;
+    blockingReason.value = "";
     return;
   }
 
+  const clearSelectionButton = createElement("button", {
+    className: "availability-clear-selection",
+    textContent: "Unselect all days",
+    type: "button",
+  });
+  clearSelectionButton.addEventListener("click", () => {
+    selectedDayKeys = [];
+    selectedDayAvailability = [];
+    pendingAvailabilityAction = null;
+    availabilityChanged = false;
+    blockingReason.value = "";
+    updateCalendarDayStyles();
+    updateAvailabilitySettings();
+  });
+  availabilityToggle.appendChild(clearSelectionButton);
+
   const availableDays = selectedDayAvailability.filter(Boolean).length;
   const blockedDays = selectedDayAvailability.length - availableDays;
+  const canEditReason = blockedDays > 0 &&
+    (availableDays === 0 || pendingAvailabilityAction === "block");
+  blockingReason.disabled = !canEditReason;
+  if (!canEditReason) {
+    blockingReason.value = "";
+  }
 
   if (blockedDays === 0 || availableDays === 0) {
     const isAvailable = availableDays > 0;
@@ -369,43 +393,28 @@ function updateAvailabilitySettings() {
     });
     actionButton.addEventListener("click", () => {
       pendingAvailabilityAction = action;
+      availabilityChanged = true;
       updateAvailabilitySettings();
     });
     actionContainer.appendChild(actionButton);
   });
 
-  const confirmButton = createElement("button", {
-    className: "availability-confirm",
-    textContent: "Confirm",
-    type: "button",
-  });
-  confirmButton.disabled = pendingAvailabilityAction === null;
-  confirmButton.addEventListener("click", () => {
-    if (!pendingAvailabilityAction) {
-      return;
-    }
-
-    const makeAvailable = pendingAvailabilityAction === "open";
-    selectedDayKeys.forEach((dayKey) => {
-      availabilityByDate.set(dayKey, makeAvailable);
-    });
-    selectedDayAvailability = selectedDayKeys.map((dayKey) => availabilityByDate.get(dayKey));
-    pendingAvailabilityAction = null;
-    availabilityChanged = true;
-    updateCalendarDayStyles();
-    updateAvailabilitySettings();
-  });
-
-  availabilityToggle.append(mixedSummary, actionContainer, confirmButton);
+  availabilityToggle.append(mixedSummary, actionContainer);
 }
 
 updateAvailabilitySettings();
 
 availabilitySaveButton.addEventListener("click", async () => {
   const propertyId = properties[selectedPropertyIndex]?.property_id;
+  const pendingAvailability = pendingAvailabilityAction === "open"
+    ? true
+    : pendingAvailabilityAction === "block"
+      ? false
+      : null;
+
   const dates = selectedDayKeys.map((dayKey) => ({
     date: dayKey.slice(String(propertyId).length + 1),
-    available: availabilityByDate.get(dayKey) !== false,
+    available: pendingAvailability ?? availabilityByDate.get(dayKey) !== false,
   }));
   const reason = blockingReason.value.trim();
 
@@ -427,6 +436,13 @@ availabilitySaveButton.addEventListener("click", async () => {
     }
 
     await loadPropertyBlockings(propertyId);
+    if (pendingAvailability !== null) {
+      selectedDayKeys.forEach((dayKey) => {
+        availabilityByDate.set(dayKey, pendingAvailability);
+      });
+      selectedDayAvailability = selectedDayKeys.map((dayKey) => availabilityByDate.get(dayKey));
+    }
+    pendingAvailabilityAction = null;
     availabilityChanged = false;
     updateCalendarDayStyles();
   } catch (error) {

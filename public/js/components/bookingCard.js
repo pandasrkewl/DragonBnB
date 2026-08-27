@@ -1,12 +1,24 @@
 import { createElement } from "../reusable/functions.js";
 import { createGuestPicker } from "./guestPicker.js";
 
-export function createBookingCard(property, bookings, checkIn, checkOut, guestCounts) {
+export function createBookingCard(
+    property,
+    bookings,
+    blockings = [],
+    checkIn,
+    checkOut,
+    guestCounts
+) {
 
-    const disabledRanges = bookings.map(booking => ({
-        from: booking.start_date.split("T")[0],
-        to: booking.end_date.split("T")[0]
-    }))
+    const disabledRanges = [...bookings, ...blockings].map(range => {
+        const endDate = new Date(`${range.end_date.split("T")[0]}T00:00:00`);
+        endDate.setDate(endDate.getDate() - 1);
+
+        return {
+            from: range.start_date.split("T")[0],
+            to: endDate.toISOString().split("T")[0]
+        };
+    });
 
     const card = createElement("form", {
         className: "booking-card"
@@ -99,10 +111,13 @@ export function createBookingCard(property, bookings, checkIn, checkOut, guestCo
             minimumCheckOut.setDate(minimumCheckOut.getDate() + 1);
             checkOutCalendar.set("minDate", minimumCheckOut);   
 
-            const nextBooking = bookings.map(booking => new Date(booking.start_date)).filter(startDate => startDate > checkInDate).sort((a,b) => a-b)[0];
+            const nextUnavailableDate = [...bookings, ...blockings]
+                .map(range => new Date(`${range.start_date.split("T")[0]}T00:00:00`))
+                .filter(startDate => startDate > checkInDate)
+                .sort((a, b) => a - b)[0];
 
-            if (nextBooking) {
-                checkOutCalendar.set("maxDate", nextBooking);
+            if (nextUnavailableDate) {
+                checkOutCalendar.set("maxDate", nextUnavailableDate);
             } else {
                 checkOutCalendar.set("maxDate", null);
             }

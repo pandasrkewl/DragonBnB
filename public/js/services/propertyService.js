@@ -87,3 +87,17 @@ export function loadPropertyBookings(url) {
       console.error(error);
     });
 }
+
+export function loadPropertyBlockings(url) {
+   return fetch(url)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Could not load blockings");
+      }
+      return response.json();
+    })
+    .catch((error) => {
+      console.error(error);
+      return [];
+    });
+}

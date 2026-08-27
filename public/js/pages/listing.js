@@ -7,7 +7,7 @@ import { createAmenitiesSection } from "../components/propertyAmenities.js";
 import { createPropertyReviews } from "../components/propertyReviews.js";
 import { createBookingCard } from "../components/bookingCard.js";
 
-import { loadPropertyById, loadPropertyImages, loadPropertyAmenities, loadPropertyReviews, loadPropertyBookings } from "../services/propertyService.js"
+import { loadPropertyById, loadPropertyImages, loadPropertyAmenities, loadPropertyReviews, loadPropertyBookings, loadPropertyBlockings } from "../services/propertyService.js"
 
 
 const params = new URLSearchParams(window.location.search);
@@ -46,6 +46,7 @@ const images = await loadPropertyImages(`/api/properties/${listingId}/images`);
 const amenities = await loadPropertyAmenities(`/api/properties/${listingId}/amenities`);
 const reviews = await loadPropertyReviews(`/api/properties/${listingId}/reviews`);
 const bookings = await loadPropertyBookings(`/api/properties/${listingId}/bookings`)
+const blockings = await loadPropertyBlockings(`/api/properties/${listingId}/blockings`);
 
 const top = createPropertyListingTop(property, images);
 const bodyLeftSummary = createPropertySummary(property);
@@ -53,7 +54,7 @@ const bodyLeftHost = createHostSection(property);
 const bodyLeftDescription = createPropertyDescription(property);
 const bodyLeftAmenities = createAmenitiesSection(amenities);
 const reviewsSection = createPropertyReviews(property, reviews);
-const bookingCard = createBookingCard(property, bookings, checkIn, checkOut, guestCounts);
+const bookingCard = createBookingCard(property, bookings, blockings, checkIn, checkOut, guestCounts);
 
 topContainer.append(top);
 leftBodyContainer.append(bodyLeftSummary, bodyLeftHost, bodyLeftDescription, bodyLeftAmenities, reviewsSection);
