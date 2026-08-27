@@ -6,6 +6,7 @@ DROP TABLE IF EXISTS reviews CASCADE;
 DROP TABLE IF EXISTS bookings CASCADE;
 DROP TABLE IF EXISTS property_amenities CASCADE;
 DROP TABLE IF EXISTS amenities CASCADE;
+DROP TABLE IF EXISTS blockings CASCADE;
 DROP TABLE IF EXISTS properties CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 
@@ -46,6 +47,20 @@ CREATE TABLE properties (
     check_out_time TIME,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE blockings (
+    id SERIAL PRIMARY KEY,
+    property_id INTEGER NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    reason VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CHECK (end_date > start_date)
+);
+
+CREATE INDEX idx_blockings_property_dates
+    ON blockings(property_id, start_date, end_date);
 
 CREATE TABLE amenities (
   id SERIAL PRIMARY KEY,
@@ -465,6 +480,12 @@ VALUES
     (11, 16, 3, '2026-08-20', '2026-08-21', 525.00, 'confirmed'),
     (12, 1, 5, '2027-03-01', '2027-03-09', 1000.00, 'confirmed');
 
+INSERT INTO "blockings" ("property_id", "start_date", "end_date", "reason")
+VALUES
+    (1, '2026-04-20', '2026-04-23', 'Personal use'),
+    (1, '2026-07-01', '2026-07-05', 'Maintenance'),
+    (4, '2026-09-15', '2026-09-19', 'Personal use');
+
 INSERT INTO "reviews" ("id", "rating", "comment", "created_at", "user_id", "property_id", "booking_id")
 VALUES
     (1, 4, 'Cozy', '2026-03-02', 2, 1, 1),
@@ -491,7 +512,7 @@ VALUES
     (1, '/assets/images/properties/4-frontdoor.png', 8),
     (1, '/assets/placeholders/default_home.jpg', 9),
     (1, '/assets/images/properties/4-frontdoor.png', 10),
-    (2, '/assets/images/properties/4-frontdoor.png', 1),
+    (2, '/assets/images/properties/2-apartment.jpg', 1),
     (3, '/assets/placeholders/default_home.jpg', 1),
     (4, '/assets/images/properties/4-frontdoor.png', 1),
     (5, '/assets/placeholders/default_home.jpg', 1),

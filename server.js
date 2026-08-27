@@ -10,9 +10,12 @@ const {
   getPropertyCities,
   getPropertyById,
   getPropertyImages,
+  getPropertyImagesByUser,
   getPropertyAmenities,
   getPropertyReviews,
   getPropertyBookings,
+  getPropertyBlockings,
+  replacePropertyBlockings,
   createProperty,
   getHostProperties,
   addPropertyAmenities,
@@ -284,6 +287,27 @@ app.get("/api/properties/:id/images", async (req, res) => {
     });
   }
 });
+
+app.get("/api/property_images/:userId", async (req, res) => {
+  try {
+    const userId = Number(req.params.userId);
+
+    if (!Number.isInteger(userId) || userId <= 0) {
+      return res.status(400).json({
+        error: "Invalid user id"
+      });
+    }
+
+    const images = await getPropertyImagesByUser(userId);
+
+    res.json(images);
+  } catch (error) {
+    console.log("Error: gtting images", error);
+    res.status(500).json({
+      error: "Could not get property images by user id"
+    });
+  }
+})
 
 app.get("/api/properties/:id/amenities", async (req, res) => {
   try {
@@ -1220,6 +1244,41 @@ app.get("/api/host/bookings/upcoming", requireLogin, async (req, res) => {
   } catch (error) {
     console.error("Error fetching upcoming host bookings:", error);
     res.status(500).json({ error: "Could not fetch upcoming bookings" });
+  }
+});
+
+app.put("/api/host/properties/:propertyId/price", requireLogin, async (req, res) => {
+  try {
+    const propertyId = Number(req.params.propertyId);
+    const rawPrice = req.body.price_per_night;
+    const pricePerNight = Number(rawPrice);
+    const hostId = req.session.user.id;
+
+    if (!Number.isInteger(propertyId) || propertyId <= 0) {
+      return res.status(400).json({ error: "Invalid property id" });
+    }
+
+    if (rawPrice === "" || rawPrice === null || rawPrice === undefined ||
+      !Number.isFinite(pricePerNight) || pricePerNight < 0 || pricePerNight > 99999999.99) {
+      return res.status(400).json({ error: "Price must be between 0 and 99,999,999.99" });
+    }
+
+    const result = await pool.query(
+      `UPDATE properties
+       SET price_per_night = $1
+       WHERE id = $2 AND host_id = $3
+       RETURNING id, price_per_night`,
+      [pricePerNight.toFixed(2), propertyId, hostId],
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Property not found" });
+    }
+
+    res.json({ success: true, property: result.rows[0] });
+  } catch (error) {
+    console.error("Error updating property price:", error);
+    res.status(500).json({ error: "Could not update property price" });
   }
 });
 

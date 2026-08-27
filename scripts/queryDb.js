@@ -226,6 +226,24 @@ async function getPropertyImages(listingId) {
   return result.rows;
 }
 
+async function getPropertyImagesByUser(userId) {
+  const result = await pool.query(
+    `SELECT
+        image_url,
+        property_id,
+        price_per_night
+      FROM property_images
+      JOIN properties
+        ON properties.id = property_images.property_id
+      WHERE properties.host_id = $1
+        AND property_images.display_order = 1
+        ORDER BY property_images.property_id ASC`,
+      [userId]
+  );
+
+  return result.rows;
+}
+
 async function getPropertyAmenities(listingId) {
   const result = await pool.query(
     `SELECT 
@@ -451,6 +469,95 @@ async function getPropertyBookings(listingId) {
   );
 
   return result.rows;
+}
+
+async function getPropertyBlockings(listingId) {
+  const result = await pool.query(
+    `SELECT property_id, start_date, end_date, reason
+     FROM blockings
+     WHERE property_id = $1
+     ORDER BY start_date ASC`,
+    [listingId],
+  );
+
+  return result.rows;
+}
+
+async function replacePropertyBlockings(propertyId, hostId, dates, reason) {
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    const sortedDates = dates.map((entry) => entry.date).sort();
+    const rangeStart = sortedDates[0];
+    const lastDate = new Date(`${sortedDates[sortedDates.length - 1]}T00:00:00Z`);
+    lastDate.setUTCDate(lastDate.getUTCDate() + 1);
+    const rangeEnd = lastDate.toISOString().slice(0, 10);
+
+    const owner = await client.query(
+      "SELECT id FROM properties WHERE id = $1 AND host_id = $2",
+      [propertyId, hostId],
+    );
+    if (owner.rows.length === 0) {
+      await client.query("ROLLBACK");
+      return false;
+    }
+
+    await client.query(
+      `DELETE FROM blockings
+       WHERE property_id = $1 AND start_date < $3 AND end_date > $2`,
+      [propertyId, rangeStart, rangeEnd],
+    );
+
+    const unavailableDates = dates
+      .filter((entry) => !entry.available)
+      .map((entry) => entry.date)
+      .sort();
+    let currentStart = null;
+    let previousDate = null;
+
+    const insertRange = async (startDate, endDate) => {
+      await client.query(
+        `INSERT INTO blockings (property_id, start_date, end_date, reason)
+         VALUES ($1, $2, $3, $4)`,
+        [propertyId, startDate, endDate, reason],
+      );
+    };
+
+    for (const unavailableDate of unavailableDates) {
+      const expectedDate = previousDate
+        ? new Date(`${previousDate}T00:00:00Z`)
+        : null;
+      if (expectedDate) {
+        expectedDate.setUTCDate(expectedDate.getUTCDate() + 1);
+      }
+
+      if (currentStart && unavailableDate !== expectedDate.toISOString().slice(0, 10)) {
+        const endDate = new Date(`${previousDate}T00:00:00Z`);
+        endDate.setUTCDate(endDate.getUTCDate() + 1);
+        await insertRange(currentStart, endDate.toISOString().slice(0, 10));
+        currentStart = unavailableDate;
+      } else if (!currentStart) {
+        currentStart = unavailableDate;
+      }
+      previousDate = unavailableDate;
+    }
+
+    if (currentStart) {
+      const endDate = new Date(`${previousDate}T00:00:00Z`);
+      endDate.setUTCDate(endDate.getUTCDate() + 1);
+      await insertRange(currentStart, endDate.toISOString().slice(0, 10));
+    }
+
+    await client.query("COMMIT");
+    return true;
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
 }
 
 async function markMessagesAsRead(conversationId, userId) {
@@ -687,9 +794,12 @@ module.exports = {
   getPropertyCities,
   getPropertyById,
   getPropertyImages,
+  getPropertyImagesByUser,
   getPropertyAmenities,
   getPropertyReviews,
   getPropertyBookings,
+  getPropertyBlockings,
+  replacePropertyBlockings,
   createProperty,
   getHostProperties,
   addPropertyAmenities,
