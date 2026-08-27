@@ -106,10 +106,6 @@ app.use(
   }),
 );
 
-app.get("/api/health", (req, res) => {
-  res.json({ ok: true });
-});
-
 app.post("/api/signup", async (req, res) => {
   try {
     const { first_name, last_name, email, password, host } = req.body;
