@@ -7,8 +7,24 @@
   },
   "rewrites": [
     {
+      "source": "/listing/:propertyId/book",
+      "destination": "/api"
+    },
+    {
+      "source": "/listing",
+      "destination": "/api"
+    },
+    {
+      "source": "/messages",
+      "destination": "/api"
+    },
+    {
+      "source": "/profile",
+      "destination": "/api"
+    },
+    {
       "source": "/api/:path*",
-      "destination": "/api/index.js"
+      "destination": "/api"
     }
   ]
 }
