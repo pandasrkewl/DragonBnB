@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Trips | DrexelBnB</title>
+
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="/assets/icons/logo.svg"
+    />
+
+    <link
+      rel="stylesheet"
+      href="/css/styles.css"
+    />
+  </head>
+
+  <body>
+
+    <div id="navbar-container"></div>
+
+    <main class="trips-page">
+
+      <div class="trips-header">
+        <h1>Trips</h1>
+
+        <p>
+          View your upcoming and past reservations.
+        </p>
+      </div>
+
+
+      <div class="trips-tabs">
+
+        <button
+          id="upcoming-trips-button"
+          class="option-button-selected">
+          Upcoming
+        </button>
+
+        <button
+          id="past-trips-button"
+          class="option-button-unselected">
+          Past
+        </button>
+
+      </div>
+
+      <section id="trips-container">
+      </section>
+
+    </main>
+
+    <script
+      type="module"
+      src="/js/pages/trips.js">
+    </script>
+
+  </body>
+</html>

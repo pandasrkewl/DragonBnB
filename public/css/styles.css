@@ -2743,3 +2743,195 @@ button.profile-menu:hover{
     }
 
 }
+
+/* =========================
+   TRIPS PAGE
+   ========================= */
+
+   .trips-page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+}
+
+.trips-header h1 {
+    margin-bottom: 8px;
+}
+
+.trips-header p {
+    margin-top: 0;
+    color: #666;
+}
+
+.trips-tabs {
+    display: flex;
+    gap: 10px;
+    margin: 30px 0;
+}
+
+
+/* =========================
+   TRIP CARDS
+   ========================= */
+
+.trips-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.trip-card {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+
+    overflow: hidden;
+
+    border: 1px solid #ddd;
+    border-radius: 14px;
+
+    background-color: white;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.trip-card:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 6px 20px
+        rgba(0, 0, 0, 0.08);
+}
+
+.trip-image {
+    width: 100%;
+    height: 220px;
+
+    object-fit: cover;
+}
+
+.trip-content {
+    padding: 22px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.trip-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.trip-card-top h2 {
+    margin: 0;
+}
+
+.trip-location,
+.trip-dates,
+.trip-host,
+.trip-total {
+    margin: 0;
+}
+
+.trip-location {
+    color: #666;
+}
+
+.trip-dates {
+    margin-top: 10px;
+    font-weight: 600;
+}
+
+.trip-total {
+    margin-top: 8px;
+    font-weight: 600;
+}
+
+
+/* =========================
+   BOOKING STATUS
+   ========================= */
+
+.trip-status {
+    padding: 6px 10px;
+
+    border-radius: 999px;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    white-space: nowrap;
+}
+
+.trip-status-confirmed {
+    background-color: #e6f4ea;
+    color: #176b36;
+}
+
+.trip-status-pending {
+    background-color: #fff4d6;
+    color: #7a5700;
+}
+
+.trip-status-cancelled {
+    background-color: #fde8e8;
+    color: #a61b1b;
+}
+
+.trip-status-completed {
+    background-color: #eeeeee;
+    color: #555;
+}
+
+
+/* =========================
+   EMPTY TRIPS
+   ========================= */
+
+.trips-empty {
+    text-align: center;
+
+    padding: 60px 20px;
+}
+
+.trips-empty img {
+    width: 180px;
+    max-width: 100%;
+
+    margin-bottom: 20px;
+}
+
+.trips-empty h2 {
+    margin-bottom: 8px;
+}
+
+.trips-empty p {
+    color: #666;
+}
+
+
+/* =========================
+   MOBILE
+   ========================= */
+
+@media (max-width: 700px) {
+
+    .trip-card {
+        grid-template-columns: 1fr;
+    }
+
+    .trip-image {
+        height: 210px;
+    }
+
+    .trip-card-top {
+        flex-direction: column;
+    }
+
+}

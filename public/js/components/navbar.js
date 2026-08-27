@@ -474,24 +474,37 @@ export function createNavbar({
     ],
   );
 
-  const dropdownMenu = createElement("div", { className: "profile-dropdown" }, [
-    createElement("a", {
-      href: "/api/messages",
-      className: "dropdown-item",
-      textContent: "Messages",
-    }),
-    createElement("a", {
-      href: "/api/profile",
-      className: "dropdown-item",
-      textContent: "Profile",
-    }),
+  const dropdownMenu = createElement(
+    "div",
+    {
+      className: "profile-dropdown"
+    },
+    [
+      createElement("a", {
+        href: "/reservations.html",
+        className: "dropdown-item",
+        textContent: "Trips",
+      }),
   
-    createElement("a", {
-      href: "/api/logout",
-      className: "dropdown-item",
-      textContent: "Logout",
-    }),
-  ]);
+      createElement("a", {
+        href: "/api/messages",
+        className: "dropdown-item",
+        textContent: "Messages",
+      }),
+  
+      createElement("a", {
+        href: "/api/profile",
+        className: "dropdown-item",
+        textContent: "Profile",
+      }),
+  
+      createElement("a", {
+        href: "/api/logout",
+        className: "dropdown-item",
+        textContent: "Logout",
+      }),
+    ]
+  );
 
   const profileDropdown = createElement(
     "div",
