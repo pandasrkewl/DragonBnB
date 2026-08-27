@@ -424,7 +424,7 @@ app.get(
   },
 );
 
-app.post("/api/messages", requireLogin, async (req, res) => {
+app.post("/messages", requireLogin, async (req, res) => {
   try {
     const { conversationId, content } = req.body;
     const senderId = req.session.user.id;
