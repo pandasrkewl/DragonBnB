@@ -8,23 +8,23 @@
   "rewrites": [
     {
       "source": "/listing/:propertyId/book",
-      "destination": "/api/index.js"
+      "destination": "/api"
     },
     {
       "source": "/listing",
-      "destination": "/api/index.js"
+      "destination": "/api"
     },
     {
       "source": "/messages",
-      "destination": "/api/index.js"
+      "destination": "/api"
     },
     {
       "source": "/profile",
-      "destination": "/api/index.js"
+      "destination": "/api"
     },
     {
       "source": "/api/:path*",
-      "destination": "/api/index.js"
+      "destination": "/api"
     }
   ]
 }
