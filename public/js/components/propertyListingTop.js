@@ -21,22 +21,35 @@ export function createPropertyListingTop(property, images) {
         className: "listing-favorite"
     }); 
 
-    const favoriteButton = createElement("p", {
-        className: "listing-favorite-btn",
-        textContent: "♡",
-        "aria-label": "Add to wishlist"
-    }); 
-
-    const favoriteSectionText = createElement("p", {
-        className: "listing-favorite-text",
-        textContent: "Save"    
+    const favoriteButton = createElement("button", {
+        className: property.is_favorited ? "listing-favorite-btn is-favorited" : "listing-favorite-btn",
+        textContent: property.is_favorited ? "♥" : "♡",
+        type: "button",
+        "aria-label": property.is_favorited ? "Remove from wishlist" : "Add to wishlist"
     }); 
 
     const gallery = createPropertyGallery(images);
 
-    favoriteSection.append(favoriteButton, favoriteSectionText);
+    favoriteSection.append(favoriteButton);
+    gallery.appendChild(favoriteSection);
 
-    header.append(title, favoriteSection);
+    favoriteButton.addEventListener("click", async () => {
+        const response = await fetch(`/api/wishlist/${property.id}`, { method: "POST" });
+        if (response.status === 401) {
+            window.alert("Please log in to save favorites.");
+            return;
+        }
+        if (!response.ok) {
+            throw new Error("Could not update favorite");
+        }
+        const result = await response.json();
+        property.is_favorited = result.isFavorited;
+        favoriteButton.textContent = result.isFavorited ? "♥" : "♡";
+        favoriteButton.classList.toggle("is-favorited", result.isFavorited);
+        favoriteButton.setAttribute("aria-label", result.isFavorited ? "Remove from wishlist" : "Add to wishlist");
+    });
+
+    header.append(title);
 
     top_container.append(header, gallery);
 

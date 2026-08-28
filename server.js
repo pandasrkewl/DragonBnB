@@ -31,6 +31,8 @@ const {
   getBookingsForToday,
   getBookingsUpcoming,
   getBookingsPast,
+  getWishlist,
+  toggleWishlist,
 } = require("./scripts/queryDb");
 const { geocodeAddress } = require("./scripts/geocode");
 const session = require("express-session");
@@ -240,6 +242,7 @@ app.get("/api/properties", async (req, res) => {
       checkIn,
       checkOut,
       pets,
+      userId: req.session.user?.id,
     });
 
     res.json(properties);
@@ -255,7 +258,7 @@ app.get("/api/properties", async (req, res) => {
 app.get("/api/properties/:id", async (req, res) => {
   try {
     const listingId = req.params.id;
-    const property = await getPropertyById(listingId);
+    const property = await getPropertyById(listingId, req.session.user?.id);
     if (!property) {
       return res.status(404).json({ error: "Property not found" });
     }
@@ -369,6 +372,26 @@ app.get("/api/properties/:id/bookings", async (req, res) => {
     console.log("Error: getting bookings", error);
     res.status(500).json({
       error: "Could not get bookings",
+    });
+  }
+});
+
+app.get("/api/properties/:id/blockings", async (req, res) => {
+  try {
+    const listingId = Number(req.params.id);
+
+    if (!Number.isInteger(listingId) || listingId <= 0) {
+      return res.status(400).json({
+        error: "Invalid property id",
+      });
+    }
+
+    const blockings = await getPropertyBlockings(listingId);
+    res.json(blockings);
+  } catch (error) {
+    console.log("Error: getting blockings", error);
+    res.status(500).json({
+      error: "Could not get blockings",
     });
   }
 });
@@ -1020,6 +1043,39 @@ app.get("/api/me", (req, res) => {
   res.json(req.session.user);
 });
 
+app.get("/api/wishlist", requireLogin, async (req, res) => {
+  try {
+    const wishlist = await getWishlist(req.session.user.id);
+    res.json(wishlist);
+  } catch (error) {
+    console.error("Error getting wishlist:", error);
+    res.status(500).json({ error: "Could not get wishlist" });
+  }
+});
+
+app.post("/api/wishlist/:propertyId", requireLogin, async (req, res) => {
+  try {
+    const propertyId = Number(req.params.propertyId);
+
+    if (!Number.isInteger(propertyId) || propertyId <= 0) {
+      return res.status(400).json({ error: "Invalid property id" });
+    }
+
+    const property = await pool.query("SELECT id FROM properties WHERE id = $1", [
+      propertyId,
+    ]);
+    if (property.rows.length === 0) {
+      return res.status(404).json({ error: "Property not found" });
+    }
+
+    const isFavorited = await toggleWishlist(req.session.user.id, propertyId);
+    res.json({ propertyId, isFavorited });
+  } catch (error) {
+    console.error("Error updating wishlist:", error);
+    res.status(500).json({ error: "Could not update wishlist" });
+  }
+});
+
 app.use("/host", requireLogin);
 
 app.get("/api/host/bookings/today", requireLogin, async (req, res) => {
@@ -1337,6 +1393,14 @@ app.get("/profile", (req, res) => {
   }
 
   res.sendFile(path.join(__dirname, "public", "profile.html"));
+});
+
+app.get("/favorites", (req, res) => {
+  if (!req.session.user) {
+    return res.redirect("/");
+  }
+
+  res.sendFile(path.join(__dirname, "public", "favorites.html"));
 });
 
 app.get("/api/trips", requireLogin, async (req, res) => {

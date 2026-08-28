@@ -32,6 +32,7 @@ async function getProperties({
   checkIn = null,
   checkOut = null,
   pets = 0,
+  userId = null,
 }) {
   const allowedSorts = {
     rating: "rating DESC",
@@ -76,6 +77,15 @@ async function getProperties({
   }
 
   const whereClause = filters.length ? `WHERE ${filters.join(" AND ")}` : "";
+  const favoriteUserId = Number.isInteger(Number(userId)) ? Number(userId) : null;
+  const favoriteSelect = `EXISTS (
+            SELECT 1
+            FROM wishlists w
+            WHERE w.property_id = p.id
+              AND w.user_id = $${paramIndex}
+        ) AS is_favorited,`;
+  values.push(favoriteUserId);
+  paramIndex += 1;
 
   const queryText = `SELECT
         p.id,
@@ -86,6 +96,8 @@ async function getProperties({
         p.latitude,
         p.longitude,
         p.price_per_night,
+
+        ${favoriteSelect}
 
         COALESCE(
             (
@@ -148,7 +160,7 @@ async function getPropertyCities({ query = "" }) {
   return result.rows.map((row) => row.city);
 }
 
-async function getPropertyById(listingId) {
+async function getPropertyById(listingId, userId = null) {
   const result = await pool.query(
     `SELECT
             p.id,
@@ -193,6 +205,13 @@ async function getPropertyById(listingId) {
             p.check_in_time,
             p.check_out_time,
 
+            EXISTS (
+                SELECT 1
+                FROM wishlists w
+                WHERE w.property_id = p.id
+                  AND w.user_id = $2
+            ) AS is_favorited,
+
             u.id AS host_id,
             u.first_name AS host_first_name,
             u.last_name AS host_last_name, 
@@ -206,10 +225,71 @@ async function getPropertyById(listingId) {
             ON p.host_id = u.id
 
         WHERE p.id = $1`,
-    [listingId],
+    [listingId, Number.isInteger(Number(userId)) ? Number(userId) : null],
   );
 
   return result.rows[0];
+}
+
+async function getWishlist(userId) {
+  const result = await pool.query(
+    `SELECT
+        p.id,
+        p.title,
+        p.city,
+        p.state,
+        p.price_per_night,
+        p.property_type,
+        p.max_guests,
+        p.created_at,
+        w.list_name,
+        COALESCE(
+          (
+            SELECT pi.image_url
+            FROM property_images pi
+            WHERE pi.property_id = p.id
+            ORDER BY pi.display_order ASC
+            LIMIT 1
+          ),
+          '/assets/placeholders/default_home.jpg'
+        ) AS image_url,
+        COALESCE(
+          (
+            SELECT ROUND(AVG(r.rating), 2)
+            FROM reviews r
+            WHERE r.property_id = p.id
+          ),
+          0
+        ) AS rating
+     FROM wishlists w
+     JOIN properties p ON p.id = w.property_id
+     WHERE w.user_id = $1
+     ORDER BY w.id DESC`,
+    [userId],
+  );
+
+  return result.rows;
+}
+
+async function toggleWishlist(userId, propertyId) {
+  const existing = await pool.query(
+    `SELECT id FROM wishlists
+     WHERE user_id = $1 AND property_id = $2 AND list_name = 'Favorites'`,
+    [userId, propertyId],
+  );
+
+  if (existing.rows.length > 0) {
+    await pool.query("DELETE FROM wishlists WHERE id = $1", [existing.rows[0].id]);
+    return false;
+  }
+
+  await pool.query(
+    `INSERT INTO wishlists (user_id, property_id, list_name)
+     VALUES ($1, $2, 'Favorites')
+     ON CONFLICT (user_id, property_id, list_name) DO NOTHING`,
+    [userId, propertyId],
+  );
+  return true;
 }
 
 async function getPropertyImages(listingId) {
@@ -822,6 +902,8 @@ module.exports = {
   getProperties,
   getPropertyCities,
   getPropertyById,
+  getWishlist,
+  toggleWishlist,
   getPropertyImages,
   getPropertyImagesByUser,
   getPropertyAmenities,

@@ -485,6 +485,27 @@ button.profile-menu:hover{
   transform: scale(1.05);
 }
 
+.favorite-btn.is-favorited,
+.listing-favorite-btn.is-favorited {
+  color: #e31c5f;
+}
+
+.favorites-page {
+  width: 90%;
+  max-width: 1200px;
+  margin: 40px auto;
+}
+
+.favorites-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 24px 18px;
+}
+
+.favorites-grid .column {
+  flex: none;
+}
+
 .category {
   font-size: 20px;
 }
@@ -495,8 +516,8 @@ button.profile-menu:hover{
 
 .favorite-btn {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 2px;
+  right: 2px;
 
   border: none;
   background: none;
@@ -1233,14 +1254,26 @@ body.results-view .results-map {
 }
 
 .listing-favorite-btn {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  color: #222;
   font-size: 30px;
+  line-height: 1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
 }
 
 .listing-favorite {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 1;
   display: flex;
   align-items: center;
-  gap: 3px;
-  cursor: pointer;
 }
 
 .property-gallery {
