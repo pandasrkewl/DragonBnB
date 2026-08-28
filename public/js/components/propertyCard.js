@@ -22,7 +22,7 @@ export function createPropertyCard(property) {
     column.addEventListener("click", () => {
         const params = new URLSearchParams(window.location.search);
         params.set("id", property.id);
-        window.location.href = `/api/listing?${params.toString()}`;
+        window.location.href = `/listing?${params.toString()}`;
     });
     
     return column;

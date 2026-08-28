@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const path = require("path");
 const express = require("express");
 const multer = require("multer");
@@ -8,9 +10,12 @@ const {
   getPropertyCities,
   getPropertyById,
   getPropertyImages,
+  getPropertyImagesByUser,
   getPropertyAmenities,
   getPropertyReviews,
   getPropertyBookings,
+  getPropertyBlockings,
+  replacePropertyBlockings,
   createProperty,
   getHostProperties,
   addPropertyAmenities,
@@ -27,6 +32,7 @@ const {
   getBookingsUpcoming,
   getBookingsPast,
 } = require("./scripts/queryDb");
+const { geocodeAddress } = require("./scripts/geocode");
 const session = require("express-session");
 const bcrypt = require("bcrypt");
 const pool = require("./db");
@@ -44,7 +50,7 @@ const storage = multer.diskStorage({
     const uniqueName =
       Date.now() + "-" + file.originalname.replace(/\s+/g, "-");
     cb(null, uniqueName);
-  }
+  },
 });
 
 const upload = multer({ storage });
@@ -77,6 +83,12 @@ io.on("connection", (socket) => {
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+app.get("/api/config", (req, res) => {
+  res.json({
+    mapApiKey: process.env.MAP_API_KEY || "",
+  });
+});
 
 function isInvalidDateRange(checkIn, checkOut) {
   if (!checkIn || !checkOut) {
@@ -126,13 +138,7 @@ app.post("/api/signup", async (req, res) => {
         (first_name, last_name, email, password_hash, host)
        VALUES ($1, $2, $3, $4, $5)
        RETURNING id, first_name, host`,
-      [
-        first_name,
-        last_name,
-        normalizedEmail,
-        hashedPassword,
-        true
-      ],
+      [first_name, last_name, normalizedEmail, hashedPassword, true],
     );
 
     req.session.user = result.rows[0];
@@ -184,7 +190,7 @@ app.post("/api/login", async (req, res) => {
       last_name: user.last_name,
       email: user.email,
       host: user.host,
-      image_url: user.image_url
+      image_url: user.image_url,
     };
 
     req.session.save((err) => {
@@ -283,6 +289,27 @@ app.get("/api/properties/:id/images", async (req, res) => {
   }
 });
 
+app.get("/api/property_images/:userId", async (req, res) => {
+  try {
+    const userId = Number(req.params.userId);
+
+    if (!Number.isInteger(userId) || userId <= 0) {
+      return res.status(400).json({
+        error: "Invalid user id"
+      });
+    }
+
+    const images = await getPropertyImagesByUser(userId);
+
+    res.json(images);
+  } catch (error) {
+    console.log("Error: gtting images", error);
+    res.status(500).json({
+      error: "Could not get property images by user id"
+    });
+  }
+})
+
 app.get("/api/properties/:id/amenities", async (req, res) => {
   try {
     const listingId = Number(req.params.id);
@@ -346,11 +373,11 @@ app.get("/api/properties/:id/bookings", async (req, res) => {
   }
 });
 
-app.get("/api/listing", (req, res) => {
+app.get("/listing", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "listing.html"));
 });
 
-app.get("/api/messages", (req, res) => {
+app.get("/messages", (req, res) => {
   if (!req.session.user) {
     return res.redirect("/login.html");
   }
@@ -454,19 +481,13 @@ app.post("/api/messages", requireLogin, async (req, res) => {
 
 app.post("/api/bookings", requireLogin, async (req, res) => {
   try {
-    const {
-      propertyId,
-      startDate,
-      endDate,
-      totalPrice,
-      message
-    } = req.body;
+    const { propertyId, startDate, endDate, totalPrice, message } = req.body;
 
     const guestId = req.session.user.id;
 
     if (!propertyId || !startDate || !endDate || totalPrice == null) {
       return res.status(400).json({
-        error: "Missing booking information"
+        error: "Missing booking information",
       });
     }
 
@@ -479,25 +500,20 @@ app.post("/api/bookings", requireLogin, async (req, res) => {
          AND end_date = $4
          AND status = 'pending'
        LIMIT 1`,
-      [
-        propertyId,
-        guestId,
-        startDate,
-        endDate
-      ]
+      [propertyId, guestId, startDate, endDate],
     );
 
     if (existingBooking.rows.length > 0) {
       return res.status(409).json({
-        error: "You already requested this booking."
+        error: "You already requested this booking.",
       });
     }
-    
+
     const property = await getPropertyById(propertyId);
 
     if (!property) {
       return res.status(404).json({
-        error: "Property not found"
+        error: "Property not found",
       });
     }
 
@@ -512,13 +528,7 @@ app.post("/api/bookings", requireLogin, async (req, res) => {
       )
       VALUES ($1, $2, $3, $4, $5, 'pending')
       RETURNING id`,
-      [
-        propertyId,
-        guestId,
-        startDate,
-        endDate,
-        totalPrice
-      ]
+      [propertyId, guestId, startDate, endDate, totalPrice],
     );
 
     const bookingId = bookingResult.rows[0].id;
@@ -526,7 +536,7 @@ app.post("/api/bookings", requireLogin, async (req, res) => {
     const conversationId = await createOrGetConversation(
       property.host_id,
       guestId,
-      propertyId
+      propertyId,
     );
 
     const reservationRequest = JSON.stringify({
@@ -537,34 +547,25 @@ app.post("/api/bookings", requireLogin, async (req, res) => {
       endDate: endDate,
       total: totalPrice,
       status: "pending",
-      image: property.image_url
+      image: property.image_url,
     });
 
-    await sendMessage(
-      conversationId,
-      guestId,
-      reservationRequest
-    );
+    await sendMessage(conversationId, guestId, reservationRequest);
 
     if (message && message.trim()) {
-      await sendMessage(
-        conversationId,
-        guestId,
-        message.trim()
-      );
+      await sendMessage(conversationId, guestId, message.trim());
     }
 
     res.status(201).json({
       success: true,
       bookingId,
-      conversationId
+      conversationId,
     });
-
   } catch (error) {
     console.error("Error creating booking:", error);
 
     res.status(500).json({
-      error: "Could not create booking"
+      error: "Could not create booking",
     });
   }
 });
@@ -671,25 +672,24 @@ app.post(
   },
 );
 
-app.get("/api/listing/:propertyId/book", async(req, res) => {
-
+app.get("/listing/:propertyId/book", async (req, res) => {
   try {
     const propertyId = Number(req.params.propertyId);
 
     if (!Number.isInteger(propertyId) || propertyId <= 0) {
-      return res.status(400).json({"error": "Invalid property id"});
+      return res.status(400).json({ error: "Invalid property id" });
     }
 
     const property = await getPropertyById(propertyId);
 
     if (!property) {
-      return res.status(404).json({"error": "Property not found"})
+      return res.status(404).json({ error: "Property not found" });
     }
 
     res.sendFile(path.join(__dirname, "public", "book.html"));
   } catch (error) {
     console.error("Error loading booking page:", error);
-    res.status(500).send("Could not load booking page");  
+    res.status(500).send("Could not load booking page");
   }
 });
 
@@ -714,7 +714,7 @@ app.post("/api/properties", requireLogin, async (req, res) => {
       property_type,
       pets_allowed,
       check_in_time,
-      check_out_time
+      check_out_time,
     } = req.body;
 
     if (
@@ -732,7 +732,23 @@ app.post("/api/properties", requireLogin, async (req, res) => {
       !property_type
     ) {
       return res.status(400).json({
-        error: "Missing required property information"
+        error: "Missing required property information",
+      });
+    }
+
+    const geocoded = await geocodeAddress({
+      address_line_1,
+      address_line_2,
+      city,
+      state,
+      postal_code,
+      country,
+    });
+
+    if (!geocoded) {
+      return res.status(400).json({
+        error:
+          "We couldn't verify that address. Please check it and try again.",
       });
     }
 
@@ -746,6 +762,8 @@ app.post("/api/properties", requireLogin, async (req, res) => {
       state,
       postal_code,
       country,
+      latitude: geocoded.latitude,
+      longitude: geocoded.longitude,
       max_guests,
       bedrooms,
       bathrooms,
@@ -754,48 +772,44 @@ app.post("/api/properties", requireLogin, async (req, res) => {
       property_type,
       pets_allowed,
       check_in_time,
-      check_out_time
+      check_out_time,
     });
 
     res.status(201).json(property);
-
   } catch (error) {
-
     console.error("Error creating property:", error);
 
     res.status(500).json({
-      error: "Could not create property"
+      error: "Could not create property",
     });
-
   }
 });
 
 app.get("/api/host/properties", requireLogin, async (req, res) => {
   try {
-      const user = req.session.user;
+    const user = req.session.user;
 
-      if (!user || !user.id) {
-          return res.status(401).json({
-              error: "Not authenticated"
-          });
-      }
-
-      if (!user.host) {
-          return res.status(403).json({
-              error: "Not a host"
-          });
-      }
-
-      const properties = await getHostProperties(user.id);
-
-      res.json(properties);
-
-  } catch (error) {
-      console.error("Error getting host properties:", error);
-
-      res.status(500).json({
-          error: "Could not get host properties"
+    if (!user || !user.id) {
+      return res.status(401).json({
+        error: "Not authenticated",
       });
+    }
+
+    if (!user.host) {
+      return res.status(403).json({
+        error: "Not a host",
+      });
+    }
+
+    const properties = await getHostProperties(user.id);
+
+    res.json(properties);
+  } catch (error) {
+    console.error("Error getting host properties:", error);
+
+    res.status(500).json({
+      error: "Could not get host properties",
+    });
   }
 });
 
@@ -809,7 +823,7 @@ app.post(
 
       if (!req.files || req.files.length === 0) {
         return res.status(400).json({
-          error: "No images uploaded"
+          error: "No images uploaded",
         });
       }
 
@@ -818,119 +832,99 @@ app.post(
       for (let i = 0; i < req.files.length; i++) {
         const file = req.files[i];
 
-        const imageUrl =
-          `/assets/images/properties/${file.filename}`;
+        const imageUrl = `/assets/images/properties/${file.filename}`;
 
-        const image = await addPropertyImage(
-          propertyId,
-          imageUrl,
-          i
-        );
+        const image = await addPropertyImage(propertyId, imageUrl, i);
 
         savedImages.push(image);
       }
 
       res.status(201).json(savedImages);
-
     } catch (error) {
       console.error("Error uploading property images:", error);
 
       res.status(500).json({
-        error: "Could not upload images"
+        error: "Could not upload images",
       });
     }
-  }
+  },
 );
 
-app.post(
-  "/api/properties/:id/amenities",
-  requireLogin,
-  async (req, res) => {
-    try {
-      const propertyId = Number(req.params.id);
-      const { amenities } = req.body;
+app.post("/api/properties/:id/amenities", requireLogin, async (req, res) => {
+  try {
+    const propertyId = Number(req.params.id);
+    const { amenities } = req.body;
 
-      if (!Array.isArray(amenities)) {
-        return res.status(400).json({
-          error: "Amenities must be an array"
-        });
-      }
-
-      await addPropertyAmenities(
-        propertyId,
-        amenities
-      );
-
-      res.status(201).json({
-        success: true
-      });
-
-    } catch (error) {
-      console.error(
-        "Error saving property amenities:",
-        error
-      );
-
-      res.status(500).json({
-        error: "Could not save amenities"
+    if (!Array.isArray(amenities)) {
+      return res.status(400).json({
+        error: "Amenities must be an array",
       });
     }
+
+    await addPropertyAmenities(propertyId, amenities);
+
+    res.status(201).json({
+      success: true,
+    });
+  } catch (error) {
+    console.error("Error saving property amenities:", error);
+
+    res.status(500).json({
+      error: "Could not save amenities",
+    });
   }
-);
+});
 
-app.put(
-  "/api/properties/:id",
-  requireLogin,
-  async (req, res) => {
-    try {
-      const propertyId = Number(req.params.id);
-      const userId = req.session.user.id;
-      if (!Number.isInteger(propertyId) || propertyId <= 0) {
-        return res.status(400).json({
-          error: "Invalid property id"
-        });
-      }
-      const {
-        property_type,
-        title,
-        description,
-        address_line_1,
-        address_line_2,
-        city,
-        state,
-        postal_code,
-        country,
-        max_guests,
-        bedrooms,
-        bathrooms,
-        beds,
-        pets_allowed,
-        check_in_time,
-        check_out_time,
-        price_per_night
-      } = req.body;
+app.put("/api/properties/:id", requireLogin, async (req, res) => {
+  try {
+    const propertyId = Number(req.params.id);
+    const userId = req.session.user.id;
+    if (!Number.isInteger(propertyId) || propertyId <= 0) {
+      return res.status(400).json({
+        error: "Invalid property id",
+      });
+    }
+    const {
+      property_type,
+      title,
+      description,
+      address_line_1,
+      address_line_2,
+      city,
+      state,
+      postal_code,
+      country,
+      max_guests,
+      bedrooms,
+      bathrooms,
+      beds,
+      pets_allowed,
+      check_in_time,
+      check_out_time,
+      price_per_night,
+    } = req.body;
 
-      if (
-        !property_type ||
-        !title ||
-        !address_line_1 ||
-        !city ||
-        !state ||
-        !postal_code ||
-        !country ||
-        !max_guests ||
-        bedrooms === undefined ||
-        bathrooms === undefined ||
-        beds === undefined ||
-        !price_per_night
-      ) {
-        return res.status(400).json({
-          error: "Missing required property information"
-        });
-      }
+    if (
+      !property_type ||
+      !title ||
+      !address_line_1 ||
+      !city ||
+      !state ||
+      !postal_code ||
+      !country ||
+      !max_guests ||
+      bedrooms === undefined ||
+      bathrooms === undefined ||
+      beds === undefined ||
+      !price_per_night
+    ) {
+      return res.status(400).json({
+        error: "Missing required property information",
+      });
+    }
 
-      const result = await pool.query(
-        `UPDATE properties
+    const result = await pool.query(
+      `UPDATE properties
          SET
            property_type = $1,
            title = $2,
@@ -952,87 +946,71 @@ app.put(
          WHERE id = $18
          AND host_id = $19
          RETURNING *`,
-        [
-          property_type,
-          title,
-          description,
-          address_line_1,
-          address_line_2 || null,
-          city,
-          state,
-          postal_code,
-          country,
-          max_guests,
-          bedrooms,
-          bathrooms,
-          beds,
-          pets_allowed ?? false,
-          check_in_time || null,
-          check_out_time || null,
-          price_per_night,
-          propertyId,
-          userId
-        ]
-      );
-      if (result.rows.length === 0) {
-        return res.status(404).json({
-          error: "Property not found or you do not own this property"
-        });
-      }
-      res.json(result.rows[0]);
-    } catch (error) {
-      console.error("Error updating property:", error);
-      res.status(500).json({
-        error: "Could not update property"
+      [
+        property_type,
+        title,
+        description,
+        address_line_1,
+        address_line_2 || null,
+        city,
+        state,
+        postal_code,
+        country,
+        max_guests,
+        bedrooms,
+        bathrooms,
+        beds,
+        pets_allowed ?? false,
+        check_in_time || null,
+        check_out_time || null,
+        price_per_night,
+        propertyId,
+        userId,
+      ],
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        error: "Property not found or you do not own this property",
       });
     }
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error("Error updating property:", error);
+    res.status(500).json({
+      error: "Could not update property",
+    });
   }
-);
+});
 
-app.delete(
-  "/api/properties/:id",
-  requireLogin,
-  async (req, res) => {
-    try {
-      const propertyId = Number(req.params.id);
-      const userId = req.session.user.id;
+app.delete("/api/properties/:id", requireLogin, async (req, res) => {
+  try {
+    const propertyId = Number(req.params.id);
+    const userId = req.session.user.id;
 
-      const result = await pool.query(
-        `DELETE FROM properties
+    const result = await pool.query(
+      `DELETE FROM properties
          WHERE id = $1
          AND host_id = $2
          RETURNING id`,
-        [
-          propertyId,
-          userId
-        ]
-      );
+      [propertyId, userId],
+    );
 
-      if (result.rows.length === 0) {
-        return res.status(404).json({
-          error:
-            "Property not found or you do not own this property"
-        });
-
-      }
-      res.json({
-        success: true
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        error: "Property not found or you do not own this property",
       });
-
-    } catch (error) {
-      console.error(
-        "Error deleting property:",
-        error
-      );
-
-      res.status(500).json({
-        error: "Could not delete property"
-      });
-
     }
+    res.json({
+      success: true,
+    });
+  } catch (error) {
+    console.error("Error deleting property:", error);
 
+    res.status(500).json({
+      error: "Could not delete property",
+    });
   }
-);
+});
 
 app.get("/api/me", (req, res) => {
   if (!req.session.user) {
@@ -1074,13 +1052,13 @@ app.put("/api/bookings/:bookingId/status", requireLogin, async (req, res) => {
 
     if (!Number.isInteger(bookingId) || bookingId <= 0) {
       return res.status(400).json({
-        error: "Invalid booking id"
+        error: "Invalid booking id",
       });
     }
 
     if (!["confirmed", "rejected"].includes(status)) {
       return res.status(400).json({
-        error: "Invalid booking status"
+        error: "Invalid booking status",
       });
     }
 
@@ -1113,14 +1091,14 @@ app.put("/api/bookings/:bookingId/status", requireLogin, async (req, res) => {
          ON p.id = b.property_id
        WHERE b.id = $1
        FOR UPDATE`,
-      [bookingId]
+      [bookingId],
     );
 
     if (bookingResult.rows.length === 0) {
       await client.query("ROLLBACK");
 
       return res.status(404).json({
-        error: "Booking not found"
+        error: "Booking not found",
       });
     }
 
@@ -1130,7 +1108,7 @@ app.put("/api/bookings/:bookingId/status", requireLogin, async (req, res) => {
       await client.query("ROLLBACK");
 
       return res.status(403).json({
-        error: "You are not the host for this property"
+        error: "You are not the host for this property",
       });
     }
 
@@ -1138,7 +1116,7 @@ app.put("/api/bookings/:bookingId/status", requireLogin, async (req, res) => {
       await client.query("ROLLBACK");
 
       return res.status(409).json({
-        error: "This booking has already been handled"
+        error: "This booking has already been handled",
       });
     }
 
@@ -1147,7 +1125,7 @@ app.put("/api/bookings/:bookingId/status", requireLogin, async (req, res) => {
       `UPDATE bookings
        SET status = $1
        WHERE id = $2`,
-      [status, bookingId]
+      [status, bookingId],
     );
 
     let conflictingBookings = [];
@@ -1171,12 +1149,7 @@ app.put("/api/bookings/:bookingId/status", requireLogin, async (req, res) => {
            start_date,
            end_date,
            total_price`,
-        [
-          booking.property_id,
-          bookingId,
-          booking.end_date,
-          booking.start_date
-        ]
+        [booking.property_id, bookingId, booking.end_date, booking.start_date],
       );
 
       conflictingBookings = conflictResult.rows;
@@ -1187,7 +1160,7 @@ app.put("/api/bookings/:bookingId/status", requireLogin, async (req, res) => {
     const conversationId = await createOrGetConversation(
       hostId,
       booking.user_id,
-      booking.property_id
+      booking.property_id,
     );
 
     const actionMessage = JSON.stringify({
@@ -1195,27 +1168,23 @@ app.put("/api/bookings/:bookingId/status", requireLogin, async (req, res) => {
       status: status === "confirmed" ? "accepted" : "rejected",
       property: booking.title,
       dates: `${booking.start_date.toLocaleDateString()} - ${booking.end_date.toLocaleDateString()}`,
-      image: booking.property_image
+      image: booking.property_image,
     });
 
     const savedMessage = await sendMessage(
       conversationId,
       hostId,
-      actionMessage
+      actionMessage,
     );
 
-    io.to(String(conversationId)).emit(
-      "receiveMessage",
-      savedMessage
-    );
+    io.to(String(conversationId)).emit("receiveMessage", savedMessage);
     if (status === "confirmed") {
       for (const conflict of conflictingBookings) {
-        const conflictConversationId =
-          await createOrGetConversation(
-            hostId,
-            conflict.user_id,
-            booking.property_id
-          );
+        const conflictConversationId = await createOrGetConversation(
+          hostId,
+          conflict.user_id,
+          booking.property_id,
+        );
 
         const rejectedMessage = JSON.stringify({
           type: "reservation_action",
@@ -1224,18 +1193,18 @@ app.put("/api/bookings/:bookingId/status", requireLogin, async (req, res) => {
           dates:
             `${new Date(conflict.start_date).toLocaleDateString()} - ` +
             `${new Date(conflict.end_date).toLocaleDateString()}`,
-          image: booking.property_image
+          image: booking.property_image,
         });
 
         const savedRejectedMessage = await sendMessage(
           conflictConversationId,
           hostId,
-          rejectedMessage
+          rejectedMessage,
         );
 
         io.to(String(conflictConversationId)).emit(
           "receiveMessage",
-          savedRejectedMessage
+          savedRejectedMessage,
         );
       }
     }
@@ -1244,18 +1213,16 @@ app.put("/api/bookings/:bookingId/status", requireLogin, async (req, res) => {
       success: true,
       status,
       message: savedMessage,
-      rejectedConflicts: conflictingBookings.length
+      rejectedConflicts: conflictingBookings.length,
     });
-
   } catch (error) {
     await client.query("ROLLBACK");
 
     console.error("Error updating booking:", error);
 
     res.status(500).json({
-      error: "Could not update booking"
+      error: "Could not update booking",
     });
-
   } finally {
     client.release();
   }
@@ -1310,6 +1277,41 @@ app.get("/api/host/bookings/past", requireLogin, async (req, res) => {
   }
 });
 
+app.put("/api/host/properties/:propertyId/price", requireLogin, async (req, res) => {
+  try {
+    const propertyId = Number(req.params.propertyId);
+    const rawPrice = req.body.price_per_night;
+    const pricePerNight = Number(rawPrice);
+    const hostId = req.session.user.id;
+
+    if (!Number.isInteger(propertyId) || propertyId <= 0) {
+      return res.status(400).json({ error: "Invalid property id" });
+    }
+
+    if (rawPrice === "" || rawPrice === null || rawPrice === undefined ||
+      !Number.isFinite(pricePerNight) || pricePerNight < 0 || pricePerNight > 99999999.99) {
+      return res.status(400).json({ error: "Price must be between 0 and 99,999,999.99" });
+    }
+
+    const result = await pool.query(
+      `UPDATE properties
+       SET price_per_night = $1
+       WHERE id = $2 AND host_id = $3
+       RETURNING id, price_per_night`,
+      [pricePerNight.toFixed(2), propertyId, hostId],
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Property not found" });
+    }
+
+    res.json({ success: true, property: result.rows[0] });
+  } catch (error) {
+    console.error("Error updating property price:", error);
+    res.status(500).json({ error: "Could not update property price" });
+  }
+});
+
 app.get("/api/logout", (req, res) => {
   req.session.destroy((err) => {
     if (err) {
@@ -1329,7 +1331,7 @@ app.get("/api/logout", (req, res) => {
   });
 });
 
-app.get("/api/profile", (req, res) => {
+app.get("/profile", (req, res) => {
   if (!req.session.user) {
     return res.redirect("/");
   }

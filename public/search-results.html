@@ -8,12 +8,17 @@
     <link rel="stylesheet" href="css/styles.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"/>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   </head>
-  <body>
+  <body class="results-view">
     <div id="navbar-container"></div>
     <main class="results-page">
       <div id="results-header" class="results-header"></div>
-      <div id="results-grid" class="results-grid"></div>
+      <div class="results-split">
+        <div id="results-grid" class="results-grid"></div>
+        <div id="results-map" class="results-map"></div>
+      </div>
     </main>
     <script type="module" src="/js/pages/searchResults.js"></script>
   </body>

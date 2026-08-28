@@ -82,7 +82,77 @@ function createListingForm() {
     type: "text",
     name: "address_line_1",
     placeholder: "Street address",
+    autocomplete: "off",
     required: "required"
+  });
+
+  const addressSuggestions = createElement("div", {
+    className: "suggestion-list address-suggestion-list"
+  });
+
+  const addressField = createElement(
+    "div",
+    { className: "address-field" },
+    [address, addressSuggestions]
+  );
+
+  let addressDebounceTimer = null;
+
+  address.addEventListener("input", () => {
+    clearTimeout(addressDebounceTimer);
+    const query = address.value.trim();
+
+    if (query.length < 4) {
+      addressSuggestions.classList.remove("open");
+      addressSuggestions.replaceChildren();
+      return;
+    }
+
+    addressDebounceTimer = setTimeout(async () => {
+      try {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&q=${encodeURIComponent(query)}`
+        );
+
+        if (!response.ok) {
+          return;
+        }
+
+        const results = await response.json();
+        addressSuggestions.replaceChildren();
+
+        if (!results.length) {
+          addressSuggestions.classList.remove("open");
+          return;
+        }
+
+        results.forEach((result) => {
+          const item = createElement("button", {
+            type: "button",
+            className: "suggestion-item",
+            textContent: result.display_name
+          });
+
+          item.addEventListener("click", () => {
+            const details = result.address || {};
+            address.value = [details.house_number, details.road].filter(Boolean).join(" ") || address.value;
+            city.value = details.city || details.town || details.village || city.value;
+            state.value = details.state || state.value;
+            postalCode.value = details.postcode || postalCode.value;
+            country.value = details.country || country.value;
+
+            addressSuggestions.classList.remove("open");
+            addressSuggestions.replaceChildren();
+          });
+
+          addressSuggestions.appendChild(item);
+        });
+
+        addressSuggestions.classList.add("open");
+      } catch (error) {
+        console.error("Address autocomplete failed:", error);
+      }
+    }, 450);
   });
 
   const addressLine2 = createElement("input", {
@@ -306,7 +376,7 @@ function createListingForm() {
     description,
 
     addressLabel,
-    address,
+    addressField,
     addressLine2,
     city,
     state,

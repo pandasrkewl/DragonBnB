@@ -15,6 +15,61 @@
     </header>
 
     <main>
+        <div id="availability-container">
+
+            <!-- Property selector -->
+            <div id="property-selector">
+
+            </div>
+
+            <div id="calendar-section">
+                <div id="calendar-header">
+                    <h1>Availability</h1>
+                </div>
+
+                <div id="calendar-settings">
+                    <select id="month-dropdown" aria-label="Select month"></select>
+                    <select id="year-dropdown" aria-label="Select year"></select>
+                </div>
+
+                <div id="calendar">
+                    <table id="calendar-table">
+                        <thead>
+                            <tr>
+                                <th>Sunday</th>
+                                <th>Monday</th>
+                                <th>Tuesday</th>
+                                <th>Wednesday</th>
+                                <th>Thursday</th>
+                                <th>Friday</th>
+                                <th>Saturday</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="calendar-rows"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="availability-settings">
+                <div class="pricing-input">
+                    <span class="pricing-label">Pricing</span>
+
+                    <div class="price-editor">
+                        <span class="currency">$</span>
+                        <input id="price-per-night" type="number" value="150" min="0">
+                        <span class="per-night">/ night</span>
+                        <button id="price-save-button" class="price-save-button" type="button" disabled>Save</button>
+                    </div>
+                </div>
+
+                <div id="availability-toggle" class="availability-toggle-container"></div>
+                <label class="blocking-reason-label" for="blocking-reason">Reason</label>
+                <textarea id="blocking-reason" maxlength="255" placeholder="Add a reason for blocked days"></textarea>
+                <button id="availability-save-button" class="availability-save-button" type="button" disabled>Save availability</button>
+            </div>
+
+        </div>
     </main>
 
     <footer>
