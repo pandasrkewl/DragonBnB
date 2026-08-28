@@ -1004,19 +1004,31 @@ async function loadListings() {
 
 
       // Edit button
-      const editButton = document.createElement("button");
-      editButton.textContent = "Edit";
+      const editButton = createElement("button", {
+        textContent: "Edit",
+        disabled: property.has_bookings;
+        title: "This property cannot be edited because it has bookings" ? property.has_bookings : ""
+      });
       editButton.addEventListener("click", (event) => {
         event.stopPropagation();
+        if (property.has_bookings) {
+          return;
+        }
         openEditListingModal(property);
       });
 
       // Delete button
-      const deleteButton = document.createElement("button");
-      deleteButton.textContent = "Delete";
-      deleteButton.className = "delete-btn";
+      const deleteButton = createElement("button", {
+        textContent: "Delete",
+        className: "delete-btn",
+        disabled: property.has_bookings,
+        title: "This property cannot be deleted because it has bookings" ? property.has_bookings : ""
+      });
       deleteButton.addEventListener("click", async (event) => {
         event.stopPropagation();
+        if (property.has_bookings) {
+          return;
+        }
         const confirmed = confirm(
           `Are you sure you want to delete "${property.title}"?`
         );

@@ -17,6 +17,19 @@ export function createPropertyListingTop(property, images) {
         textContent: property.title
     });
 
+    const addressParts = [
+        property.address_line_1,
+        property.address_line_2,
+        [property.city, property.state, property.postal_code]
+            .filter(Boolean)
+            .join(", ")
+    ].filter(Boolean);
+
+    const address = createElement("p", {
+        className: "property-listing-address",
+        textContent: addressParts.join(", ")
+    });
+
     const favoriteSection = createElement("div", {
         className: "listing-favorite"
     }); 
@@ -36,7 +49,7 @@ export function createPropertyListingTop(property, images) {
 
     favoriteSection.append(favoriteButton, favoriteSectionText);
 
-    header.append(title, favoriteSection);
+    header.append(title, address, favoriteSection);
 
     top_container.append(header, gallery);
 

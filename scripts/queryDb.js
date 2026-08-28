@@ -779,6 +779,11 @@ async function getHostProperties(hostId) {
         p.state,
         p.price_per_night,
         p.property_type,
+        EXISTS (
+          SELECT 1
+          FROM bookings b
+          WHERE b.property_id = p.id
+        ) AS has_bookings,
         COALESCE(
           (
             SELECT pi.image_url

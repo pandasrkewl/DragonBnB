@@ -104,6 +104,45 @@ function isInvalidDateRange(checkIn, checkOut) {
 
   return startDate > endDate;
 }
+
+async function getPropertyEditAccess(propertyId, userId) {
+  const result = await pool.query(
+    `SELECT
+       p.id,
+       EXISTS (
+         SELECT 1
+         FROM bookings b
+         WHERE b.property_id = p.id
+       ) AS has_bookings
+     FROM properties p
+     WHERE p.id = $1 AND p.host_id = $2`,
+    [propertyId, userId],
+  );
+
+  return result.rows[0] || null;
+}
+
+async function requireEditableProperty(req, res) {
+  const propertyId = Number(req.params.id);
+  const access = await getPropertyEditAccess(propertyId, req.session.user.id);
+
+  if (!access) {
+    res.status(404).json({
+      error: "Property not found or you do not own this property",
+    });
+    return null;
+  }
+
+  if (access.has_bookings) {
+    res.status(409).json({
+      error: "Properties with bookings cannot be edited or deleted",
+    });
+    return null;
+  }
+
+  return access;
+}
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "dev-secret",
@@ -821,6 +860,10 @@ app.post(
     try {
       const propertyId = Number(req.params.id);
 
+      if (!(await requireEditableProperty(req, res))) {
+        return;
+      }
+
       if (!req.files || req.files.length === 0) {
         return res.status(400).json({
           error: "No images uploaded",
@@ -853,6 +896,11 @@ app.post(
 app.post("/api/properties/:id/amenities", requireLogin, async (req, res) => {
   try {
     const propertyId = Number(req.params.id);
+
+    if (!(await requireEditableProperty(req, res))) {
+      return;
+    }
+
     const { amenities } = req.body;
 
     if (!Array.isArray(amenities)) {
@@ -878,12 +926,16 @@ app.post("/api/properties/:id/amenities", requireLogin, async (req, res) => {
 app.put("/api/properties/:id", requireLogin, async (req, res) => {
   try {
     const propertyId = Number(req.params.id);
-    const userId = req.session.user.id;
     if (!Number.isInteger(propertyId) || propertyId <= 0) {
       return res.status(400).json({
         error: "Invalid property id",
       });
     }
+
+    if (!(await requireEditableProperty(req, res))) {
+      return;
+    }
+
     const {
       property_type,
       title,
@@ -965,7 +1017,7 @@ app.put("/api/properties/:id", requireLogin, async (req, res) => {
         check_out_time || null,
         price_per_night,
         propertyId,
-        userId,
+        req.session.user.id,
       ],
     );
     if (result.rows.length === 0) {
@@ -985,14 +1037,21 @@ app.put("/api/properties/:id", requireLogin, async (req, res) => {
 app.delete("/api/properties/:id", requireLogin, async (req, res) => {
   try {
     const propertyId = Number(req.params.id);
-    const userId = req.session.user.id;
+
+    if (!Number.isInteger(propertyId) || propertyId <= 0) {
+      return res.status(400).json({ error: "Invalid property id" });
+    }
+
+    if (!(await requireEditableProperty(req, res))) {
+      return;
+    }
 
     const result = await pool.query(
       `DELETE FROM properties
          WHERE id = $1
          AND host_id = $2
          RETURNING id`,
-      [propertyId, userId],
+      [propertyId, req.session.user.id],
     );
 
     if (result.rows.length === 0) {
