@@ -3,7 +3,7 @@ import { createBookingHeader } from "../components/bookingHeader.js";
 import { createConfirmationSection } from "../components/confirmationSection.js";
 import { createBookingPropertySummary } from "../components/bookingPropertySummary.js";
 
-import { loadPropertyById, loadPropertyImages } from "../services/propertyService.js"
+import { loadPropertyBlockings, loadPropertyById, loadPropertyImages, loadPropertyBookings } from "../services/propertyService.js"
 
 const bookingHeader = document.getElementById("booking-header");
 const bookingBody = document.getElementById("booking-body");
@@ -25,6 +25,8 @@ const guestCounts = {
 const propertyId = window.location.pathname.split("/")[2];
 const property = await loadPropertyById(`/api/properties/${propertyId}`);
 const propertyImages = await loadPropertyImages(`/api/properties/${propertyId}/images`);
+const bookings = await loadPropertyBookings(`/api/properties/${propertyId}/bookings`)
+const blockings = await loadPropertyBlockings(`/api/properties/${propertyId}/blockings`)
 
 const thumbnail = propertyImages[0]?.image_url || null;
 const subtotal = nights * property.price_per_night;
@@ -63,7 +65,9 @@ const propertyContainer = createElement("div", {
 
 const propertySummary = createBookingPropertySummary(
     property,
-    bookingDetails
+    bookingDetails,
+    bookings,
+    blockings
 );
 
 propertyContainer.append(

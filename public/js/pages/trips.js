@@ -1,5 +1,6 @@
 import { createNavbar } from "../components/navbar.js";
 import { createElement } from "../reusable/functions.js";
+import { createReviewModal } from "../components/tripsModal.js";
 
 const navBarContainer =
   document.getElementById("navbar-container");
@@ -156,6 +157,44 @@ function createTripCard(trip) {
       `Hosted by ${trip.host_first_name} ${trip.host_last_name}`
   });
 
+  let reviewSection = null;
+
+  if (trip.status === "completed") {
+    if (trip.review_id) {
+      reviewSection = createElement("div", {
+        className: "trip-review"
+      });
+
+      const stars = createElement("p", {
+        className: "trip-review-stars",
+        textContent:
+          "★".repeat(trip.review_rating) +
+          "☆".repeat(5 - trip.review_rating)
+      });
+
+      reviewSection.appendChild(stars);
+      if (trip.review_comment) {
+        const comment = createElement("p", {
+          className: "trip-review-comment",
+          textContent: trip.review_comment
+        });
+        reviewSection.appendChild(comment);
+      }
+    } else {
+      reviewSection = createElement("button", {
+        type: "button",
+        className: "write-review-button",
+        textContent: "Write a review"
+      });
+
+      reviewSection.addEventListener("click", (event) => {
+        event.stopPropagation();
+        createReviewModal(trip, () => {
+          renderTrips("past");
+        });
+      });
+    }
+  }
 
   const total = createElement("p", {
     className: "trip-total",
@@ -180,6 +219,11 @@ function createTripCard(trip) {
     total,
     status
   );
+
+
+  if (reviewSection) {
+    content.appendChild(reviewSection);
+  }
 
   card.append(
     image,

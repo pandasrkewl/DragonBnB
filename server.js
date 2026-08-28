@@ -214,6 +214,108 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
+app.post("/api/reviews", requireLogin, async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+
+    const {
+      bookingId,
+      rating,
+      comment
+    } = req.body;
+
+    const numericRating = Number(rating);
+
+    
+    const numericBookingId = Number(bookingId);
+
+    if (!Number.isInteger(numericRating) || numericRating < 1 || numericRating > 5) {
+      return res.status(400).json({
+        error: "Rating got to be between 1 and 5"
+      });
+    }
+
+    if (
+      !Number.isInteger(numericBookingId) ||
+      numericBookingId <= 0
+    ) {
+      return res.status(400).json({
+        error: "Invalid booking"
+      });
+    }
+
+    const bookingResult = await pool.query(
+      `SELECT
+         b.id,
+         b.property_id,
+         b.status,
+         b.end_date
+       FROM bookings b
+       WHERE b.id = $1
+         AND b.user_id = $2`,
+      [numericBookingId, userId]
+    );
+
+    if (bookingResult.rows.length === 0) {
+      return res.status(404).json({
+        error: "Booking not found"
+      });
+    }
+
+    const booking = bookingResult.rows[0];
+
+    if (booking.status !== "completed") {
+      return res.status(400).json({
+        error: "You can only review completed trips"
+      });
+    }
+
+    const existingReview = await pool.query(
+      `SELECT id
+       FROM reviews
+       WHERE booking_id = $1`,
+      [numericBookingId]
+    );
+
+    if (existingReview.rows.length > 0) {
+      return res.status(409).json({
+        error: "You already reviewed this trip"
+      });
+    }
+
+    const result = await pool.query(
+      `INSERT INTO reviews (
+         rating,
+         comment,
+         user_id,
+         property_id,
+         booking_id
+       )
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING *`,
+      [
+        numericRating,
+        comment?.trim() || null,
+        userId,
+        booking.property_id,
+        numericBookingId
+      ]
+    );
+
+    res.status(201).json({
+      success: true,
+      review: result.rows[0]
+    });
+
+  } catch (error) {
+    console.error("Error creating review:", error);
+
+    res.status(500).json({
+      error: "Could not create review"
+    });
+  }
+});
+
 app.get("/api/properties", async (req, res) => {
   try {
     const location = req.query.location || "";
@@ -1359,6 +1461,10 @@ app.get("/api/trips", requireLogin, async (req, res) => {
          host.first_name AS host_first_name,
          host.last_name AS host_last_name,
 
+         r.id AS review_id,
+         r.rating AS review_rating,
+         r.comment AS review_comment,
+
          COALESCE(
            (
              SELECT pi.image_url
@@ -1377,6 +1483,9 @@ app.get("/api/trips", requireLogin, async (req, res) => {
 
        JOIN users host
          ON host.id = p.host_id
+
+       LEFT JOIN reviews r
+         ON r.booking_id = b.id
 
        WHERE b.user_id = $1
 
