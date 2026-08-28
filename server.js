@@ -396,6 +396,37 @@ app.get("/api/properties/:id/blockings", async (req, res) => {
   }
 });
 
+app.put("/api/host/properties/:propertyId/blockings", requireLogin, async (req, res) => {
+  try {
+    const propertyId = Number(req.params.propertyId);
+    const hostId = req.session.user.id;
+    const { dates, reason } = req.body;
+
+    if (!Number.isInteger(propertyId) || propertyId <= 0) {
+      return res.status(400).json({ error: "Invalid property id" });
+    }
+
+    if (!Array.isArray(dates)) {
+      return res.status(400).json({ error: "Dates are required" });
+    }
+
+    const saved = await replacePropertyBlockings(propertyId, hostId, dates, reason || "");
+
+    if (!saved) {
+      return res.status(404).json({
+        error: "Property not found or you do not own this property",
+      });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error updating property blockings:", error);
+    res.status(500).json({
+      error: "Could not update property blockings",
+    });
+  }
+});
+
 app.get("/listing", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "listing.html"));
 });
