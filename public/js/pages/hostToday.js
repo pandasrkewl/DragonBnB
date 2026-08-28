@@ -4,6 +4,7 @@ import { createElement, createModal } from "../reusable/functions.js";
 const navBarContainer = document.getElementById("navbar-container");
 const today = document.getElementById("todayButton");
 const upcoming = document.getElementById("upcomingButton");
+const past = document.getElementById("pastButton");
 const centerDiv = document.querySelector(".center-div");
 
 async function validateAccount() {
@@ -38,18 +39,26 @@ navBarContainer.appendChild(navElement);
 
 //Switching between tabs
 const updateHostView = (view) => {
-  if (!today || !upcoming) return;
+  if (!today || !upcoming || !past) return;
 
-  if (view === "today") {
-    today.className = "option-button-selected";
-    upcoming.className = "option-button-unselected";
-  } else {
-    today.className = "option-button-unselected";
-    upcoming.className = "option-button-selected";
-  }
+  today.className =
+    view === "today"
+      ? "option-button-selected"
+      : "option-button-unselected";
+
+  upcoming.className =
+    view === "upcoming"
+      ? "option-button-selected"
+      : "option-button-unselected";
+
+  past.className =
+    view === "past"
+      ? "option-button-selected"
+      : "option-button-unselected";
 };
 
-if (today && upcoming) {
+
+if (today && upcoming && past) {
   today.addEventListener("click", async () => {
     updateHostView("today");
     await renderBookings("today");
@@ -59,7 +68,13 @@ if (today && upcoming) {
     updateHostView("upcoming");
     await renderBookings("upcoming");
   });
+
+  past.addEventListener("click", async () => {
+    updateHostView("past");
+    await renderBookings("past");
+  });
 }
+
 
 updateHostView("today");
 renderBookings("today");
@@ -122,11 +137,14 @@ function buildBookingsModal(bookings) {
 }
 
 async function fetchBookings(view) {
+
   try {
     const endpoint =
       view === "today"
         ? "/api/host/bookings/today"
-        : "/api/host/bookings/upcoming";
+        : view === "upcoming"
+          ? "/api/host/bookings/upcoming"
+          : "/api/host/bookings/past";
 
     const res = await fetch(endpoint);
 
@@ -151,18 +169,38 @@ async function renderBookings(view) {
   if (!bookings.length) {
     centerDiv.replaceChildren();
 
+    let headingText;
+    let subheadingText;
+    
+    if (view === "today") {
+      headingText =
+        "You don't have any reservations today";
+    
+      subheadingText =
+        "Reservations happening today will appear here.";
+    
+    } else if (view === "upcoming") {
+      headingText =
+        "You don't have any upcoming reservations";
+    
+      subheadingText =
+        "Once a guest books your space, upcoming stays will appear here.";
+    
+    } else {
+      headingText =
+        "You don't have any past reservations";
+    
+      subheadingText =
+        "Completed reservations will appear here.";
+    }
+    
+    
     const newHeading = createElement("h1", {
-      textContent:
-        view === "today"
-          ? "You don't have any reservations"
-          : "You don't have any upcoming reservations",
+      textContent: headingText
     });
-
+    
     const newSubheading = createElement("h4", {
-      textContent:
-        view === "today"
-          ? "Your place won’t appear in search results and can’t be booked. Relist to start earning."
-          : "Once a guest books your space, upcoming stays will appear here.",
+      textContent: subheadingText
     });
 
     const newImage = createElement("img", {

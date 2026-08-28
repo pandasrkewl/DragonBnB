@@ -30,6 +30,7 @@ const {
   getUnreadCountForConversation,
   getBookingsForToday,
   getBookingsUpcoming,
+  getBookingsPast,
 } = require("./scripts/queryDb");
 const { geocodeAddress } = require("./scripts/geocode");
 const session = require("express-session");
@@ -1247,6 +1248,35 @@ app.get("/api/host/bookings/upcoming", requireLogin, async (req, res) => {
   }
 });
 
+app.get("/api/host/bookings/past", requireLogin, async (req, res) => {
+  try {
+    const user = req.session.user;
+
+    if (!user || !user.id) {
+      return res.status(401).json({
+        error: "Not authenticated"
+      });
+    }
+
+    if (!user.host) {
+      return res.status(403).json({
+        error: "Not a host"
+      });
+    }
+
+    const bookings = await getBookingsPast(user.id);
+
+    res.json(bookings);
+
+  } catch (error) {
+    console.error("Error fetching past host bookings:", error);
+
+    res.status(500).json({
+      error: "Could not fetch past bookings"
+    });
+  }
+});
+
 app.put("/api/host/properties/:propertyId/price", requireLogin, async (req, res) => {
   try {
     const propertyId = Number(req.params.propertyId);
@@ -1307,6 +1337,113 @@ app.get("/profile", (req, res) => {
   }
 
   res.sendFile(path.join(__dirname, "public", "profile.html"));
+});
+
+app.get("/api/trips", requireLogin, async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+
+    const result = await pool.query(
+      `SELECT
+         b.id AS booking_id,
+         b.property_id,
+         b.start_date,
+         b.end_date,
+         b.total_price,
+         b.status,
+
+         p.title,
+         p.city,
+         p.state,
+
+         host.first_name AS host_first_name,
+         host.last_name AS host_last_name,
+
+         COALESCE(
+           (
+             SELECT pi.image_url
+             FROM property_images pi
+             WHERE pi.property_id = p.id
+             ORDER BY pi.display_order ASC
+             LIMIT 1
+           ),
+           '/assets/placeholders/default_home.jpg'
+         ) AS image_url
+
+       FROM bookings b
+
+       JOIN properties p
+         ON p.id = b.property_id
+
+       JOIN users host
+         ON host.id = p.host_id
+
+       WHERE b.user_id = $1
+
+       ORDER BY b.start_date DESC`,
+      [userId]
+    );
+
+
+    const upcoming = [];
+    const past = [];
+
+
+    result.rows.forEach((booking) => {
+
+      const closedStatus = [
+        "cancelled",
+        "rejected",
+        "completed"
+      ].includes(booking.status);
+
+
+      const tripEnded =
+        new Date(booking.end_date) <
+        new Date(
+          new Date().toDateString()
+        );
+
+
+      if (tripEnded || closedStatus) {
+        past.push(booking);
+      } else {
+        upcoming.push(booking);
+      }
+
+    });
+
+
+    upcoming.sort(
+      (a, b) =>
+        new Date(a.start_date) -
+        new Date(b.start_date)
+    );
+
+
+    past.sort(
+      (a, b) =>
+        new Date(b.start_date) -
+        new Date(a.start_date)
+    );
+
+
+    res.json({
+      upcoming,
+      past
+    });
+
+
+  } catch (error) {
+    console.error(
+      "Error fetching trips:",
+      error
+    );
+
+    res.status(500).json({
+      error: "Could not fetch trips"
+    });
+  }
 });
 
 if (require.main === module) {

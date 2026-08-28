@@ -485,13 +485,18 @@ export function createNavbar({
       className: "dropdown-item",
       textContent: "Profile",
     }),
-  
     createElement("a", {
-      href: "/api/logout",
+      href: "/reservations.html",
       className: "dropdown-item",
-      textContent: "Logout",
+      textContent: "Trips",
     }),
-  ]);
+      createElement("a", {
+        href: "/api/logout",
+        className: "dropdown-item",
+        textContent: "Logout",
+      }),
+    ]
+  );
 
   const profileDropdown = createElement(
     "div",
