@@ -2,7 +2,16 @@ import { createElement, createModal } from "../reusable/functions.js";
 import { createGuestPicker } from "./guestPicker.js";
 import { createDatePicker } from "./datePicker.js";
 
-export function createBookingPropertySummary(property, bookingDetails) {
+export function createBookingPropertySummary(property, bookingDetails, bookings=[], blockings=[]) {
+
+    const disabledRanges = [...bookings, ...blockings].map(range => {
+        const endDate = new Date(`${range.end_date.split("T")[0]}T00:00:00`);
+
+        return {
+            from: range.start_date.split("T")[0],
+            to: endDate.toISOString().split("T")[0]
+        };
+    });
 
     const propertySummaryContainer = createElement("div", {
         className: "property-summary-container"
@@ -88,9 +97,12 @@ export function createBookingPropertySummary(property, bookingDetails) {
     });
 
     datesChangeButton.addEventListener("click", () => {
+
         const datePicker = createDatePicker(
             bookingDetails.checkIn,
-            bookingDetails.checkOut
+            bookingDetails.checkOut,
+            null,
+            disabledRanges
         );
 
         const saveButton = createElement("button", {

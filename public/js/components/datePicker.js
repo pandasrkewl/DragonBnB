@@ -1,16 +1,18 @@
 import { createElement } from "../reusable/functions.js";
 
-export function createDatePicker(initialCheckIn = null, initialCheckOut = null, onChange = null) {
+export function createDatePicker(initialCheckIn = null, initialCheckOut = null, onChange = null, disabledRanges=[]) {
     const checkIn = createElement("input", {
         type: "text",
         className: "date-input",
-        placeholder: "Check in"
+        placeholder: "Check in",
+        disabledRanges: disabledRanges
     });
 
     const checkOut = createElement("input", {
         type: "text",
         className: "date-input",
-        placeholder: "Check out"
+        placeholder: "Check out",
+        disable: disabledRanges
     });
 
     const panel = createElement("div", {
@@ -37,13 +39,13 @@ export function createDatePicker(initialCheckIn = null, initialCheckOut = null, 
 
     const checkOutCalendar = flatpickr(checkOut, {
         minDate: "today",
-        defaultDate: initialCheckOut
+        defaultDate: initialCheckOut,
+        disable: disabledRanges
     });
 
     const checkInCalendar = flatpickr(checkIn, {
         minDate: "today",
         defaultDate: initialCheckIn,
-
         onChange(selectedDates) {
             const selectedCheckIn = selectedDates[0];
 
@@ -62,7 +64,8 @@ export function createDatePicker(initialCheckIn = null, initialCheckOut = null, 
                     checkOut: checkOut.value
                 });
             }
-        }
+        },
+        disable: disabledRanges
     });
 
     if (initialCheckIn) {
