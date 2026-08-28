@@ -485,19 +485,11 @@ export function createNavbar({
       className: "dropdown-item",
       textContent: "Profile",
     }),
-  
-      createElement("a", {
-        href: "/api/messages",
-        className: "dropdown-item",
-        textContent: "Messages",
-      }),
-  
-      createElement("a", {
-        href: "/api/profile",
-        className: "dropdown-item",
-        textContent: "Profile",
-      }),
-  
+    createElement("a", {
+      href: "/reservations.html",
+      className: "dropdown-item",
+      textContent: "Trips",
+    }),
       createElement("a", {
         href: "/api/logout",
         className: "dropdown-item",
