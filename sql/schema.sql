@@ -478,7 +478,8 @@ VALUES
     (9, 1, 3, '2026-08-20', '2026-08-23', 525.00, 'confirmed'),
     (10, 1, 4, '2026-08-28', '2026-08-31', 525.00, 'confirmed'),
     (11, 16, 3, '2026-08-20', '2026-08-21', 525.00, 'confirmed'),
-    (12, 1, 5, '2027-03-01', '2027-03-09', 1000.00, 'confirmed');
+    (12, 1, 5, '2027-03-01', '2027-03-09', 1000.00, 'confirmed'),
+    (13, 2, 2, '2026-07-20', '2026-07-22', 280.00, 'completed');
 
 INSERT INTO "blockings" ("property_id", "start_date", "end_date", "reason")
 VALUES
@@ -569,4 +570,9 @@ SELECT setval(
 SELECT setval(
   'bookings_id_seq',
   (SELECT MAX(id) FROM bookings)
+);
+
+SELECT setval(
+  'reviews_id_seq',
+  (SELECT MAX(id) FROM reviews)
 );
