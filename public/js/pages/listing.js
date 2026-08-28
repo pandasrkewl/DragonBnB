@@ -28,9 +28,10 @@ const rightBodyContainer = document.getElementById("right-body-container");
 
 const response = await fetch("/api/me");
 const user = await response.json();
+const userMode = user ? "tenant" : "guest";
 
 const navElement = createNavbar({
-  userMode: "host",
+  userMode: userMode,
   activeHostTab: 2,
   isRegisteredHost: user?.host ?? false,
 });

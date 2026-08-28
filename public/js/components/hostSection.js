@@ -1,5 +1,6 @@
 import { createElement } from "../reusable/functions.js";
 import { createOrGetConversation } from "../services/messageService.js";
+import { createLoginModal } from "./loginModal.js";
 
 export function createHostSection(property) {
   const hostContainer = createElement("div", {
@@ -37,7 +38,7 @@ export function createHostSection(property) {
         if (loginBtn) {
           loginBtn.click();
         } else {
-          console.error("You must be logged in to message a host.");
+          document.body.appendChild(createLoginModal());
         }
         return;
       }

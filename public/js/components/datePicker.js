@@ -1,6 +1,6 @@
 import { createElement } from "../reusable/functions.js";
 
-export function createDatePicker(initialCheckIn = null, initialCheckOut = null, onChange = null) {
+export function createDatePicker(initialCheckIn = null, initialCheckOut = null, onChange = null, disabledRanges=[]) {
     const checkIn = createElement("input", {
         type: "text",
         className: "date-input",
@@ -59,10 +59,12 @@ export function createDatePicker(initialCheckIn = null, initialCheckOut = null, 
             if (onChange) {
                 onChange({
                     checkIn: checkIn.value,
-                    checkOut: checkOut.value
+                    checkOut: checkOut.value,
+                    disable: disabledRanges
                 });
             }
-        }
+        },
+        disable: disabledRanges
     });
 
     if (initialCheckIn) {
@@ -76,7 +78,8 @@ export function createDatePicker(initialCheckIn = null, initialCheckOut = null, 
         if (onChange) {
             onChange({
                 checkIn: checkIn.value,
-                checkOut: checkOut.value
+                checkOut: checkOut.value,
+                disable: disabledRanges
             });
         }
     });
