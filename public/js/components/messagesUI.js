@@ -26,10 +26,21 @@ export function createConversationList(conversations, activeConvoId, onSelect) {
       textContent: convo.other_user_name || "User",
     });
 
+    const textChildren = [title];
+
+    if (convo.property_title) {
+      textChildren.push(
+        createElement("div", {
+          className: "convo-property",
+          textContent: convo.property_title,
+        }),
+      );
+    }
+
     const textContainer = createElement(
       "div",
       { className: "convo-text-wrapper" },
-      [title],
+      textChildren,
     );
 
     const date = createElement("div", {

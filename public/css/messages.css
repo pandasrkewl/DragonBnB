@@ -118,6 +118,14 @@
   color: #222222;
 }
 
+.convo-property {
+  font-size: 13px;
+  color: #717171;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .convo-last-message {
   font-size: 13px;
   color: #717171;

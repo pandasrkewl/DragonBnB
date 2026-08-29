@@ -657,8 +657,8 @@ async function getBookingsForToday(hostId) {
     `SELECT 
       bookings.id,
       bookings.status,
-      bookings.start_date,
-      bookings.end_date,
+      to_char(bookings.start_date, 'YYYY-MM-DD') AS start_date,
+      to_char(bookings.end_date, 'YYYY-MM-DD') AS end_date,
       bookings.user_id AS tenant_id,
       properties.title AS property_title,
       users.image_url,
@@ -683,8 +683,8 @@ async function getBookingsUpcoming(hostId) {
     `SELECT 
       bookings.id,
       bookings.status,
-      bookings.start_date,
-      bookings.end_date,
+      to_char(bookings.start_date, 'YYYY-MM-DD') AS start_date,
+      to_char(bookings.end_date, 'YYYY-MM-DD') AS end_date,
       bookings.user_id AS tenant_id,
       properties.title AS property_title,
       users.image_url,
@@ -708,8 +708,8 @@ async function getBookingsPast(hostId) {
   const result = await pool.query(
     `SELECT
       bookings.id,
-      bookings.start_date,
-      bookings.end_date,
+      to_char(bookings.start_date, 'YYYY-MM-DD') AS start_date,
+      to_char(bookings.end_date, 'YYYY-MM-DD') AS end_date,
       bookings.user_id AS tenant_id,
       bookings.status AS status,
       properties.title AS property_title,
