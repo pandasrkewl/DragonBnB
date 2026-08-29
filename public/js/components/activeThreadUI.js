@@ -143,10 +143,10 @@ function createReservationPanel(conversation, onAction, isAlreadyConfirmed = fal
   });
 
   const checkInStr = conversation.check_in_date
-    ? new Date(conversation.check_in_date).toLocaleDateString()
+    ? new Date(`${conversation.check_in_date}T00:00:00`).toLocaleDateString()
     : "N/A";
   const checkOutStr = conversation.check_out_date
-    ? new Date(conversation.check_out_date).toLocaleDateString()
+    ? new Date(`${conversation.check_out_date}T00:00:00`).toLocaleDateString()
     : "N/A";
 
   const details = createElement("div", { className: "reservation-details" }, [

@@ -1682,8 +1682,8 @@ app.get("/api/trips", requireLogin, async (req, res) => {
       `SELECT
          b.id AS booking_id,
          b.property_id,
-         b.start_date,
-         b.end_date,
+         to_char(b.start_date, 'YYYY-MM-DD') AS start_date,
+         to_char(b.end_date, 'YYYY-MM-DD') AS end_date,
          b.total_price,
          b.status,
 
