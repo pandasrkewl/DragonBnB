@@ -36,6 +36,7 @@ const {
 } = require("./scripts/queryDb");
 const { geocodeAddress } = require("./scripts/geocode");
 const session = require("express-session");
+const pgSession = require("connect-pg-simple")(session);
 const bcrypt = require("bcrypt");
 const pool = require("./db");
 const {
@@ -106,11 +107,19 @@ function isInvalidDateRange(checkIn, checkOut) {
 
   return startDate > endDate;
 }
+const sessionStore = new pgSession({
+  pool,
+  tableName: "session",
+  schemaName: "public",
+});
+
 app.use(
   session({
+    store: sessionStore,
     secret: process.env.SESSION_SECRET || "dev-secret",
     resave: false,
     saveUninitialized: false,
+    proxy: true,
     cookie: {
       maxAge: 1000 * 60 * 60 * 24,
       httpOnly: true,
@@ -533,9 +542,9 @@ app.get("/listing", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "listing.html"));
 });
 
-app.get("/messages", (req, res) => {
+app.get("/messages", requireLogin, (req, res) => {
   if (!req.session.user) {
-    return res.redirect("/login.html");
+    return res.redirect("/");
   }
   res.sendFile(path.join(__dirname, "public", "messages.html"));
 });
@@ -1501,7 +1510,7 @@ app.put("/api/host/properties/:propertyId/price", requireLogin, async (req, res)
   }
 });
 
-app.get("/api/logout", (req, res) => {
+app.get("/api/logout", requireLogin, (req, res) => {
   req.session.destroy((err) => {
     if (err) {
       console.error("Logout error:", err);
@@ -1520,7 +1529,7 @@ app.get("/api/logout", (req, res) => {
   });
 });
 
-app.get("/profile", (req, res) => {
+app.get("/profile", requireLogin, (req, res) => {
   if (!req.session.user) {
     return res.redirect("/");
   }
@@ -1528,7 +1537,7 @@ app.get("/profile", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "profile.html"));
 });
 
-app.get("/favorites", (req, res) => {
+app.get("/favorites", requireLogin, (req, res) => {
   if (!req.session.user) {
     return res.redirect("/");
   }

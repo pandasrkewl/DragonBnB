@@ -10,6 +10,14 @@ DROP TABLE IF EXISTS blockings CASCADE;
 DROP TABLE IF EXISTS properties CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 
+CREATE TABLE session (
+    sid varchar(255) NOT NULL PRIMARY KEY,
+    sess json NOT NULL,
+    expire timestamp(6) NOT NULL
+);
+
+CREATE INDEX idx_session_expire ON session (expire);
+
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     first_name VARCHAR(100) NOT NULL,
