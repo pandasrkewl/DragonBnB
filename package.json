@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/pandasrkewl/DragonBnB#readme",
   "dependencies": {
+    "@vercel/blob": "^2.8.0",
     "bcrypt": "^6.0.0",
     "connect-pg-simple": "^10.0.0",
     "date-fns": "^4.4.0",
