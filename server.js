@@ -3,6 +3,7 @@ require("dotenv").config();
 const path = require("path");
 const express = require("express");
 const multer = require("multer");
+const { put } = require("@vercel/blob");
 const http = require("http");
 const { Server } = require("socket.io");
 const {
@@ -44,19 +45,12 @@ const {
   verifyUserInConversation,
 } = require("./middleware/authMiddleware");
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "public/assets/images/properties");
-  },
-
-  filename: function (req, file, cb) {
-    const uniqueName =
-      Date.now() + "-" + file.originalname.replace(/\s+/g, "-");
-    cb(null, uniqueName);
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 10 * 1024 * 1024,
   },
 });
-
-const upload = multer({ storage });
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -1056,14 +1050,24 @@ app.post(
         });
       }
 
+      if (!process.env.BLOB_READ_WRITE_TOKEN) {
+        return res.status(500).json({
+          error: "Vercel Blob storage is not configured",
+        });
+      }
+
       const savedImages = [];
 
       for (let i = 0; i < req.files.length; i++) {
         const file = req.files[i];
+        const uniqueName = `properties/${Date.now()}-${file.originalname.replace(/\s+/g, "-")}`;
 
-        const imageUrl = `/assets/images/properties/${file.filename}`;
+        const blob = await put(uniqueName, file.buffer, {
+          access: "public",
+          contentType: file.mimetype || "application/octet-stream",
+        });
 
-        const image = await addPropertyImage(propertyId, imageUrl, i);
+        const image = await addPropertyImage(propertyId, blob.url, i);
 
         savedImages.push(image);
       }
