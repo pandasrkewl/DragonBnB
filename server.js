@@ -113,6 +113,7 @@ async function getPropertyEditAccess(propertyId, userId) {
          SELECT 1
          FROM bookings b
          WHERE b.property_id = p.id
+           AND b.status IN ('pending', 'confirmed')
        ) AS has_bookings
      FROM properties p
      WHERE p.id = $1 AND p.host_id = $2`,
@@ -1035,6 +1036,8 @@ app.put("/api/properties/:id", requireLogin, async (req, res) => {
 });
 
 app.delete("/api/properties/:id", requireLogin, async (req, res) => {
+  let client;
+
   try {
     const propertyId = Number(req.params.id);
 
@@ -1046,28 +1049,46 @@ app.delete("/api/properties/:id", requireLogin, async (req, res) => {
       return;
     }
 
-    const result = await pool.query(
-      `DELETE FROM properties
+    client = await pool.connect();
+    await client.query("BEGIN");
+
+    const property = await client.query(
+      `SELECT id
+         FROM properties
          WHERE id = $1
-         AND host_id = $2
-         RETURNING id`,
+         AND host_id = $2`,
       [propertyId, req.session.user.id],
     );
 
-    if (result.rows.length === 0) {
+    if (property.rows.length === 0) {
+      await client.query("ROLLBACK");
       return res.status(404).json({
         error: "Property not found or you do not own this property",
       });
     }
+
+    await client.query("DELETE FROM reviews WHERE property_id = $1", [propertyId]);
+    await client.query("DELETE FROM bookings WHERE property_id = $1", [propertyId]);
+    await client.query(
+      "DELETE FROM properties WHERE id = $1 AND host_id = $2",
+      [propertyId, req.session.user.id],
+    );
+    await client.query("COMMIT");
+
     res.json({
       success: true,
     });
   } catch (error) {
+    if (client) {
+      await client.query("ROLLBACK").catch(() => {});
+    }
     console.error("Error deleting property:", error);
 
     res.status(500).json({
       error: "Could not delete property",
     });
+  } finally {
+    client?.release();
   }
 });
 
@@ -1115,7 +1136,7 @@ app.put("/api/bookings/:bookingId/status", requireLogin, async (req, res) => {
       });
     }
 
-    if (!["confirmed", "rejected"].includes(status)) {
+    if (!["confirmed", "rejected", "cancelled"].includes(status)) {
       return res.status(400).json({
         error: "Invalid booking status",
       });
@@ -1123,7 +1144,6 @@ app.put("/api/bookings/:bookingId/status", requireLogin, async (req, res) => {
 
     await client.query("BEGIN");
 
-    // Find the booking and verify this user owns the property
     const bookingResult = await client.query(
       `SELECT
           b.id,
@@ -1171,15 +1191,37 @@ app.put("/api/bookings/:bookingId/status", requireLogin, async (req, res) => {
       });
     }
 
-    if (booking.status !== "pending") {
-      await client.query("ROLLBACK");
+    if (status === "cancelled") {
+      if (booking.status !== "confirmed") {
+        await client.query("ROLLBACK");
 
-      return res.status(409).json({
-        error: "This booking has already been handled",
-      });
+        return res.status(409).json({
+          error: "Only confirmed bookings can be cancelled",
+        });
+      }
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const bookingStart = new Date(booking.start_date);
+      bookingStart.setHours(0, 0, 0, 0);
+
+      if (bookingStart <= today) {
+        await client.query("ROLLBACK");
+
+        return res.status(409).json({
+          error: "This booking has already started or is in progress",
+        });
+      }
+    } else {
+      if (booking.status !== "pending") {
+        await client.query("ROLLBACK");
+
+        return res.status(409).json({
+          error: "This booking has already been handled",
+        });
+      }
     }
 
-    // Update the booking the host clicked
     await client.query(
       `UPDATE bookings
        SET status = $1
@@ -1189,7 +1231,6 @@ app.put("/api/bookings/:bookingId/status", requireLogin, async (req, res) => {
 
     let conflictingBookings = [];
 
-    // If accepted, reject all OTHER overlapping pending requests
     if (status === "confirmed") {
       const conflictResult = await client.query(
         `UPDATE bookings
@@ -1197,8 +1238,6 @@ app.put("/api/bookings/:bookingId/status", requireLogin, async (req, res) => {
          WHERE property_id = $1
            AND id != $2
            AND status = 'pending'
-
-           -- Date ranges overlap
            AND start_date < $3
            AND end_date > $4
 
@@ -1222,11 +1261,18 @@ app.put("/api/bookings/:bookingId/status", requireLogin, async (req, res) => {
       booking.property_id,
     );
 
+    const statusLabel =
+      status === "confirmed"
+        ? "accepted"
+        : status === "cancelled"
+          ? "cancelled"
+          : "rejected";
+
     const actionMessage = JSON.stringify({
       type: "reservation_action",
-      status: status === "confirmed" ? "accepted" : "rejected",
+      status: statusLabel,
       property: booking.title,
-      dates: `${booking.start_date.toLocaleDateString()} - ${booking.end_date.toLocaleDateString()}`,
+      dates: `${new Date(booking.start_date).toLocaleDateString()} - ${new Date(booking.end_date).toLocaleDateString()}`,
       image: booking.property_image,
     });
 
@@ -1449,25 +1495,15 @@ app.get("/api/trips", requireLogin, async (req, res) => {
 
 
     result.rows.forEach((booking) => {
+      const bookingForList = {
+        ...booking,
+        status: booking.status,
+      };
 
-      const closedStatus = [
-        "cancelled",
-        "rejected",
-        "completed"
-      ].includes(booking.status);
-
-
-      const tripEnded =
-        new Date(booking.end_date) <
-        new Date(
-          new Date().toDateString()
-        );
-
-
-      if (tripEnded || closedStatus) {
-        past.push(booking);
+      if (["completed", "cancelled", "rejected"].includes(booking.status)) {
+        past.push(bookingForList);
       } else {
-        upcoming.push(booking);
+        upcoming.push(bookingForList);
       }
 
     });

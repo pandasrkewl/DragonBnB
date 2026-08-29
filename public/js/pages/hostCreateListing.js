@@ -5,6 +5,33 @@ const navBarContainer = document.getElementById("navbar-container");
 const listingGrid = document.getElementById("listing-grid");
 const createListingButton = document.getElementById("create-listing-btn");
 
+//Get User Info
+
+let user = null;
+
+async function validateAccount() {
+  try {
+    const response = await fetch("/api/me");
+
+    if (!response.ok) {
+      window.location.replace("/");
+      return;
+    }
+
+    user = await response.json();
+
+    if (!user) {
+      window.location.replace("/");
+      return;
+    }
+  } catch (err) {
+    console.error("Failed to validate account:", err);
+    window.location.replace("/");
+  }
+}
+
+await validateAccount();
+
 const navElement = createNavbar({
   userMode: "host",
   activeHostTab: 2,

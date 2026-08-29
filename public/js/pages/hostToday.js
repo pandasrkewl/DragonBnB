@@ -161,6 +161,34 @@ async function fetchBookings(view) {
   }
 }
 
+async function cancelBooking(bookingId) {
+  const confirmed = window.confirm("Cancel this confirmed booking? This will mark it as cancelled.");
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`/api/bookings/${bookingId}/status`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ status: "cancelled" }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || "Could not cancel booking");
+    }
+
+    await renderBookings("upcoming");
+  } catch (error) {
+    console.error("Error cancelling booking:", error);
+    window.alert(error.message);
+  }
+}
+
 async function renderBookings(view) {
   if (!centerDiv) return;
 
@@ -219,6 +247,8 @@ async function renderBookings(view) {
   });
 
   bookings.forEach((b) => {
+    const statusValue = b.status || "confirmed";
+
     const imgUrl = b.image_url
       ? b.image_url.startsWith("/")
         ? b.image_url
@@ -230,6 +260,11 @@ async function renderBookings(view) {
       className: "big-avatar"
     });
 
+    const statusTag = createElement("div", {
+      className: `trip-status trip-status-${statusValue}`,
+      textContent: statusValue.charAt(0).toUpperCase() + statusValue.slice(1),
+    });
+
     const content = createElement("div", {
       className: "listing-content",
     }, [
@@ -237,10 +272,29 @@ async function renderBookings(view) {
         textContent: `${b.first_name} ${b.last_name}`,
       }),
       createElement("div", {
+        className: "trip-property",
+        textContent: b.property_title || "Property",
+      }),
+      createElement("div", {
         className: "price",
         textContent: formatDateRange(b.start_date, b.end_date),
       }),
+      statusTag,
     ]);
+
+    const canCancel =
+      statusValue === "confirmed" &&
+      b.start_date &&
+      new Date(b.start_date) > new Date(new Date().setHours(0, 0, 0, 0));
+
+    if (canCancel) {
+      const cancelButton = createElement("button", {
+        className: "cancel-booking-btn",
+        textContent: "Cancel booking",
+      });
+      cancelButton.addEventListener("click", () => cancelBooking(b.id));
+      content.appendChild(cancelButton);
+    }
 
     const card = createElement("div", {
       className: "listing-card",

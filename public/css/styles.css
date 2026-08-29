@@ -199,6 +199,21 @@ footer{
     background:#c62828;
 }
 
+.cancel-booking-btn {
+    margin-top: 12px;
+    background: #fff;
+    color: #c62828;
+    border: 1px solid #c62828;
+    border-radius: 4px;
+    padding: 10px 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.cancel-booking-btn:hover {
+    background: #fff3f3;
+}
+
 .delete-btn:hover{
     background:#a61d1d;
 }
@@ -3406,6 +3421,12 @@ body.results-view .results-map {
 /* =========================
    BOOKING STATUS
    ========================= */
+
+.trip-property {
+    margin: 6px 0 10px;
+    color: #555;
+    font-weight: 600;
+}
 
 .trip-status {
     padding: 6px 10px;
