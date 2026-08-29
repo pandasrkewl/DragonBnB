@@ -30,6 +30,7 @@ test('messages pages load the Socket.IO client from a deployment-safe CDN URL an
 
   expect(html).toContain('https://cdn.socket.io/4.8.3/socket.io.min.js');
   expect(clientScript).toContain('if (!window.io)');
+  expect(clientScript).toContain('https://dragonbnb-socket.onrender.com');
 });
 
 afterAll(async () => {
