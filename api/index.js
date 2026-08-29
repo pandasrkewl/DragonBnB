@@ -1,1 +1,1 @@
-export { default } from "../server";
+module.exports = require("../server");
