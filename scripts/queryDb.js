@@ -655,9 +655,12 @@ async function markMessagesAsRead(conversationId, userId) {
 async function getBookingsForToday(hostId) {
   const result = await pool.query(
     `SELECT 
+      bookings.id,
+      bookings.status,
       bookings.start_date,
       bookings.end_date,
       bookings.user_id AS tenant_id,
+      properties.title AS property_title,
       users.image_url,
       users.first_name,
       users.last_name
@@ -667,6 +670,7 @@ async function getBookingsForToday(hostId) {
     JOIN users
       ON users.id = bookings.user_id
     WHERE properties.host_id = $1
+      AND bookings.status = 'confirmed'
       AND CURRENT_DATE BETWEEN bookings.start_date AND bookings.end_date;`,
     [hostId],
   );
@@ -677,9 +681,12 @@ async function getBookingsForToday(hostId) {
 async function getBookingsUpcoming(hostId) {
   const result = await pool.query(
     `SELECT 
+      bookings.id,
+      bookings.status,
       bookings.start_date,
       bookings.end_date,
       bookings.user_id AS tenant_id,
+      properties.title AS property_title,
       users.image_url,
       users.first_name,
       users.last_name
@@ -689,6 +696,7 @@ async function getBookingsUpcoming(hostId) {
     JOIN users
       ON users.id = bookings.user_id
     WHERE properties.host_id = $1
+      AND bookings.status = 'confirmed'
       AND CURRENT_DATE < bookings.start_date;`,
     [hostId],
   );
@@ -699,10 +707,12 @@ async function getBookingsUpcoming(hostId) {
 async function getBookingsPast(hostId) {
   const result = await pool.query(
     `SELECT
+      bookings.id,
       bookings.start_date,
       bookings.end_date,
       bookings.user_id AS tenant_id,
-      bookings.status,
+      bookings.status AS status,
+      properties.title AS property_title,
       users.image_url,
       users.first_name,
       users.last_name
@@ -716,7 +726,7 @@ async function getBookingsPast(hostId) {
 
     WHERE properties.host_id = $1
       AND bookings.end_date < CURRENT_DATE
-      AND bookings.status = 'confirmed'
+      AND bookings.status = 'completed'
 
     ORDER BY bookings.end_date DESC`,
     [hostId]
@@ -859,6 +869,12 @@ async function getHostProperties(hostId) {
         p.state,
         p.price_per_night,
         p.property_type,
+        EXISTS (
+          SELECT 1
+          FROM bookings b
+          WHERE b.property_id = p.id
+            AND b.status IN ('pending', 'confirmed')
+        ) AS has_bookings,
         COALESCE(
           (
             SELECT pi.image_url

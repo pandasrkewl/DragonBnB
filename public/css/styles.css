@@ -137,6 +137,12 @@ footer{
     box-shadow: 0 2px 8px rgba(0, 0, 0, .1);
     min-width: 0;
     max-width: 300px;
+    transition: opacity 0.2s ease, filter 0.2s ease;
+}
+
+.listing-card--locked {
+    opacity: 0.9;
+    border: 1px solid #d9d9d9;
 }
 
 .listing-card img {
@@ -172,8 +178,40 @@ footer{
     width:auto;
 }
 
+.button-group button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    filter: grayscale(0.4);
+}
+
+.button-group button:not(.view-btn):disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    filter: grayscale(0.4);
+}
+
+.button-group .delete-btn:disabled {
+    background: #9e9e9e;
+    border-color: #9e9e9e;
+}
+
 .delete-btn{
     background:#c62828;
+}
+
+.cancel-booking-btn {
+    margin-top: 12px;
+    background: #fff;
+    color: #c62828;
+    border: 1px solid #c62828;
+    border-radius: 4px;
+    padding: 10px 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.cancel-booking-btn:hover {
+    background: #fff3f3;
 }
 
 .delete-btn:hover{
@@ -3416,6 +3454,12 @@ body.results-view .results-map {
 /* =========================
    BOOKING STATUS
    ========================= */
+
+.trip-property {
+    margin: 6px 0 10px;
+    color: #555;
+    font-weight: 600;
+}
 
 .trip-status {
     padding: 6px 10px;

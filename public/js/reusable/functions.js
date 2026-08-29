@@ -2,6 +2,15 @@ export function createElement(tag, attributes = {}, children = []) {
   const el = document.createElement(tag);
 
   for (const [key, value] of Object.entries(attributes)) {
+    if (typeof value === "boolean") {
+      if (value) {
+        el.setAttribute(key, key);
+      } else {
+        el.removeAttribute(key);
+      }
+      continue;
+    }
+
     if (key === "className") {
       el.className = value;
     } else if (key === "id") {
