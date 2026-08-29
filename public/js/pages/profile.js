@@ -22,7 +22,7 @@ async function loadProfile() {
     // -------------------------
 
     const navbar = createNavbar({
-      userMode: user.host ? "host" : "tenant",
+      userMode: "tenant",
       isRegisteredHost: user.host ?? false,
     });
 

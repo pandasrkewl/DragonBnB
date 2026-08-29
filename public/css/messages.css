@@ -421,3 +421,10 @@
   color: #222;
   width: 100%;
 }
+
+.cancel-btn {
+  background: white;
+  border: 1px solid #d93025;
+  color: #d93025;
+  width: 100%;
+}

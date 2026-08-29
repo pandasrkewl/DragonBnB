@@ -5,6 +5,33 @@ const navBarContainer = document.getElementById("navbar-container");
 const listingGrid = document.getElementById("listing-grid");
 const createListingButton = document.getElementById("create-listing-btn");
 
+//Get User Info
+
+let user = null;
+
+async function validateAccount() {
+  try {
+    const response = await fetch("/api/me");
+
+    if (!response.ok) {
+      window.location.replace("/");
+      return;
+    }
+
+    user = await response.json();
+
+    if (!user) {
+      window.location.replace("/");
+      return;
+    }
+  } catch (err) {
+    console.error("Failed to validate account:", err);
+    window.location.replace("/");
+  }
+}
+
+await validateAccount();
+
 const navElement = createNavbar({
   userMode: "host",
   activeHostTab: 2,
@@ -953,49 +980,54 @@ async function loadListings() {
     properties.forEach((property) => {
 
       // Card
-      const card = document.createElement("article");
-      card.className = "listing-card";
-      card.style.cursor = "pointer";
+      const card = createElement("article", {
+        className: `listing-card${property.has_bookings ? " listing-card--locked" : ""}`,
+        style: "cursor: pointer;"
+      });
 
       // Image
-      const image = document.createElement("img");
-      image.src =
-        property.image_url ||
-        "../assets/placeholders/default_home.jpg";
-      image.alt = property.title;
+      const image = createElement("img", {
+        src: property.image_url || "../assets/placeholders/default_home.jpg",
+        alt: property.title
+      });
 
       // Content
-      const content = document.createElement("div");
-      content.className = "listing-content";
+      const content = createElement("div", {
+        className: "listing-content"
+      });
 
       // Title
-      const title = document.createElement("h3");
-      title.textContent = property.title;
+      const title = createElement("h3", {
+        textContent: property.title
+      });
 
       // Price
-      const price = document.createElement("p");
-      price.className = "price";
-      price.textContent =
-        `$${Number(property.price_per_night).toFixed(2)} / night`;
+      const price = createElement("p", {
+        className: "price",
+        textContent: `$${Number(property.price_per_night).toFixed(2)} / night`
+      });
 
       // Location
-      const location = document.createElement("p");
-      location.textContent =
-        `${property.city}, ${property.state}`;
+      const location = createElement("p", {
+        textContent: `${property.city}, ${property.state}`
+      });
 
       // Property type
-      const type = document.createElement("p");
-      type.textContent = property.property_type;
-
+      const type = createElement("p", {
+        textContent: property.property_type
+      });
 
       // Buttons
-      const buttonGroup = document.createElement("div");
-      buttonGroup.className = "button-group";
+      const buttonGroup = createElement("div", {
+        className: "button-group"
+      });
 
 
       // View button
-      const viewButton = document.createElement("button");
-      viewButton.textContent = "View";
+      const viewButton = createElement("button", {
+        className: "view-btn",
+        textContent: "View"
+      });
       viewButton.addEventListener("click", (event) => {
         event.stopPropagation();
         window.location.href =
@@ -1004,19 +1036,35 @@ async function loadListings() {
 
 
       // Edit button
-      const editButton = document.createElement("button");
-      editButton.textContent = "Edit";
+      const editButton = createElement("button", {
+        textContent: "Edit",
+        disabled: property.has_bookings,
+        title: property.has_bookings
+          ? "This property cannot be edited because it has bookings"
+          : ""
+      });
       editButton.addEventListener("click", (event) => {
         event.stopPropagation();
+        if (property.has_bookings) {
+          return;
+        }
         openEditListingModal(property);
       });
 
       // Delete button
-      const deleteButton = document.createElement("button");
-      deleteButton.textContent = "Delete";
-      deleteButton.className = "delete-btn";
+      const deleteButton = createElement("button", {
+        textContent: "Delete",
+        className: "delete-btn",
+        disabled: property.has_bookings,
+        title: property.has_bookings
+          ? "This property cannot be deleted because it has bookings"
+          : ""
+      });
       deleteButton.addEventListener("click", async (event) => {
         event.stopPropagation();
+        if (property.has_bookings) {
+          return;
+        }
         const confirmed = confirm(
           `Are you sure you want to delete "${property.title}"?`
         );

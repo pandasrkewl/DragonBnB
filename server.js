@@ -36,6 +36,7 @@ const {
 } = require("./scripts/queryDb");
 const { geocodeAddress } = require("./scripts/geocode");
 const session = require("express-session");
+const pgSession = require("connect-pg-simple")(session);
 const bcrypt = require("bcrypt");
 const pool = require("./db");
 const {
@@ -63,7 +64,28 @@ const PORT = process.env.PORT || 3000;
 app.set("trust proxy", 1);
 
 const server = http.createServer(app);
-const io = new Server(server);
+const allowedOrigins = [
+  "https://drexel-bnb.vercel.app",
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
+  "http://localhost:5173",
+  "http://localhost:8080",
+];
+
+const io = new Server(server, {
+  cors: {
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin) || origin.indexOf("vercel.app") > -1) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error("Not allowed by CORS"));
+    },
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+});
 
 io.on("connection", (socket) => {
   console.log("A user connected:", socket.id);
@@ -106,11 +128,58 @@ function isInvalidDateRange(checkIn, checkOut) {
 
   return startDate > endDate;
 }
+const sessionStore = new pgSession({
+  pool,
+  tableName: "session",
+  schemaName: "public",
+});
+
+async function getPropertyEditAccess(propertyId, userId) {
+  const result = await pool.query(
+    `SELECT
+       p.id,
+       EXISTS (
+         SELECT 1
+         FROM bookings b
+         WHERE b.property_id = p.id
+           AND b.status IN ('pending', 'confirmed')
+       ) AS has_bookings
+     FROM properties p
+     WHERE p.id = $1 AND p.host_id = $2`,
+    [propertyId, userId],
+  );
+
+  return result.rows[0] || null;
+}
+
+async function requireEditableProperty(req, res) {
+  const propertyId = Number(req.params.id);
+  const access = await getPropertyEditAccess(propertyId, req.session.user.id);
+
+  if (!access) {
+    res.status(404).json({
+      error: "Property not found or you do not own this property",
+    });
+    return null;
+  }
+
+  if (access.has_bookings) {
+    res.status(409).json({
+      error: "Properties with bookings cannot be edited or deleted",
+    });
+    return null;
+  }
+
+  return access;
+}
+
 app.use(
   session({
+    store: sessionStore,
     secret: process.env.SESSION_SECRET || "dev-secret",
     resave: false,
     saveUninitialized: false,
+    proxy: true,
     cookie: {
       maxAge: 1000 * 60 * 60 * 24,
       httpOnly: true,
@@ -533,9 +602,9 @@ app.get("/listing", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "listing.html"));
 });
 
-app.get("/messages", (req, res) => {
+app.get("/messages", requireLogin, (req, res) => {
   if (!req.session.user) {
-    return res.redirect("/login.html");
+    return res.redirect("/");
   }
   res.sendFile(path.join(__dirname, "public", "messages.html"));
 });
@@ -977,6 +1046,10 @@ app.post(
     try {
       const propertyId = Number(req.params.id);
 
+      if (!(await requireEditableProperty(req, res))) {
+        return;
+      }
+
       if (!req.files || req.files.length === 0) {
         return res.status(400).json({
           error: "No images uploaded",
@@ -1009,6 +1082,11 @@ app.post(
 app.post("/api/properties/:id/amenities", requireLogin, async (req, res) => {
   try {
     const propertyId = Number(req.params.id);
+
+    if (!(await requireEditableProperty(req, res))) {
+      return;
+    }
+
     const { amenities } = req.body;
 
     if (!Array.isArray(amenities)) {
@@ -1034,12 +1112,16 @@ app.post("/api/properties/:id/amenities", requireLogin, async (req, res) => {
 app.put("/api/properties/:id", requireLogin, async (req, res) => {
   try {
     const propertyId = Number(req.params.id);
-    const userId = req.session.user.id;
     if (!Number.isInteger(propertyId) || propertyId <= 0) {
       return res.status(400).json({
         error: "Invalid property id",
       });
     }
+
+    if (!(await requireEditableProperty(req, res))) {
+      return;
+    }
+
     const {
       property_type,
       title,
@@ -1121,7 +1203,7 @@ app.put("/api/properties/:id", requireLogin, async (req, res) => {
         check_out_time || null,
         price_per_night,
         propertyId,
-        userId,
+        req.session.user.id,
       ],
     );
     if (result.rows.length === 0) {
@@ -1139,32 +1221,59 @@ app.put("/api/properties/:id", requireLogin, async (req, res) => {
 });
 
 app.delete("/api/properties/:id", requireLogin, async (req, res) => {
+  let client;
+
   try {
     const propertyId = Number(req.params.id);
-    const userId = req.session.user.id;
 
-    const result = await pool.query(
-      `DELETE FROM properties
+    if (!Number.isInteger(propertyId) || propertyId <= 0) {
+      return res.status(400).json({ error: "Invalid property id" });
+    }
+
+    if (!(await requireEditableProperty(req, res))) {
+      return;
+    }
+
+    client = await pool.connect();
+    await client.query("BEGIN");
+
+    const property = await client.query(
+      `SELECT id
+         FROM properties
          WHERE id = $1
-         AND host_id = $2
-         RETURNING id`,
-      [propertyId, userId],
+         AND host_id = $2`,
+      [propertyId, req.session.user.id],
     );
 
-    if (result.rows.length === 0) {
+    if (property.rows.length === 0) {
+      await client.query("ROLLBACK");
       return res.status(404).json({
         error: "Property not found or you do not own this property",
       });
     }
+
+    await client.query("DELETE FROM reviews WHERE property_id = $1", [propertyId]);
+    await client.query("DELETE FROM bookings WHERE property_id = $1", [propertyId]);
+    await client.query(
+      "DELETE FROM properties WHERE id = $1 AND host_id = $2",
+      [propertyId, req.session.user.id],
+    );
+    await client.query("COMMIT");
+
     res.json({
       success: true,
     });
   } catch (error) {
+    if (client) {
+      await client.query("ROLLBACK").catch(() => {});
+    }
     console.error("Error deleting property:", error);
 
     res.status(500).json({
       error: "Could not delete property",
     });
+  } finally {
+    client?.release();
   }
 });
 
@@ -1245,7 +1354,7 @@ app.put("/api/bookings/:bookingId/status", requireLogin, async (req, res) => {
       });
     }
 
-    if (!["confirmed", "rejected"].includes(status)) {
+    if (!["confirmed", "rejected", "cancelled"].includes(status)) {
       return res.status(400).json({
         error: "Invalid booking status",
       });
@@ -1253,7 +1362,6 @@ app.put("/api/bookings/:bookingId/status", requireLogin, async (req, res) => {
 
     await client.query("BEGIN");
 
-    // Find the booking and verify this user owns the property
     const bookingResult = await client.query(
       `SELECT
           b.id,
@@ -1301,15 +1409,37 @@ app.put("/api/bookings/:bookingId/status", requireLogin, async (req, res) => {
       });
     }
 
-    if (booking.status !== "pending") {
-      await client.query("ROLLBACK");
+    if (status === "cancelled") {
+      if (booking.status !== "confirmed") {
+        await client.query("ROLLBACK");
 
-      return res.status(409).json({
-        error: "This booking has already been handled",
-      });
+        return res.status(409).json({
+          error: "Only confirmed bookings can be cancelled",
+        });
+      }
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const bookingStart = new Date(booking.start_date);
+      bookingStart.setHours(0, 0, 0, 0);
+
+      if (bookingStart <= today) {
+        await client.query("ROLLBACK");
+
+        return res.status(409).json({
+          error: "This booking has already started or is in progress",
+        });
+      }
+    } else {
+      if (booking.status !== "pending") {
+        await client.query("ROLLBACK");
+
+        return res.status(409).json({
+          error: "This booking has already been handled",
+        });
+      }
     }
 
-    // Update the booking the host clicked
     await client.query(
       `UPDATE bookings
        SET status = $1
@@ -1319,7 +1449,6 @@ app.put("/api/bookings/:bookingId/status", requireLogin, async (req, res) => {
 
     let conflictingBookings = [];
 
-    // If accepted, reject all OTHER overlapping pending requests
     if (status === "confirmed") {
       const conflictResult = await client.query(
         `UPDATE bookings
@@ -1327,8 +1456,6 @@ app.put("/api/bookings/:bookingId/status", requireLogin, async (req, res) => {
          WHERE property_id = $1
            AND id != $2
            AND status = 'pending'
-
-           -- Date ranges overlap
            AND start_date < $3
            AND end_date > $4
 
@@ -1352,11 +1479,18 @@ app.put("/api/bookings/:bookingId/status", requireLogin, async (req, res) => {
       booking.property_id,
     );
 
+    const statusLabel =
+      status === "confirmed"
+        ? "accepted"
+        : status === "cancelled"
+          ? "cancelled"
+          : "rejected";
+
     const actionMessage = JSON.stringify({
       type: "reservation_action",
-      status: status === "confirmed" ? "accepted" : "rejected",
+      status: statusLabel,
       property: booking.title,
-      dates: `${booking.start_date.toLocaleDateString()} - ${booking.end_date.toLocaleDateString()}`,
+      dates: `${new Date(booking.start_date).toLocaleDateString()} - ${new Date(booking.end_date).toLocaleDateString()}`,
       image: booking.property_image,
     });
 
@@ -1501,7 +1635,7 @@ app.put("/api/host/properties/:propertyId/price", requireLogin, async (req, res)
   }
 });
 
-app.get("/api/logout", (req, res) => {
+app.get("/api/logout", requireLogin, (req, res) => {
   req.session.destroy((err) => {
     if (err) {
       console.error("Logout error:", err);
@@ -1520,7 +1654,7 @@ app.get("/api/logout", (req, res) => {
   });
 });
 
-app.get("/profile", (req, res) => {
+app.get("/profile", requireLogin, (req, res) => {
   if (!req.session.user) {
     return res.redirect("/");
   }
@@ -1528,7 +1662,7 @@ app.get("/profile", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "profile.html"));
 });
 
-app.get("/favorites", (req, res) => {
+app.get("/favorites", requireLogin, (req, res) => {
   if (!req.session.user) {
     return res.redirect("/");
   }
@@ -1594,25 +1728,15 @@ app.get("/api/trips", requireLogin, async (req, res) => {
 
 
     result.rows.forEach((booking) => {
+      const bookingForList = {
+        ...booking,
+        status: booking.status,
+      };
 
-      const closedStatus = [
-        "cancelled",
-        "rejected",
-        "completed"
-      ].includes(booking.status);
-
-
-      const tripEnded =
-        new Date(booking.end_date) <
-        new Date(
-          new Date().toDateString()
-        );
-
-
-      if (tripEnded || closedStatus) {
-        past.push(booking);
+      if (["completed", "cancelled", "rejected"].includes(booking.status)) {
+        past.push(bookingForList);
       } else {
-        upcoming.push(booking);
+        upcoming.push(bookingForList);
       }
 
     });
@@ -1657,3 +1781,5 @@ if (require.main === module) {
 }
 
 module.exports = app;
+module.exports.io = io;
+module.exports.server = server;

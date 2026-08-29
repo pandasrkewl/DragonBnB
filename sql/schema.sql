@@ -9,6 +9,15 @@ DROP TABLE IF EXISTS amenities CASCADE;
 DROP TABLE IF EXISTS blockings CASCADE;
 DROP TABLE IF EXISTS properties CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
+DROP TABLE IF EXISTS session CASCADE;
+
+CREATE TABLE session (
+    sid varchar(255) NOT NULL PRIMARY KEY,
+    sess json NOT NULL,
+    expire timestamp(6) NOT NULL
+);
+
+CREATE INDEX idx_session_expire ON session (expire);
 
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
@@ -475,9 +484,9 @@ VALUES
     (6, 1, 5, '2026-02-14', '2026-02-16', 350.00, 'completed'),
     (7, 1, 7, '2026-04-05', '2026-04-08', 525.00, 'completed'),
     (8, 1, 9, '2026-06-12', '2026-06-15', 525.00, 'completed'),
-    (9, 1, 3, '2026-08-20', '2026-08-23', 525.00, 'confirmed'),
+    (9, 1, 3, '2026-08-20', '2026-08-23', 525.00, 'completed'),
     (10, 1, 4, '2026-08-28', '2026-08-31', 525.00, 'confirmed'),
-    (11, 16, 3, '2026-08-20', '2026-08-21', 525.00, 'confirmed'),
+    (11, 16, 3, '2026-08-20', '2026-08-21', 525.00, 'completed'),
     (12, 1, 5, '2027-03-01', '2027-03-09', 1000.00, 'confirmed'),
     (13, 2, 2, '2026-07-20', '2026-07-22', 280.00, 'completed');
 

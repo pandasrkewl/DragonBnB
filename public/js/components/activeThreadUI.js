@@ -59,7 +59,13 @@ export function createActiveThread(
     [chatColumn],
   );
 
-  if (currentUser.host && conversation.booking_status === "pending") {
+  const shouldShowCancelAction =
+    currentUser.host &&
+    conversation.booking_status === "confirmed" &&
+    conversation.check_in_date &&
+    new Date(conversation.check_in_date) > new Date(new Date().setHours(0, 0, 0, 0));
+
+  if (currentUser.host && (conversation.booking_status === "pending" || shouldShowCancelAction)) {
     const reservationPanel = createReservationPanel(
       conversation,
       async (status) => {
@@ -67,7 +73,9 @@ export function createActiveThread(
           const backendStatus =
             status === "accepted"
               ? "confirmed"
-              : "rejected";
+              : status === "cancelled"
+                ? "cancelled"
+                : "rejected";
 
           const response = await fetch(
             `/api/bookings/${conversation.booking_id}/status`,
@@ -109,7 +117,8 @@ export function createActiveThread(
             error
           );
         }
-      }
+      },
+      conversation.booking_status !== "pending",
     );
     reservationPanel.classList.add("hidden");
     threadBody.appendChild(reservationPanel);
@@ -118,7 +127,7 @@ export function createActiveThread(
   return { headerUI, threadBody, messagesArea };
 }
 
-function createReservationPanel(conversation, onAction) {
+function createReservationPanel(conversation, onAction, isAlreadyConfirmed = false) {
   const panel = createElement("div", { className: "reservation-sidebar" });
 
   const avatar = createElement("img", {
@@ -128,7 +137,9 @@ function createReservationPanel(conversation, onAction) {
   });
 
   const title = createElement("h2", {
-    textContent: `${conversation.guest_name || "Guest"} asked to stay ${conversation.nights || "X"} nights`,
+    textContent: isAlreadyConfirmed
+      ? `${conversation.guest_name || "Guest"}'s stay is confirmed`
+      : `${conversation.guest_name || "Guest"} asked to stay ${conversation.nights || "X"} nights`,
   });
 
   const checkInStr = conversation.check_in_date
@@ -155,9 +166,19 @@ textContent: `Total: $${Number(conversation.total_price || 0).toFixed(2)}`,
     className: "btn decline-btn",
     textContent: "Decline",
   });
+  const cancelBtn = createElement("button", {
+    className: "btn cancel-btn",
+    textContent: "Cancel booking",
+  });
 
   acceptBtn.addEventListener("click", () => onAction("accepted"));
   declineBtn.addEventListener("click", () => onAction("rejected"));
+  cancelBtn.addEventListener("click", () => onAction("cancelled"));
+
+  if (isAlreadyConfirmed) {
+    panel.append(avatar, title, details, cancelBtn);
+    return panel;
+  }
 
   panel.append(avatar, title, details, acceptBtn, declineBtn);
   return panel;

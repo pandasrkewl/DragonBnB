@@ -32,7 +32,6 @@ const userMode = user ? "tenant" : "guest";
 
 const navElement = createNavbar({
   userMode: userMode,
-  activeHostTab: 2,
   isRegisteredHost: user?.host ?? false,
 });
 

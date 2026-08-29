@@ -18,6 +18,7 @@ const threadContainer = document.getElementById("active-thread-container");
 let currentUser = null;
 let activeConversationId = null;
 let socket = null;
+const SOCKET_SERVER_URL = "https://dragonbnb-socket.onrender.com";
 
 async function init() {
   try {
@@ -36,7 +37,12 @@ async function init() {
     return;
   }
 
-  socket = io();
+  if (!window.io) {
+    console.error("Socket.IO client failed to load");
+    return;
+  }
+
+  socket = io(SOCKET_SERVER_URL);
 
   socket.on("receiveMessage", (newMessage) => {
     if (newMessage.conversation_id === activeConversationId) {

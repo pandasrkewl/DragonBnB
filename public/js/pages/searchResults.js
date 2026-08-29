@@ -13,7 +13,7 @@ const user = await response.json();
 const configResponse = await fetch("/api/config");
 const config = await configResponse.json();
 
-let userMode = user? "tenant" : "guest";
+let userMode = user ? "tenant" : "guest";
 
 const navElement = createNavbar({
   userMode,

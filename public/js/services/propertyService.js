@@ -2,7 +2,7 @@ import { createPropertyCard } from "../components/propertyCard.js";
 
 export function loadProperties(url, railId) {
 
-  fetch(url)
+  return fetch(url)
     .then((response) => {
       if (!response.ok) {
         throw new Error("Could not load properties");
