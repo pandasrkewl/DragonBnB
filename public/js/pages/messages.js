@@ -36,6 +36,11 @@ async function init() {
     return;
   }
 
+  if (!window.io) {
+    console.error("Socket.IO client failed to load");
+    return;
+  }
+
   socket = io();
 
   socket.on("receiveMessage", (newMessage) => {
