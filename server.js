@@ -64,7 +64,28 @@ const PORT = process.env.PORT || 3000;
 app.set("trust proxy", 1);
 
 const server = http.createServer(app);
-const io = new Server(server);
+const allowedOrigins = [
+  "https://drexel-bnb.vercel.app",
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
+  "http://localhost:5173",
+  "http://localhost:8080",
+];
+
+const io = new Server(server, {
+  cors: {
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin) || origin.indexOf("vercel.app") > -1) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error("Not allowed by CORS"));
+    },
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+});
 
 io.on("connection", (socket) => {
   console.log("A user connected:", socket.id);
@@ -1666,3 +1687,5 @@ if (require.main === module) {
 }
 
 module.exports = app;
+module.exports.io = io;
+module.exports.server = server;
