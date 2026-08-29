@@ -32,6 +32,7 @@ const {
   getBookingsForToday,
   getBookingsUpcoming,
   getBookingsPast,
+  markPastBookingsCompleted,
   getWishlist,
   toggleWishlist,
 } = require("./scripts/queryDb");
@@ -308,6 +309,8 @@ app.post("/api/reviews", requireLogin, async (req, res) => {
         error: "Invalid booking"
       });
     }
+
+    await markPastBookingsCompleted();
 
     const bookingResult = await pool.query(
       `SELECT
@@ -1567,6 +1570,8 @@ app.get("/api/host/bookings/upcoming", requireLogin, async (req, res) => {
       return res.status(403).json({ error: "Not a host" });
     }
 
+    await markPastBookingsCompleted();
+
     const bookings = await getBookingsUpcoming(user.id);
     res.json(bookings);
   } catch (error) {
@@ -1590,6 +1595,8 @@ app.get("/api/host/bookings/past", requireLogin, async (req, res) => {
         error: "Not a host"
       });
     }
+
+    await markPastBookingsCompleted();
 
     const bookings = await getBookingsPast(user.id);
 
@@ -1677,6 +1684,8 @@ app.get("/favorites", requireLogin, (req, res) => {
 app.get("/api/trips", requireLogin, async (req, res) => {
   try {
     const userId = req.session.user.id;
+
+    await markPastBookingsCompleted();
 
     const result = await pool.query(
       `SELECT

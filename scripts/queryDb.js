@@ -735,6 +735,15 @@ async function getBookingsPast(hostId) {
   return result.rows;
 }
 
+async function markPastBookingsCompleted() {
+  await pool.query(
+    `UPDATE bookings
+        SET status = 'completed'
+      WHERE status = 'confirmed'
+        AND end_date < CURRENT_DATE`,
+  );
+}
+
 async function getUnreadMessageCount(userId) {
   const result = await pool.query(
     `SELECT COUNT(*) as unread_count
@@ -934,6 +943,7 @@ module.exports = {
   getBookingsForToday,
   getBookingsUpcoming,
   getBookingsPast,
+  markPastBookingsCompleted,
   getUserConversations,
   getConversationById,
   getConversationMessages,
