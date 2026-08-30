@@ -451,8 +451,8 @@ async function getConversationById(conversationId) {
             u_guest.id AS guest_id,
             u_guest.first_name || ' ' || u_guest.last_name AS guest_name,
             u_guest.image_url AS guest_image,
-            (SELECT start_date FROM bookings WHERE property_id = c.property_id AND user_id = c.guest_id ORDER BY start_date DESC LIMIT 1) AS check_in_date,
-            (SELECT end_date FROM bookings WHERE property_id = c.property_id AND user_id = c.guest_id ORDER BY start_date DESC LIMIT 1) AS check_out_date,
+            (SELECT to_char(start_date, 'YYYY-MM-DD') FROM bookings WHERE property_id = c.property_id AND user_id = c.guest_id ORDER BY start_date DESC LIMIT 1) AS check_in_date,
+            (SELECT to_char(end_date, 'YYYY-MM-DD') FROM bookings WHERE property_id = c.property_id AND user_id = c.guest_id ORDER BY start_date DESC LIMIT 1) AS check_out_date,
             (SELECT end_date - start_date FROM bookings WHERE property_id = c.property_id AND user_id = c.guest_id ORDER BY start_date DESC LIMIT 1) AS nights,
             (SELECT id FROM bookings WHERE property_id = c.property_id AND user_id = c.guest_id ORDER BY start_date DESC LIMIT 1) AS booking_id,
             (SELECT status FROM bookings WHERE property_id = c.property_id AND user_id = c.guest_id ORDER BY start_date DESC LIMIT 1) AS booking_status,
@@ -657,8 +657,8 @@ async function getBookingsForToday(hostId) {
     `SELECT 
       bookings.id,
       bookings.status,
-      bookings.start_date,
-      bookings.end_date,
+      to_char(bookings.start_date, 'YYYY-MM-DD') AS start_date,
+      to_char(bookings.end_date, 'YYYY-MM-DD') AS end_date,
       bookings.user_id AS tenant_id,
       properties.title AS property_title,
       users.image_url,
@@ -683,8 +683,8 @@ async function getBookingsUpcoming(hostId) {
     `SELECT 
       bookings.id,
       bookings.status,
-      bookings.start_date,
-      bookings.end_date,
+      to_char(bookings.start_date, 'YYYY-MM-DD') AS start_date,
+      to_char(bookings.end_date, 'YYYY-MM-DD') AS end_date,
       bookings.user_id AS tenant_id,
       properties.title AS property_title,
       users.image_url,
@@ -708,8 +708,8 @@ async function getBookingsPast(hostId) {
   const result = await pool.query(
     `SELECT
       bookings.id,
-      bookings.start_date,
-      bookings.end_date,
+      to_char(bookings.start_date, 'YYYY-MM-DD') AS start_date,
+      to_char(bookings.end_date, 'YYYY-MM-DD') AS end_date,
       bookings.user_id AS tenant_id,
       bookings.status AS status,
       properties.title AS property_title,
@@ -733,6 +733,15 @@ async function getBookingsPast(hostId) {
   );
 
   return result.rows;
+}
+
+async function markPastBookingsCompleted() {
+  await pool.query(
+    `UPDATE bookings
+        SET status = 'completed'
+      WHERE status = 'confirmed'
+        AND end_date < CURRENT_DATE`,
+  );
 }
 
 async function getUnreadMessageCount(userId) {
@@ -934,6 +943,7 @@ module.exports = {
   getBookingsForToday,
   getBookingsUpcoming,
   getBookingsPast,
+  markPastBookingsCompleted,
   getUserConversations,
   getConversationById,
   getConversationMessages,
