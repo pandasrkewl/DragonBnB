@@ -3578,6 +3578,82 @@ body.results-view .results-map {
   transform: scale(1.08);
 }
 
+.guest-rating-widget {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.guest-rating-label {
+  font-size: 14px;
+  color: #555;
+}
+
+.guest-rating-widget .review-star {
+  font-size: 24px;
+}
+
+.reservation-guest-rating {
+  margin: 0;
+  color: #ffb400;
+  letter-spacing: 1px;
+}
+
+.confirm-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.confirm-modal-message {
+  margin: 0;
+  text-align: center;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #222;
+}
+
+.confirm-modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.confirm-modal-cancel,
+.confirm-modal-confirm {
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.confirm-modal-cancel {
+  background: #ffffff;
+  border: 1px solid #cccccc;
+  color: #222222;
+}
+
+.confirm-modal-cancel:hover {
+  background: #f5f5f5;
+}
+
+.confirm-modal-confirm {
+  background: #222222;
+  border: 1px solid #222222;
+  color: #ffffff;
+}
+
+.confirm-modal-confirm:hover {
+  opacity: 0.9;
+}
+
+.confirm-modal-confirm.danger {
+  background: #c62828;
+  border-color: #c62828;
+}
+
 .review-textarea {
   width: 100%;
   min-height: 120px;

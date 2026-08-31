@@ -21,6 +21,8 @@ const {
   getHostProperties,
   addPropertyAmenities,
   addPropertyImage,
+  createUserRating,
+  getUserAverageRating,
   getUserConversations,
   getConversationById,
   getConversationMessages,
@@ -380,6 +382,71 @@ app.post("/api/reviews", requireLogin, async (req, res) => {
 
     res.status(500).json({
       error: "Could not create review"
+    });
+  }
+});
+
+app.post("/api/user-ratings", requireLogin, async (req, res) => {
+  try {
+    const host = req.session.user;
+
+    if (!host.host) {
+      return res.status(403).json({
+        error: "Only hosts can rate guests"
+      });
+    }
+
+    const { userId, rating } = req.body;
+
+    const numericUserId = Number(userId);
+    const numericRating = Number(rating);
+
+    if (!Number.isInteger(numericUserId) || numericUserId <= 0) {
+      return res.status(400).json({
+        error: "Invalid guest"
+      });
+    }
+
+    if (!Number.isInteger(numericRating) || numericRating < 1 || numericRating > 5) {
+      return res.status(400).json({
+        error: "Rating got to be between 1 and 5"
+      });
+    }
+
+    const hostedGuest = await pool.query(
+      `SELECT 1
+       FROM bookings b
+       JOIN properties p
+         ON p.id = b.property_id
+       WHERE b.user_id = $1
+         AND p.host_id = $2
+         AND b.status = 'completed'
+       LIMIT 1`,
+      [numericUserId, host.id]
+    );
+
+    if (hostedGuest.rows.length === 0) {
+      return res.status(403).json({
+        error: "You can only rate guests who have completed a stay with you"
+      });
+    }
+
+    const saved = await createUserRating(host.id, numericUserId, numericRating);
+
+    const average = await getUserAverageRating(numericUserId);
+
+    res.status(201).json({
+      success: true,
+      average: average.average,
+      count: average.count,
+      myRating: saved.rating
+    });
+
+  } catch (error) {
+    console.error("Error creating user rating:", error);
+
+    res.status(500).json({
+      error: "Could not save rating"
     });
   }
 });
@@ -1555,6 +1622,73 @@ app.put("/api/bookings/:bookingId/status", requireLogin, async (req, res) => {
     });
   } finally {
     client.release();
+  }
+});
+
+app.put("/api/bookings/:bookingId/cancel", requireLogin, async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+    const bookingId = Number(req.params.bookingId);
+
+    if (!Number.isInteger(bookingId) || bookingId <= 0) {
+      return res.status(400).json({
+        error: "Invalid booking id",
+      });
+    }
+
+    const bookingResult = await pool.query(
+      `SELECT id, user_id, status, start_date
+       FROM bookings
+       WHERE id = $1`,
+      [bookingId],
+    );
+
+    if (bookingResult.rows.length === 0) {
+      return res.status(404).json({
+        error: "Booking not found",
+      });
+    }
+
+    const booking = bookingResult.rows[0];
+
+    if (booking.user_id !== userId) {
+      return res.status(403).json({
+        error: "This is not your reservation",
+      });
+    }
+
+    if (!["pending", "confirmed"].includes(booking.status)) {
+      return res.status(409).json({
+        error: "This reservation can no longer be cancelled",
+      });
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const bookingStart = new Date(booking.start_date);
+    bookingStart.setHours(0, 0, 0, 0);
+
+    if (bookingStart <= today) {
+      return res.status(409).json({
+        error: "This trip has already started or is in progress",
+      });
+    }
+
+    await pool.query(
+      `UPDATE bookings SET status = 'cancelled' WHERE id = $1`,
+      [bookingId],
+    );
+
+    res.json({
+      success: true,
+      status: "cancelled",
+    });
+  } catch (error) {
+    console.error("Error cancelling reservation:", error);
+
+    res.status(500).json({
+      error: "Could not cancel reservation",
+    });
   }
 });
 

@@ -456,7 +456,8 @@ async function getConversationById(conversationId) {
             (SELECT end_date - start_date FROM bookings WHERE property_id = c.property_id AND user_id = c.guest_id ORDER BY (status = 'pending') DESC, start_date DESC LIMIT 1) AS nights,
             (SELECT id FROM bookings WHERE property_id = c.property_id AND user_id = c.guest_id ORDER BY (status = 'pending') DESC, start_date DESC LIMIT 1) AS booking_id,
             (SELECT status FROM bookings WHERE property_id = c.property_id AND user_id = c.guest_id ORDER BY (status = 'pending') DESC, start_date DESC LIMIT 1) AS booking_status,
-            (SELECT total_price FROM bookings WHERE property_id = c.property_id AND user_id = c.guest_id ORDER BY (status = 'pending') DESC, start_date DESC LIMIT 1) AS total_price
+            (SELECT total_price FROM bookings WHERE property_id = c.property_id AND user_id = c.guest_id ORDER BY (status = 'pending') DESC, start_date DESC LIMIT 1) AS total_price,
+            (SELECT ROUND(AVG(rating)::numeric, 1) FROM user_ratings WHERE user_id = c.guest_id) AS guest_rating
         FROM conversations c
         JOIN users u_host ON c.host_id = u_host.id
         JOIN users u_guest ON c.guest_id = u_guest.id
@@ -715,7 +716,18 @@ async function getBookingsPast(hostId) {
       properties.title AS property_title,
       users.image_url,
       users.first_name,
-      users.last_name
+      users.last_name,
+      (
+        SELECT ROUND(AVG(ur.rating)::numeric, 1)
+        FROM user_ratings ur
+        WHERE ur.user_id = bookings.user_id
+      ) AS guest_rating,
+      (
+        SELECT ur.rating
+        FROM user_ratings ur
+        WHERE ur.user_id = bookings.user_id
+          AND ur.rater_id = $1
+      ) AS my_guest_rating
     FROM bookings
 
     JOIN properties
@@ -903,6 +915,42 @@ async function getHostProperties(hostId) {
   return result.rows;
 }
 
+async function createUserRating(raterId, userId, rating) {
+  const result = await pool.query(
+    `INSERT INTO user_ratings (
+      rater_id,
+      user_id,
+      rating
+    )
+    VALUES ($1, $2, $3)
+    ON CONFLICT (rater_id, user_id)
+    DO UPDATE SET
+      rating = EXCLUDED.rating,
+      created_at = CURRENT_TIMESTAMP
+    RETURNING *`,
+    [
+      raterId,
+      userId,
+      rating
+    ]
+  );
+
+  return result.rows[0];
+}
+
+async function getUserAverageRating(userId) {
+  const result = await pool.query(
+    `SELECT
+      ROUND(AVG(rating)::numeric, 1) AS average,
+      COUNT(*)::int AS count
+    FROM user_ratings
+    WHERE user_id = $1`,
+    [userId]
+  );
+
+  return result.rows[0];
+}
+
 async function addPropertyImage(propertyId, imageUrl, displayOrder) {
   const result = await pool.query(
     `INSERT INTO property_images (
@@ -940,6 +988,8 @@ module.exports = {
   getHostProperties,
   addPropertyAmenities,
   addPropertyImage,
+  createUserRating,
+  getUserAverageRating,
   getBookingsForToday,
   getBookingsUpcoming,
   getBookingsPast,

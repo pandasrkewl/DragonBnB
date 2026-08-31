@@ -139,6 +139,94 @@ function buildBookingsModal(bookings) {
   return createModal("Today's bookings", container);
 }
 
+// Every rendered Past-tab rating widget, grouped by guest id, so that rating a
+// guest on one reservation updates every other card for the same guest on the page.
+const guestRatingWidgetsByGuest = new Map();
+
+function registerGuestRatingWidget(guestId, controller) {
+  if (!guestRatingWidgetsByGuest.has(guestId)) {
+    guestRatingWidgetsByGuest.set(guestId, []);
+  }
+  guestRatingWidgetsByGuest.get(guestId).push(controller);
+}
+
+function syncGuestRatingWidgets(guestId, average, myRating) {
+  const controllers = guestRatingWidgetsByGuest.get(guestId) || [];
+  controllers.forEach((controller) => controller.update(average, myRating));
+}
+
+function createGuestRatingWidget(booking) {
+  const guestId = booking.tenant_id;
+
+  const widget = createElement("div", { className: "guest-rating-widget" });
+  const label = createElement("div", { className: "guest-rating-label" });
+  const starsContainer = createElement("div", { className: "review-stars" });
+  const stars = [];
+
+  let myRating = booking.my_guest_rating || 0;
+
+  const setLabel = (average) => {
+    label.textContent =
+      average != null ? `Guest rating: ★ ${average}` : "Not rated yet";
+  };
+
+  const paintStars = (value) => {
+    stars.forEach((star, index) => {
+      const filled = index < value;
+      star.textContent = filled ? "★" : "☆";
+      star.classList.toggle("selected", filled);
+    });
+  };
+
+  const update = (average, nextMyRating) => {
+    if (nextMyRating != null) {
+      myRating = nextMyRating;
+    }
+    setLabel(average);
+    paintStars(myRating);
+  };
+
+  for (let i = 1; i <= 5; i++) {
+    const star = createElement("button", {
+      type: "button",
+      className: "review-star",
+      textContent: "☆",
+    });
+
+    star.addEventListener("click", async () => {
+      try {
+        const response = await fetch("/api/user-ratings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: guestId, rating: i }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Could not save rating");
+        }
+
+        syncGuestRatingWidgets(guestId, data.average, data.myRating);
+      } catch (error) {
+        console.error("Error saving guest rating:", error);
+        window.alert(error.message);
+      }
+    });
+
+    stars.push(star);
+    starsContainer.appendChild(star);
+  }
+
+  setLabel(booking.guest_rating);
+  paintStars(myRating);
+
+  registerGuestRatingWidget(guestId, { update });
+
+  widget.append(label, starsContainer);
+  return widget;
+}
+
 async function fetchBookings(view) {
 
   try {
@@ -194,6 +282,8 @@ async function cancelBooking(bookingId) {
 
 async function renderBookings(view) {
   if (!centerDiv) return;
+
+  guestRatingWidgetsByGuest.clear();
 
   const bookings = await fetchBookings(view);
 
@@ -297,6 +387,10 @@ async function renderBookings(view) {
       });
       cancelButton.addEventListener("click", () => cancelBooking(b.id));
       content.appendChild(cancelButton);
+    }
+
+    if (view === "past") {
+      content.appendChild(createGuestRatingWidget(b));
     }
 
     const card = createElement("div", {
