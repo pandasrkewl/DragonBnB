@@ -35,6 +35,7 @@ await validateAccount();
 const navElement = createNavbar({
   userMode: "host",
   activeHostTab: 2,
+  user: user,
 });
 navBarContainer.appendChild(navElement);
 

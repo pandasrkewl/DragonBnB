@@ -15,15 +15,15 @@ async function loadNavbar() {
     navElement = createNavbar({
       userMode: userMode,
       isRegisteredHost: user?.host ?? false,
+      user: user,
     });
-
   } catch (err) {
     console.error(err);
 
     navElement = createNavbar({
       userMode: "guest",
+      user: user,
     });
-
   }
 
   navBarContainer.appendChild(navElement);

@@ -24,6 +24,7 @@ async function loadProfile() {
     const navbar = createNavbar({
       userMode: "tenant",
       isRegisteredHost: user.host ?? false,
+      user: user,
     });
 
     navbarContainer.appendChild(navbar);

@@ -35,6 +35,7 @@ async function init() {
       userMode: "host",
       isRegisteredHost: currentUser.host,
       activeHostTab: 3,
+      user: currentUser,
     });
     navBarContainer.appendChild(navElement);
   } catch (err) {

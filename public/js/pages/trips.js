@@ -38,6 +38,7 @@ async function loadNavbar() {
       const navbar = createNavbar({
         userMode: "tenant",
         isRegisteredHost: user.host ?? false,
+        user: user,
       });
   
       navBarContainer.appendChild(navbar);

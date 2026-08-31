@@ -38,6 +38,7 @@ navBarContainer.appendChild(
   createNavbar({
     userMode: "tenant",
     isRegisteredHost: user?.host ?? false,
+    user: user,
   }),
 );
 
