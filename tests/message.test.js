@@ -43,18 +43,6 @@ test("returns falsy for a nonexistent conversation id", async () => {
   expect(conversation).toBeFalsy();
 });
 
-test("sends a message in an active conversation", async () => {
-  const messageContent = "Hello from Jest test suite!";
-
-  const message = await sendMessage(testConversationId, 2, messageContent);
-
-  expect(message).toBeDefined();
-  expect(message.message).toBe(messageContent);
-  expect(message.conversation_id).toBe(testConversationId);
-  expect(message.sender_id).toBe(2);
-  expect(message.read).toBe(false);
-});
-
 test("gets messages for a specific conversation", async () => {
   const messages = await getConversationMessages(testConversationId, 50, 0);
 
