@@ -29,6 +29,7 @@ async function init() {
     const navElement = createNavbar({
       userMode: "tenant",
       isRegisteredHost: currentUser.host,
+      user: currentUser,
     });
     navBarContainer.appendChild(navElement);
   } catch (err) {

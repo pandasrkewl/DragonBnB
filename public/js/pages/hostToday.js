@@ -7,6 +7,8 @@ const upcoming = document.getElementById("upcomingButton");
 const past = document.getElementById("pastButton");
 const centerDiv = document.querySelector(".center-div");
 
+let user = null;
+
 async function validateAccount() {
   try {
     const response = await fetch("/api/me");
@@ -16,9 +18,9 @@ async function validateAccount() {
       return;
     }
 
-    const body = await response.json();
+    user = await response.json();
 
-    if (!body) {
+    if (!user) {
       window.location.replace("/");
       return;
     }
@@ -28,11 +30,12 @@ async function validateAccount() {
   }
 }
 
-validateAccount();
+await validateAccount();
 
 const navElement = createNavbar({
   userMode: "host",
   activeHostTab: 0,
+  user: user,
 });
 
 navBarContainer.appendChild(navElement);

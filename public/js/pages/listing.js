@@ -33,6 +33,7 @@ const userMode = user ? "tenant" : "guest";
 const navElement = createNavbar({
   userMode: userMode,
   isRegisteredHost: user?.host ?? false,
+  user: user,
 });
 
 navBarContainer.appendChild(navElement);

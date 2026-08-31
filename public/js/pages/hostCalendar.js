@@ -10,15 +10,6 @@ import {
   startOfToday 
 } from "https://cdn.jsdelivr.net/npm/date-fns/+esm";
 
-
-// Navbar
-const navBarContainer = document.getElementById("navbar-container");
-const navElement = createNavbar({
-  userMode: "host",
-  activeHostTab: 1,
-});
-navBarContainer.appendChild(navElement);
-
 //Get User Info
 
 let user = null;
@@ -45,6 +36,16 @@ async function validateAccount() {
 }
 
 await validateAccount();
+
+// Navbar
+const navBarContainer = document.getElementById("navbar-container");
+const navElement = createNavbar({
+  userMode: "host",
+  activeHostTab: 1,
+  user: user,
+});
+
+navBarContainer.appendChild(navElement);
 console.log(user);
 
 // Current Date
