@@ -396,14 +396,14 @@ app.post("/api/user-ratings", requireLogin, async (req, res) => {
       });
     }
 
-    const { userId, rating } = req.body;
+    const { bookingId, rating } = req.body;
 
-    const numericUserId = Number(userId);
+    const numericBookingId = Number(bookingId);
     const numericRating = Number(rating);
 
-    if (!Number.isInteger(numericUserId) || numericUserId <= 0) {
+    if (!Number.isInteger(numericBookingId) || numericBookingId <= 0) {
       return res.status(400).json({
-        error: "Invalid guest"
+        error: "Invalid reservation"
       });
     }
 
@@ -413,33 +413,49 @@ app.post("/api/user-ratings", requireLogin, async (req, res) => {
       });
     }
 
-    const hostedGuest = await pool.query(
-      `SELECT 1
+    const bookingResult = await pool.query(
+      `SELECT b.id, b.user_id, b.status, p.host_id
        FROM bookings b
        JOIN properties p
          ON p.id = b.property_id
-       WHERE b.user_id = $1
-         AND p.host_id = $2
-         AND b.status = 'completed'
-       LIMIT 1`,
-      [numericUserId, host.id]
+       WHERE b.id = $1`,
+      [numericBookingId]
     );
 
-    if (hostedGuest.rows.length === 0) {
-      return res.status(403).json({
-        error: "You can only rate guests who have completed a stay with you"
+    if (bookingResult.rows.length === 0) {
+      return res.status(404).json({
+        error: "Reservation not found"
       });
     }
 
-    const saved = await createUserRating(host.id, numericUserId, numericRating);
+    const booking = bookingResult.rows[0];
 
-    const average = await getUserAverageRating(numericUserId);
+    if (booking.host_id !== host.id) {
+      return res.status(403).json({
+        error: "You are not the host for this reservation"
+      });
+    }
+
+    if (booking.status !== "completed") {
+      return res.status(409).json({
+        error: "You can only rate guests for completed stays"
+      });
+    }
+
+    const saved = await createUserRating(
+      numericBookingId,
+      booking.user_id,
+      numericRating
+    );
+
+    const average = await getUserAverageRating(booking.user_id);
 
     res.status(201).json({
       success: true,
+      guestId: booking.user_id,
       average: average.average,
       count: average.count,
-      myRating: saved.rating
+      bookingRating: saved.rating
     });
 
   } catch (error) {

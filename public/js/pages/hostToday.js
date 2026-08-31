@@ -139,8 +139,9 @@ function buildBookingsModal(bookings) {
   return createModal("Today's bookings", container);
 }
 
-// Every rendered Past-tab rating widget, grouped by guest id, so that rating a
-// guest on one reservation updates every other card for the same guest on the page.
+// Every rendered Past-tab rating widget, grouped by guest id. Each reservation
+// keeps its own star rating, but the "Guest rating" average shown on every card
+// for that guest is kept in sync whenever any one of their stays is rated.
 const guestRatingWidgetsByGuest = new Map();
 
 function registerGuestRatingWidget(guestId, controller) {
@@ -150,9 +151,9 @@ function registerGuestRatingWidget(guestId, controller) {
   guestRatingWidgetsByGuest.get(guestId).push(controller);
 }
 
-function syncGuestRatingWidgets(guestId, average, myRating) {
+function syncGuestAverage(guestId, average) {
   const controllers = guestRatingWidgetsByGuest.get(guestId) || [];
-  controllers.forEach((controller) => controller.update(average, myRating));
+  controllers.forEach((controller) => controller.setAverage(average));
 }
 
 function createGuestRatingWidget(booking) {
@@ -163,9 +164,10 @@ function createGuestRatingWidget(booking) {
   const starsContainer = createElement("div", { className: "review-stars" });
   const stars = [];
 
-  let myRating = booking.my_guest_rating || 0;
+  // This reservation's own rating — independent of the guest's other stays.
+  let bookingRating = booking.my_booking_rating || 0;
 
-  const setLabel = (average) => {
+  const setAverage = (average) => {
     label.textContent =
       average != null ? `Guest rating: ★ ${average}` : "Not rated yet";
   };
@@ -176,14 +178,6 @@ function createGuestRatingWidget(booking) {
       star.textContent = filled ? "★" : "☆";
       star.classList.toggle("selected", filled);
     });
-  };
-
-  const update = (average, nextMyRating) => {
-    if (nextMyRating != null) {
-      myRating = nextMyRating;
-    }
-    setLabel(average);
-    paintStars(myRating);
   };
 
   for (let i = 1; i <= 5; i++) {
@@ -198,7 +192,7 @@ function createGuestRatingWidget(booking) {
         const response = await fetch("/api/user-ratings", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId: guestId, rating: i }),
+          body: JSON.stringify({ bookingId: booking.id, rating: i }),
         });
 
         const data = await response.json();
@@ -207,7 +201,9 @@ function createGuestRatingWidget(booking) {
           throw new Error(data.error || "Could not save rating");
         }
 
-        syncGuestRatingWidgets(guestId, data.average, data.myRating);
+        bookingRating = data.bookingRating;
+        paintStars(bookingRating);
+        syncGuestAverage(guestId, data.average);
       } catch (error) {
         console.error("Error saving guest rating:", error);
         window.alert(error.message);
@@ -218,10 +214,10 @@ function createGuestRatingWidget(booking) {
     starsContainer.appendChild(star);
   }
 
-  setLabel(booking.guest_rating);
-  paintStars(myRating);
+  setAverage(booking.guest_rating);
+  paintStars(bookingRating);
 
-  registerGuestRatingWidget(guestId, { update });
+  registerGuestRatingWidget(guestId, { setAverage });
 
   widget.append(label, starsContainer);
   return widget;

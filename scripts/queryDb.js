@@ -725,9 +725,8 @@ async function getBookingsPast(hostId) {
       (
         SELECT ur.rating
         FROM user_ratings ur
-        WHERE ur.user_id = bookings.user_id
-          AND ur.rater_id = $1
-      ) AS my_guest_rating
+        WHERE ur.booking_id = bookings.id
+      ) AS my_booking_rating
     FROM bookings
 
     JOIN properties
@@ -915,21 +914,21 @@ async function getHostProperties(hostId) {
   return result.rows;
 }
 
-async function createUserRating(raterId, userId, rating) {
+async function createUserRating(bookingId, userId, rating) {
   const result = await pool.query(
     `INSERT INTO user_ratings (
-      rater_id,
+      booking_id,
       user_id,
       rating
     )
     VALUES ($1, $2, $3)
-    ON CONFLICT (rater_id, user_id)
+    ON CONFLICT (booking_id)
     DO UPDATE SET
       rating = EXCLUDED.rating,
       created_at = CURRENT_TIMESTAMP
     RETURNING *`,
     [
-      raterId,
+      bookingId,
       userId,
       rating
     ]

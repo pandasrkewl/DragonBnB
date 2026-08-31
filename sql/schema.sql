@@ -131,12 +131,10 @@ CREATE TABLE reviews (
 
 CREATE TABLE user_ratings (
     id SERIAL PRIMARY KEY,
-    rater_id INTEGER NOT NULL REFERENCES users(id),
+    booking_id INTEGER NOT NULL UNIQUE REFERENCES bookings(id),
     user_id INTEGER NOT NULL REFERENCES users(id),
     rating INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    UNIQUE (rater_id, user_id)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE property_images (
@@ -521,12 +519,12 @@ VALUES
 
     
 
-INSERT INTO "user_ratings" ("id", "rater_id", "user_id", "rating")
+INSERT INTO "user_ratings" ("id", "booking_id", "user_id", "rating")
 VALUES
     (1, 1, 2, 5),
-    (2, 1, 5, 4),
-    (3, 1, 7, 5),
-    (4, 6, 3, 4);
+    (2, 2, 2, 4),
+    (3, 7, 7, 5),
+    (4, 9, 3, 4);
 
 INSERT INTO "property_images" ("property_id", "image_url", "display_order")
 
