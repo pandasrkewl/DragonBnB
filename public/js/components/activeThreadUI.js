@@ -6,6 +6,7 @@ export function createActiveThread(
   messages,
   currentUser,
   onSubmitMessage,
+  onReservationChange,
 ) {
   const headerUI = createThreadHeader(conversation, currentUser, () => {
     const sidebar = document.querySelector(".reservation-sidebar");
@@ -109,6 +110,10 @@ export function createActiveThread(
 
             messagesArea.scrollTop =
               messagesArea.scrollHeight;
+          }
+
+          if (onReservationChange) {
+            onReservationChange();
           }
 
         } catch (error) {

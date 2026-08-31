@@ -451,12 +451,12 @@ async function getConversationById(conversationId) {
             u_guest.id AS guest_id,
             u_guest.first_name || ' ' || u_guest.last_name AS guest_name,
             u_guest.image_url AS guest_image,
-            (SELECT to_char(start_date, 'YYYY-MM-DD') FROM bookings WHERE property_id = c.property_id AND user_id = c.guest_id ORDER BY start_date DESC LIMIT 1) AS check_in_date,
-            (SELECT to_char(end_date, 'YYYY-MM-DD') FROM bookings WHERE property_id = c.property_id AND user_id = c.guest_id ORDER BY start_date DESC LIMIT 1) AS check_out_date,
-            (SELECT end_date - start_date FROM bookings WHERE property_id = c.property_id AND user_id = c.guest_id ORDER BY start_date DESC LIMIT 1) AS nights,
-            (SELECT id FROM bookings WHERE property_id = c.property_id AND user_id = c.guest_id ORDER BY start_date DESC LIMIT 1) AS booking_id,
-            (SELECT status FROM bookings WHERE property_id = c.property_id AND user_id = c.guest_id ORDER BY start_date DESC LIMIT 1) AS booking_status,
-            (SELECT total_price FROM bookings WHERE property_id = c.property_id AND user_id = c.guest_id ORDER BY start_date DESC LIMIT 1) AS total_price
+            (SELECT to_char(start_date, 'YYYY-MM-DD') FROM bookings WHERE property_id = c.property_id AND user_id = c.guest_id ORDER BY (status = 'pending') DESC, start_date DESC LIMIT 1) AS check_in_date,
+            (SELECT to_char(end_date, 'YYYY-MM-DD') FROM bookings WHERE property_id = c.property_id AND user_id = c.guest_id ORDER BY (status = 'pending') DESC, start_date DESC LIMIT 1) AS check_out_date,
+            (SELECT end_date - start_date FROM bookings WHERE property_id = c.property_id AND user_id = c.guest_id ORDER BY (status = 'pending') DESC, start_date DESC LIMIT 1) AS nights,
+            (SELECT id FROM bookings WHERE property_id = c.property_id AND user_id = c.guest_id ORDER BY (status = 'pending') DESC, start_date DESC LIMIT 1) AS booking_id,
+            (SELECT status FROM bookings WHERE property_id = c.property_id AND user_id = c.guest_id ORDER BY (status = 'pending') DESC, start_date DESC LIMIT 1) AS booking_status,
+            (SELECT total_price FROM bookings WHERE property_id = c.property_id AND user_id = c.guest_id ORDER BY (status = 'pending') DESC, start_date DESC LIMIT 1) AS total_price
         FROM conversations c
         JOIN users u_host ON c.host_id = u_host.id
         JOIN users u_guest ON c.guest_id = u_guest.id
