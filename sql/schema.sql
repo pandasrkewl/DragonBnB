@@ -476,7 +476,7 @@ VALUES
 
 INSERT INTO "bookings" ("id", "property_id", "user_id", "start_date", "end_date", "total_price", "status")
 VALUES
-    (1, 1, 2, '2026-03-01', '2027-03-03', 100000.00, 'confirmed'),
+    (1, 1, 2, '2026-03-01', '2026-03-03', 100000.00, 'completed'),
     (2, 1, 2, '2026-05-10', '2026-05-13', 525.00, 'completed'),
     (3, 2, 3, '2026-06-01', '2026-06-03', 280.00, 'completed'),
     (4, 3, 5, '2026-07-15', '2026-07-18', 750.00, 'completed'),
