@@ -180,9 +180,9 @@ INSERT INTO users (
 )
 VALUES
     (1, 'Max', 'Chiu', 'maxkchiu@gmail.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, '/assets/images/users/1.jpg'),
-    (2, 'Larry', 'Wu', 'larrywu@test.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, '/assets/placeholders/default_user.jpg'),
+    (2, 'Larry', 'Wu', 'larrywu@test.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, '/assets/images/users/2.jpg'),
     (3, 'Peter', 'Parker', 'notspiderman@marvel.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, '/assets/images/users/3.png'),
-    (4, 'Tony', 'Stark', 'iamironman@dead.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, '/assets/placeholders/default_user.jpg'),
+    (4, 'Tony', 'Stark', 'iamironman@dead.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, '/assets/images/users/4.jpg'),
     (5, 'Emma', 'Johnson', 'emma.johnson@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, '/assets/placeholders/default_user.jpg'),
     (6, 'Noah', 'Williams', 'noah.williams@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, '/assets/placeholders/default_user.jpg'),
     (7, 'Olivia', 'Brown', 'olivia.brown@example.com', '$2b$10$4u8iTM/SNR61oh9uJ.Sg/OcJ2keSPlw60CHCAUlpLVt5yMRmndN3K', TRUE, '/assets/placeholders/default_user.jpg'),
