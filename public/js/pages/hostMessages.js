@@ -126,6 +126,7 @@ async function loadConversation(convoId) {
         socket.emit("sendMessage", responseData.message);
       }
     },
+    () => loadConversation(convoId),
   );
 
   threadContainer.replaceChildren(headerUI, threadBody);
