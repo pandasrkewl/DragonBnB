@@ -450,8 +450,6 @@ export function createNavbar({
 
   if(user) {
     profilePic = user.image_url;
-    console.log(user);
-    console.log(`User Image Url: ${profilePic}`)
   }
 
   const profileButton = createElement(
