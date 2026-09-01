@@ -154,6 +154,21 @@ function createReservationPanel(conversation, onAction, isAlreadyConfirmed = fal
     ? new Date(`${conversation.check_out_date}T00:00:00`).toLocaleDateString()
     : "N/A";
 
+  const roundedRating =
+    conversation.guest_rating != null
+      ? Math.round(conversation.guest_rating)
+      : null;
+
+  const ratingLine =
+    roundedRating != null
+      ? createElement("p", {
+          className: "reservation-guest-rating",
+          textContent:
+            `Guest rating: ${"★".repeat(roundedRating)}${"☆".repeat(5 - roundedRating)} ` +
+            `(${conversation.guest_rating})`,
+        })
+      : null;
+
   const details = createElement("div", { className: "reservation-details" }, [
     createElement("p", { textContent: `Guests: ${conversation.guests || 1}` }),
     createElement("p", { textContent: `Check-in: ${checkInStr}` }),
@@ -181,10 +196,10 @@ textContent: `Total: $${Number(conversation.total_price || 0).toFixed(2)}`,
   cancelBtn.addEventListener("click", () => onAction("cancelled"));
 
   if (isAlreadyConfirmed) {
-    panel.append(avatar, title, details, cancelBtn);
+    panel.append(avatar, title, ...(ratingLine ? [ratingLine] : []), details, cancelBtn);
     return panel;
   }
 
-  panel.append(avatar, title, details, acceptBtn, declineBtn);
+  panel.append(avatar, title, ...(ratingLine ? [ratingLine] : []), details, acceptBtn, declineBtn);
   return panel;
 }

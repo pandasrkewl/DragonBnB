@@ -2,6 +2,7 @@ DROP TABLE IF EXISTS messages CASCADE;
 DROP TABLE IF EXISTS conversations CASCADE;
 DROP TABLE IF EXISTS wishlists CASCADE;
 DROP TABLE IF EXISTS property_images CASCADE;
+DROP TABLE IF EXISTS user_ratings CASCADE;
 DROP TABLE IF EXISTS reviews CASCADE;
 DROP TABLE IF EXISTS bookings CASCADE;
 DROP TABLE IF EXISTS property_amenities CASCADE;
@@ -126,6 +127,14 @@ CREATE TABLE reviews (
     user_id INTEGER NOT NULL REFERENCES users(id),
     property_id INTEGER NOT NULL REFERENCES properties(id),
     booking_id INTEGER NOT NULL UNIQUE REFERENCES bookings(id)
+);
+
+CREATE TABLE user_ratings (
+    id SERIAL PRIMARY KEY,
+    booking_id INTEGER NOT NULL UNIQUE REFERENCES bookings(id),
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    rating INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE property_images (
@@ -510,6 +519,13 @@ VALUES
 
     
 
+INSERT INTO "user_ratings" ("id", "booking_id", "user_id", "rating")
+VALUES
+    (1, 1, 2, 5),
+    (2, 2, 2, 4),
+    (3, 7, 7, 5),
+    (4, 9, 3, 4);
+
 INSERT INTO "property_images" ("property_id", "image_url", "display_order")
 
 VALUES
@@ -593,4 +609,9 @@ SELECT setval(
 SELECT setval(
   'reviews_id_seq',
   (SELECT MAX(id) FROM reviews)
+);
+
+SELECT setval(
+  'user_ratings_id_seq',
+  (SELECT MAX(id) FROM user_ratings)
 );

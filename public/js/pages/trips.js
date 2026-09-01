@@ -1,5 +1,5 @@
 import { createNavbar } from "../components/navbar.js";
-import { createElement } from "../reusable/functions.js";
+import { createElement, createConfirmModal } from "../reusable/functions.js";
 import { createReviewModal } from "../components/tripsModal.js";
 
 const navBarContainer =
@@ -226,6 +226,65 @@ function createTripCard(trip) {
 
   if (reviewSection) {
     content.appendChild(reviewSection);
+  }
+
+  const todayMidnight = new Date();
+  todayMidnight.setHours(0, 0, 0, 0);
+
+  const canCancel =
+    (trip.status === "pending" || trip.status === "confirmed") &&
+    trip.start_date &&
+    new Date(`${trip.start_date}T00:00:00`) > todayMidnight;
+
+  if (canCancel) {
+    const cancelButton = createElement("button", {
+      type: "button",
+      className: "cancel-booking-btn",
+      textContent: "Cancel reservation"
+    });
+
+    cancelButton.addEventListener("click", async (event) => {
+      event.stopPropagation();
+
+      const confirmed = await createConfirmModal({
+        title: "Cancel reservation",
+        message: `Cancel your stay at ${trip.title}? This can't be undone.`,
+        confirmText: "Cancel reservation",
+        cancelText: "Keep reservation",
+        danger: true
+      });
+
+      if (!confirmed) {
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `/api/bookings/${trip.booking_id}/cancel`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json"
+            }
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            data.error || "Could not cancel reservation"
+          );
+        }
+
+        await loadTrips();
+      } catch (error) {
+        console.error("Error cancelling reservation:", error);
+        window.alert(error.message);
+      }
+    });
+
+    content.appendChild(cancelButton);
   }
 
   card.append(

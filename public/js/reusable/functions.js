@@ -65,3 +65,72 @@ export function createModal(titleText, bodyElement) {
     });
     return overlay;
 }
+
+// In-page replacement for window.confirm(). Resolves true when the confirm
+// button is clicked, false when cancelled / dismissed.
+export function createConfirmModal({
+    title = "Are you sure?",
+    message = "",
+    confirmText = "Confirm",
+    cancelText = "Never mind",
+    danger = false,
+} = {}) {
+    return new Promise((resolve) => {
+        let settled = false;
+
+        const finish = (result) => {
+            if (settled) {
+                return;
+            }
+            settled = true;
+            overlay.remove();
+            resolve(result);
+        };
+
+        const messageEl = createElement("p", {
+            className: "confirm-modal-message",
+            textContent: message,
+        });
+
+        const cancelButton = createElement("button", {
+            type: "button",
+            className: "confirm-modal-cancel",
+            textContent: cancelText,
+        });
+
+        const confirmButton = createElement("button", {
+            type: "button",
+            className: danger
+                ? "confirm-modal-confirm danger"
+                : "confirm-modal-confirm",
+            textContent: confirmText,
+        });
+
+        cancelButton.addEventListener("click", () => finish(false));
+        confirmButton.addEventListener("click", () => finish(true));
+
+        const actions = createElement("div", {
+            className: "confirm-modal-actions",
+        }, [cancelButton, confirmButton]);
+
+        const body = createElement("div", {
+            className: "confirm-modal-body",
+        }, [messageEl, actions]);
+
+        const overlay = createModal(title, body);
+
+        overlay.addEventListener("click", (event) => {
+            if (event.target === overlay) {
+                finish(false);
+            }
+        });
+
+        const closeButton = overlay.querySelector(".modal-close");
+        if (closeButton) {
+            closeButton.addEventListener("click", () => finish(false));
+        }
+
+        document.body.appendChild(overlay);
+        confirmButton.focus();
+    });
+}
